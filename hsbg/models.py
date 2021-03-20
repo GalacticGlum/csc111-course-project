@@ -176,6 +176,16 @@ class Minion:
             current_abilities |= buff.abilities
         return current_abilities
 
+    @property
+    def is_dead(self) -> bool:
+        """Return whether this minion is dead."""
+        return self.current_health <= 0
+
+    @property
+    def has_overkilled(self) -> bool:
+        """Return whether this minion has overkilled (i.e. health is negative)."""
+        return self.current_health < 0
+
     def take_damage(self, damage: int) -> Tuple[bool, bool, bool, bool]:
         """Inflict the given amount of damage onto this minion.
 
@@ -206,8 +216,7 @@ class Minion:
             return False, True, False, False
 
         self._damage_taken += damage
-        current_health = self.current_health
-        return True, False, current_health < 0, current_health <= 0
+        return True, False, self.has_overkilled, self.is_dead
 
     def add_buff(self, buff: Buff) -> None:
         """Apply the given buff to this minion whose source is the given minion.
