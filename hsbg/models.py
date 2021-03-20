@@ -1,7 +1,11 @@
 """Model dataclasses for representing objects of the game."""
-from enum import Enum, Flag, auto
-from dataclasses import dataclass
+from __future__ import annotations
 
+import copy
+from typing import Tuple, Dict
+from enum import Enum, Flag, auto
+from dataclasses import dataclass, field
+from abc import ABC, abstractproperty, abstractmethod
 
 class Ability(Flag):
     """A special affect, power, or behaviour found on cards."""
@@ -66,3 +70,149 @@ class AuraType(Enum):
     BATTLE_CRY = 'battle_cry'
     SUMMON = 'summon'
     DEATH_RATTLE = 'death_rattle'
+
+
+@dataclass
+class MinionTier:
+    """The tier of a minion.
+
+    Instance Attributes:
+        - tier: The value of the tier.
+        - num_copies: The number of copies of a minion with this tier.
+    """
+    tier: int = 1
+    num_copies: int = 1
+
+
+# A dict mapping each tier rank to a MinionTier instance.
+TIER_RANKS = {
+    1: MinionTier(1, 18),
+    2: MinionTier(2, 15),
+    3: MinionTier(3, 13),
+    4: MinionTier(4, 11),
+    5: MinionTier(5, 9),
+    6: MinionTier(6, 6)
+}
+
+
+@dataclass
+class Buff:
+    """A buff.
+
+    Instance Attributes:
+        - attack: The additional attack provided by this buff.
+        - health: The additional health provided by this buff.
+        - abilities: Additional abilities provided by this buff.
+    """
+    attack: int
+    health: int
+    abilities: Ability
+
+
+@dataclass
+class Minion:
+    """A minion.
+
+    Instance Attributes:
+        - name: The name of the card.
+        - rarity: The rarity of the card.
+        - cost: The mana cost of the card.
+        - type: The type of the minion.
+        - tier: The tier of this minion.
+        - abilities: The abilities of this minion.
+                     This consists of a combination of the Ability flags.
+        - keywords: The keywords of this minion.
+                    This consists of a combination of the MinionKeyword flags.
+        - valid_targets: The type of minions this minion can target.
+        - num_copies: The number of copies to make of this minion.
+        - level: The level of this minion.
+        - health: The health of this minion.
+        - attack: The attack of this minion.
+        - in_pool: Whether this minion is in the pool.
+        - parent_minion: The parent of this minion (used when a minion creates a new one).
+    """
+    # Private Instance Attributes:
+    #   - _damage_taken: The amount of damage the minion has taken.
+    #   - _temp_buffs: A dict mapping a minion instance to the buff appplied by it.
+    #                  This is used for effects like aura.
+    name: str
+    type: MinionType
+    health: int
+    attack: int
+    num_copies: int
+
+    cost: int = 1
+    rarity: Rarity = Rarity.COMMON
+    tier: MinionTier = TIER_RANKS[1]
+    level: int = 1
+
+    abilities: Ability = Ability.NONE
+    keywords: MinionKeyword = MinionKeyword.NONE
+    valid_targets: MinionType = MinionType.ALL
+
+    in_pool: bool = True
+    parent_minion: Optional[Minion] = None
+
+    _damage_taken: int = 0
+    _temp_buffs: Dict[Minion, Buff] = field(default_factory=dict)
+
+    @property
+    def current_health(self) -> int:
+        """Return the current health of this minion."""
+        total_health = self.health + sum(buff.health for buff in self._temp_buffs.values())
+        return total_health - self._damage_taken
+
+    @property
+    def current_attack(self) -> int:
+        """Return the current attack of this minion."""
+        return self.attack + sum(buff.attack for buff in self._temp_buffs.values())
+
+    def take_damage(self, damage: int) -> Tuple[bool, bool, bool, bool]:
+        """Inflict the given amount of damage onto this minion.
+
+        Return a 4-tuple of booleans values consisting of whether this minion
+        took damage, lost divine shield, overkilled, and/or whether this minion is dead.
+
+        >>> minion = Minion('Mario', MinionType.NEUTRAL, 3, 1, 1)  # Create a minion with 3 health.
+        >>> minion.abilities |= Ability.DIVINE_SHIELD  # Give the minion divine shield
+        >>> minion.take_damage(100)
+        (False, True, False, False)
+        >>> minion.current_health
+        3
+        >>> minion.take_damage(2)
+        (True, False, False, False)
+        >>> minion.current_health
+        1
+        >>> minion.take_damage(2)
+        (True, False, True, True)
+        >>> minion.current_health
+        -1
+        """
+        if damage == 0:
+            return False, False, False, False
+
+        if Ability.DIVINE_SHIELD in self.abilities:
+            # Clear divine shield, since we've taken damage.
+            self.abilities &= ~Ability.DIVINE_SHIELD
+            return False, True, False, False
+
+        self._damage_taken += damage
+        current_health = self.current_health
+        return True, False, current_health < 0, current_health <= 0
+
+    def clone(self, keep_buffs: bool = False) -> Minion:
+        """Return a clone of this minion.
+
+        Args:
+            keep_buffs: Whether to keep the buffs applied to this minion.
+        """
+        minion_copy = copy.copy(self)
+        if not keep_buffs:
+            # Clear buffs
+            minion_copy._temp_buffs = dict()
+        return minion_copy
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
