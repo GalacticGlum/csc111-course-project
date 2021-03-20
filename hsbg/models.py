@@ -155,6 +155,8 @@ class Minion:
     _damage_taken: int = 0
     _temp_buffs: List[Buff] = field(default_factory=list)
 
+    # TODO: Add event system for minion callbacks (i.e. on death, on turn start, etc...)
+
     @property
     def current_health(self) -> int:
         """Return the current health of this minion."""
