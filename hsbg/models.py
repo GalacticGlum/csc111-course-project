@@ -124,7 +124,6 @@ class Minion:
         - keywords: The keywords of this minion.
                     This consists of a combination of the MinionKeyword flags.
         - valid_targets: The type of minions this minion can target.
-        - num_copies: The number of copies to make of this minion.
         - level: The level of this minion.
         - health: The health of this minion.
         - attack: The attack of this minion.
@@ -138,7 +137,6 @@ class Minion:
     type: MinionType
     health: int
     attack: int
-    num_copies: int
 
     cost: int = 1
     rarity: Rarity = Rarity.COMMON
@@ -192,7 +190,7 @@ class Minion:
         Return a 4-tuple of booleans values consisting of whether this minion
         took damage, lost divine shield, overkilled, and/or whether this minion is dead.
 
-        >>> minion = Minion('Mario', MinionType.NEUTRAL, 3, 1, 1)  # Create a minion with 3 health.
+        >>> minion = Minion('Mario', MinionType.NEUTRAL, 3, 1)  # Create a minion with 3 health.
         >>> minion.abilities |= MinionAbility.DIVINE_SHIELD  # Give the minion divine shield
         >>> minion.take_damage(100)
         (False, True, False, False)
@@ -221,7 +219,7 @@ class Minion:
     def add_buff(self, buff: Buff) -> None:
         """Apply the given buff to this minion whose source is the given minion.
 
-        >>> minion = Minion('Lonely Boy', MinionType.DEMON, 0, 0, 1)  # A lonely minion.
+        >>> minion = Minion('Lonely Boy', MinionType.DEMON, 0, 0)  # A lonely minion.
         >>> buff = Buff(health=1, attack=2, abilities=MinionAbility.TAUNT |\
                                                       MinionAbility.DIVINE_SHIELD)
         >>> minion.add_buff(buff)
@@ -237,7 +235,7 @@ class Minion:
         """Remove the given buff.
         Do nothing if the given buff is not applied to this minion.
 
-        >>> minion = Minion('Lonely Boy', MinionType.DEMON, 0, 0, 1)  # A lonely minion.
+        >>> minion = Minion('Lonely Boy', MinionType.DEMON, 0, 0)  # A lonely minion.
         >>> buff = Buff(health=1, attack=2, abilities=MinionAbility.TAUNT |\
                                                       MinionAbility.DIVINE_SHIELD)
         >>> minion.add_buff(buff)
