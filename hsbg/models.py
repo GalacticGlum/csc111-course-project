@@ -255,6 +255,11 @@ class Minion:
 
         Args:
             keep_buffs: Whether to keep the buffs applied to this minion.
+
+        >>> minion = Minion('Lonely Boy', MinionType.DEMON, 0, 0)  # A lonely minion.
+        >>> copy_minion = minion.clone()
+        >>> minion is copy_minion
+        False
         """
         minion_copy = copy.copy(self)
         if not keep_buffs:
