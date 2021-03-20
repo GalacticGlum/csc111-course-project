@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 import copy
-from typing import Tuple, Dict
 from enum import Enum, Flag, auto
 from dataclasses import dataclass, field
+from typing import Tuple, List, Set, Dict
 from abc import ABC, abstractproperty, abstractmethod
 
-class Ability(Flag):
+class MinionAbility(Flag):
     """A special affect, power, or behaviour found on cards."""
     NONE = 0
     TAUNT = auto()
@@ -106,7 +106,7 @@ class Buff:
     """
     attack: int
     health: int
-    abilities: Ability
+    abilities: MinionAbility
 
 
 @dataclass
@@ -120,7 +120,7 @@ class Minion:
         - type: The type of the minion.
         - tier: The tier of this minion.
         - abilities: The abilities of this minion.
-                     This consists of a combination of the Ability flags.
+                     This consists of a combination of the MinionAbility flags.
         - keywords: The keywords of this minion.
                     This consists of a combination of the MinionKeyword flags.
         - valid_targets: The type of minions this minion can target.
@@ -133,8 +133,7 @@ class Minion:
     """
     # Private Instance Attributes:
     #   - _damage_taken: The amount of damage the minion has taken.
-    #   - _temp_buffs: A dict mapping a minion instance to the buff appplied by it.
-    #                  This is used for effects like aura.
+    #   - _temp_buffs: A set of buffs appplied to this minion.
     name: str
     type: MinionType
     health: int
@@ -146,7 +145,7 @@ class Minion:
     tier: MinionTier = TIER_RANKS[1]
     level: int = 1
 
-    abilities: Ability = Ability.NONE
+    abilities: MinionAbility = MinionAbility.NONE
     keywords: MinionKeyword = MinionKeyword.NONE
     valid_targets: MinionType = MinionType.ALL
 
@@ -154,18 +153,26 @@ class Minion:
     parent_minion: Optional[Minion] = None
 
     _damage_taken: int = 0
-    _temp_buffs: Dict[Minion, Buff] = field(default_factory=dict)
+    _temp_buffs: List[Buff] = field(default_factory=list)
 
     @property
     def current_health(self) -> int:
         """Return the current health of this minion."""
-        total_health = self.health + sum(buff.health for buff in self._temp_buffs.values())
+        total_health = self.health + sum(buff.health for buff in self._temp_buffs)
         return total_health - self._damage_taken
 
     @property
     def current_attack(self) -> int:
         """Return the current attack of this minion."""
-        return self.attack + sum(buff.attack for buff in self._temp_buffs.values())
+        return self.attack + sum(buff.attack for buff in self._temp_buffs)
+
+    @property
+    def current_abilities(self) -> MinionAbility:
+        """Return the current abilities of this minion."""
+        current_abilities = self.abilities
+        for buff in self._temp_buffs:
+            current_abilities |= buff.abilities
+        return current_abilities
 
     def take_damage(self, damage: int) -> Tuple[bool, bool, bool, bool]:
         """Inflict the given amount of damage onto this minion.
@@ -174,7 +181,7 @@ class Minion:
         took damage, lost divine shield, overkilled, and/or whether this minion is dead.
 
         >>> minion = Minion('Mario', MinionType.NEUTRAL, 3, 1, 1)  # Create a minion with 3 health.
-        >>> minion.abilities |= Ability.DIVINE_SHIELD  # Give the minion divine shield
+        >>> minion.abilities |= MinionAbility.DIVINE_SHIELD  # Give the minion divine shield
         >>> minion.take_damage(100)
         (False, True, False, False)
         >>> minion.current_health
@@ -191,14 +198,48 @@ class Minion:
         if damage == 0:
             return False, False, False, False
 
-        if Ability.DIVINE_SHIELD in self.abilities:
+        if MinionAbility.DIVINE_SHIELD in self.abilities:
             # Clear divine shield, since we've taken damage.
-            self.abilities &= ~Ability.DIVINE_SHIELD
+            self.abilities &= ~MinionAbility.DIVINE_SHIELD
             return False, True, False, False
 
         self._damage_taken += damage
         current_health = self.current_health
         return True, False, current_health < 0, current_health <= 0
+
+    def add_buff(self, buff: Buff) -> None:
+        """Apply the given buff to this minion whose source is the given minion.
+
+        >>> minion = Minion('Lonely Boy', MinionType.DEMON, 0, 0, 1)  # A lonely minion.
+        >>> buff = Buff(health=1, attack=2, abilities=MinionAbility.TAUNT |\
+                                                      MinionAbility.DIVINE_SHIELD)
+        >>> minion.add_buff(buff)
+        >>> minion.current_health == 1 and minion.current_attack == 2
+        True
+        >>> MinionAbility.TAUNT in minion.current_abilities and \
+            MinionAbility.DIVINE_SHIELD in minion.current_abilities
+        True
+        """
+        self._temp_buffs.append(buff)
+
+    def remove_buff(self, buff: Buff) -> None:
+        """Remove the given buff.
+        Do nothing if the given buff is not applied to this minion.
+
+        >>> minion = Minion('Lonely Boy', MinionType.DEMON, 0, 0, 1)  # A lonely minion.
+        >>> buff = Buff(health=1, attack=2, abilities=MinionAbility.TAUNT |\
+                                                      MinionAbility.DIVINE_SHIELD)
+        >>> minion.add_buff(buff)
+        >>> minion.remove_buff(buff)
+        >>> minion.current_health == 0 and minion.current_attack == 0
+        True
+        >>> minion.current_abilities == MinionAbility.NONE
+        True
+        """
+        if buff not in self._temp_buffs:
+            return
+        self._damage_taken = max(self._damage_taken - buff.health, 0)
+        self._temp_buffs.remove(buff)
 
     def clone(self, keep_buffs: bool = False) -> Minion:
         """Return a clone of this minion.
