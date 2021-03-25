@@ -102,6 +102,7 @@ def main(args: argparse.Namespace) -> None:
     with open(args.output, 'w+') as fp:
         json.dump(cards_by_tier, fp)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Scrape the Hearthstone Battlegrounds card pool.')
     parser.add_argument('-o', '--output', type=Path, default=None,
