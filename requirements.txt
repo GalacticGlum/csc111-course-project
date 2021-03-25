@@ -2,3 +2,12 @@
 hypothesis
 pytest
 python-ta
+
+# General packages
+tqdm
+colorama
+texttable
+hurry.filesize
+
+# Data scraping
+bs4
