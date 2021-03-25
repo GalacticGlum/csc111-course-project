@@ -3,6 +3,8 @@
 This script takes in as input a json file containing a list of every card in the game, along with
 another json file containing every card in the Hearthstone Battlegrounds pool organized by tavern
 tier. It outputs a new json file containing the full card information for each card in the pool.
+
+Cards that have been removed from the game, or that do not have a tavern tier are NOT included.
 """
 
 import json
