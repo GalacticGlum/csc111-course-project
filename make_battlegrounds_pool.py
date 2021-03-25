@@ -1,0 +1,67 @@
+"""Make the Hearthstone Battlegrounds card pool from Hearthstone card data and a card tier dataset.
+
+This script takes in as input a json file containing a list of every card in the game, along with
+another json file containing every card in the Hearthstone Battlegrounds pool organized by tavern
+tier. It outputs a new json file containing the full card information for each card in the pool.
+"""
+
+import json
+import argparse
+from pathlib import Path
+from datetime import datetime
+
+
+def _is_battlegrounds_card(card: dict) -> bool:
+    """Return whether this card is a battlegrounds card."""
+    return card.get('SET', None) == 'BATTLEGROUNDS' or \
+           'battlegroundsNormalDbfId' in card or \
+           'battlegroundsPremiumDbfId' in card
+
+
+def _is_golden(card: dict) -> bool:
+    """Return whether this card is golden."""
+    return 'battlegroundsNormalDbfId' in card
+
+
+def main(args: argparse.Namespace) -> None:
+    """Main entrypoint for the script."""
+    with open(args.card_data_file, encoding='utf-8') as card_data_fp,\
+         open(args.pool_data_file, encoding='utf-8') as pool_data_fp:
+        card_data = json.load(card_data_fp)
+        pool_data = json.load(pool_data_fp)
+
+        card_pool = {}
+        for tier in pool_data:
+            for card in pool_data[tier]:
+                card_pool[card['name']] = card
+
+        # Filter for only battlegrounds cards
+        card_data = [card for card in card_data if _is_battlegrounds_card(card)]
+        for card in card_data:
+            name = card['name']
+            if name not in card_pool:
+                continue
+            pool_info = card_pool[name]
+            if pool_info['is_removed'] or pool_info['tier'] is None:
+                continue
+            card['tier'] = pool_info['tier']
+            card['is_golden'] = _is_golden(card)
+
+    with open(args.output, 'w+', encoding='utf-8') as fp:
+        json.dump(card_data, fp)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Make the Hearthstone Battlegrounds card pool dataset.')
+    parser.add_argument('card_data_file', type=Path,
+                        help='A json file containing card data extracted from the Hearthstone '
+                             'game client. This should match the HearthstoneJSON format.')
+    parser.add_argument('pool_data_file', type=Path,
+                        help='A json file containing each card organized by tavern tier. '
+                             'This should match the format outputted by the '
+                             'scrape_battlegrounds_pool.py script')
+    parser.add_argument('-o', '--output', type=Path, default=None,
+                        help='The filepath of the output json file.')
+    default_output_path = Path(datetime.now().strftime('hsbg_cards-%Y%m%d-%H%M%S.json'))
+    parser.set_defaults(output=default_output_path)
+    main(parser.parse_args())
