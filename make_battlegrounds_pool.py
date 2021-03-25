@@ -36,19 +36,26 @@ def main(args: argparse.Namespace) -> None:
                 card_pool[card['name']] = card
 
         # Filter for only battlegrounds cards
-        card_data = [card for card in card_data if _is_battlegrounds_card(card)]
+        cards = []
         for card in card_data:
+            # Filter for only battlegrounds cards
+            if not _is_battlegrounds_card(card):
+                continue
             name = card['name']
+            # Make sure the card is in the pool.
             if name not in card_pool:
                 continue
             pool_info = card_pool[name]
+            # Ignore cards that don't have a tier attribute or that have been removed.
             if pool_info['is_removed'] or pool_info['tier'] is None:
                 continue
+            # Add tier and is_golden attributes to cards
             card['tier'] = pool_info['tier']
             card['is_golden'] = _is_golden(card)
+            cards.append(card)
 
     with open(args.output, 'w+', encoding='utf-8') as fp:
-        json.dump(card_data, fp)
+        json.dump(cards, fp)
 
 
 if __name__ == '__main__':
