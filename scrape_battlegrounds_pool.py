@@ -110,7 +110,7 @@ if __name__ == '__main__':
                         help='Overwrite the output file if it already exists.')
     parser.add_argument('--summarise', action='store_true', dest='summarise',
                         help='Display a summary of the data collected.')
-    parser.add_argument('--no-ignore-removed', action='store_false', dest='ignore_removed',
+    parser.add_argument('--ignore-removed', action='store_true', dest='ignore_removed',
                         help='Ignore cards that are not in the current version of the game.')
     default_output_path = Path(datetime.now().strftime('hsbg_card_pool-%Y%m%d-%H%M%S.json'))
     parser.set_defaults(output=default_output_path, ignore_removed=False)
