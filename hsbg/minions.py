@@ -1174,3 +1174,60 @@ SOUTHSEA_STRONGARM_GOLDEN = Minion(
     cost=5, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
     _on_this_played=_southsea_strongarm_on_this_played
 )
+
+# Neutral Pool
+# TODO: Implement effect: Whenever a friendly TAUNT minion is attacked,
+#       give it +2 Attack PERMANENTLY.
+# NOTE: This effect requires reading a trace of the battle from the C++ simulator,
+#       and then reflecting the changes in our game state representation.
+#       (since we need to update the attack of the minion for future combat)
+#
+#       This means that the minion needs a way of hooking into the end of the combat phase,
+#       so that it can read the output of the simulator and make the appropriate changes.
+ARM_OF_THE_EMPIRE = Minion(
+    'Arm of the Empire', CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 5,
+    cost=5, tier=3,
+    #_on_end_combat_phase=???
+)
+ARM_OF_THE_EMPIRE_GOLDEN = Minion(
+    'Arm of the Empire', CardClass.NEUTRAL, MinionRace.NEUTRAL, 8, 10,
+    cost=5, tier=3, is_golden=True,
+    #_on_end_combat_phase=???
+)
+
+def _khadgar_on_card_summoned(self, ctx) -> None:
+    """Handle the Khadgar minion effect.
+    Effect (regular): Your cards that summon minions summon twice as many.
+    Effect (golden):  Your cards that summon minions summon three times as many.
+    """
+    times = 3 if self.is_golden else 2
+    # Summon times copies of the summoned card.
+    for _ in range(times):
+        minion = ctx.summoned_minion.clone(keep_buffs=True)
+        ctx.board.place_minion(minion)
+
+# TODO: Implement effect: Your cards that summon minions summon twice as many.
+# NOTE: This requires changing the C++ simulator as well, since this effect applies
+#       during the combat phase, as well as the recruitment phase.
+KHADGAR = Minion(
+    'Khadgar', CardClass.MAGE, MinionRace.NEUTRAL, 2, 2,
+    cost=2, tier=3, rarity=CardRarity.LEGENDARY,
+    _on_card_summoned=_khadgar_on_card_summoned
+)
+KHADGAR_GOLDEN = Minion(
+    'Khadgar', CardClass.MAGE, MinionRace.NEUTRAL, 4, 4,
+    cost=2, tier=3, rarity=CardRarity.LEGENDARY, is_golden=True,
+    _on_card_summoned=_khadgar_on_card_summoned
+)
+
+# TODO: Implement deathrattle (Add a Gold Coin to your hand).
+# NOTE: This requires reading information from the C++ simulator.
+WARDEN_OF_OLD = Minion(
+    'Warden of Old', CardClass.NEUTRAL, MinionRace.NEUTRAL, 3, 3,
+    cost=4, tier=3, abilities=CardAbility.DEATH_RATTLE | CardAbility.GENERATE
+)
+# TODO: Implement deathrattle (Add 2 Gold Coins to your hand).
+WARDEN_OF_OLD_GOLDEN = Minion(
+    'Warden of Old', CardClass.NEUTRAL, MinionRace.NEUTRAL, 6, 6,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.DEATH_RATTLE | CardAbility.GENERATE
+)
