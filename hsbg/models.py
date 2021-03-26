@@ -40,6 +40,7 @@ class CardAbility(Flag):
     DIVINE_SHIELD = auto()
     POISON = auto()
     WINDFURY = auto()
+    MEGA_WINDFURY = auto()
     BATTLECRY = auto()
     DEATH_RATTLE = auto()
     START_OF_COMBAT = auto()

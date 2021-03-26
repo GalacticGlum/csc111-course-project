@@ -923,3 +923,47 @@ TWILIGHT_EMISSARY_GOLDEN = Minion(
 )
 
 # Elemental Pool
+def _arcane_assistant_on_this_played(self, ctx) -> None:
+    """Handle the battlecry effect for the Arcane Assistant minion.
+    Effect: Give your Elementals +1/+1 (or +2/+2 if golden).
+    """
+    buff_amount = 2 if self.is_golden else 1
+    minions = ctx.board.get_minions(race=MinionRace.ELEMENTAL, ignore=[self])
+    for minion in minions:
+        minion.add_buff(Buff(buff_amount, buff_amount, CardAbility.NONE))
+
+ARCANE_ASSISTANT = Minion(
+    'Arcane Assistant', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 3, 3,
+    cost=3, tier=3, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_arcane_assistant_on_this_played
+)
+ARCANE_ASSISTANT_GOLDEN = Minion(
+    'Arcane Assistant', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 6, 6,
+    cost=3, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_arcane_assistant_on_this_played
+)
+
+CRACKLING_CYCLONE = Minion(
+    'Crackling Cyclone', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 4, 1,
+    cost=4, tier=3, abilities=CardAbility.DIVINE_SHIELD | CardAbility.WINDFURY
+)
+CRACKLING_CYCLONE_GOLDEN = Minion(
+    'Crackling Cyclone', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 8, 2,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.DIVINE_SHIELD | CardAbility.MEGA_WINDFURY
+)
+
+# NOTE: Stasis Elemental adds a card to the list of recruits when it is played.
+#       This can be problematic when we already have the maximum number of recruits,
+#       since this would cause the number of available recruits to exceed the maximum,
+#       which the state space representation of the game does not support (we always assume the
+#       number of recruits is capped at the maximum, and we pad the state accordingly).
+#
+#       As a result, we probably won't implement this card. But, it is here for reference.
+STASIS_ELEMENTAL = Minion(
+    'Stasis Elemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 4, 4,
+    cost=4, tier=3, abilities=CardAbility.BATTLECRY
+)
+STASIS_ELEMENTAL_GOLDEN = Minion(
+    'Stasis Elemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 8, 8,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY
+)
