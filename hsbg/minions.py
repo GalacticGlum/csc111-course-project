@@ -861,3 +861,63 @@ SOUL_JUGGLER_GOLDEN = Minion(
     'Soul Juggler', CardClass.WARLOCK, MinionRace.NONE, 6, 6,
     cost=3, tier=3, is_golden=True
 )
+
+# Dragon Pool
+BRONZE_WARDEN = Minion(
+    'Bronze Warden', CardClass.NEUTRAL, MinionRace.DRAGON, 2, 1,
+    cost=4, tier=3, abilities=CardAbility.DIVINE_SHIELD | CardAbility.REBORN
+)
+BRONZE_WARDEN_GOLDEN = Minion(
+    'Bronze Warden', CardClass.NEUTRAL, MinionRace.DRAGON, 4, 2,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.DIVINE_SHIELD | CardAbility.REBORN
+)
+
+def _hangry_dragon_on_new_turn(self, ctx) -> None:
+    """Handle the effect for the Hangry Dragon minion.
+    Effect: At the start of your turn, gain +2/+2 (or +4/+4 if golden) if you won the last combat.
+    """
+    if not ctx.board.won_previous:
+        return
+
+    if self.is_golden:
+        self.add_buff(Buff(4, 4, CardAbility.NONE))
+    else:
+        self.add_buff(Buff(2, 2, CardAbility.NONE))
+
+HANGRY_DRAGON = Minion(
+    'Hangry Dragon', CardClass.NEUTRAL, MinionRace.DRAGON, 4, 4,
+    cost=5, tier=3,
+    _on_new_turn=_hangry_dragon_on_new_turn
+)
+HANGRY_DRAGON_GOLDEN = Minion(
+    'Hangry Dragon', CardClass.NEUTRAL, MinionRace.DRAGON, 8, 8,
+    cost=5, tier=3, is_golden=True,
+    _on_new_turn=_hangry_dragon_on_new_turn
+)
+
+def _twilight_emissary_on_this_played(self, ctx) -> None:
+    """Handle the battlecry effect for the Twilight Emissary minion.
+    Effect: Give a friendly Dragon +2/+2 (or +4/+4 if golden).
+
+    Note: the dragon is chosen RANDOMLY since we do not have targetting implemented.
+    """
+    # Choose a random friendly Murloc
+    minion = ctx.board.get_random_minion(race=MinionRace.DRAGON, kind='friendly', ignore=[self])
+    if minion is None:
+        return
+
+    if self.is_golden:
+        minion.add_buff(Buff(4, 4, CardAbility.NONE))
+    else:
+        minion.add_buff(Buff(2, 2, CardAbility.NONE))
+
+TWILIGHT_EMISSARY = Minion(
+    'Twilight Emissary', CardClass.NEUTRAL, MinionRace.DRAGON, 4, 4,
+    cost=6, tier=3, abilities=CardAbility.TAUNT | CardAbility.BATTLECRY,
+    _on_this_played=_twilight_emissary_on_this_played
+)
+TWILIGHT_EMISSARY_GOLDEN = Minion(
+    'Twilight Emissary', CardClass.NEUTRAL, MinionRace.DRAGON, 8, 8,
+    cost=6, tier=3, is_golden=True, abilities=CardAbility.TAUNT | CardAbility.BATTLECRY,
+    _on_this_played=_twilight_emissary_on_this_played
+)
