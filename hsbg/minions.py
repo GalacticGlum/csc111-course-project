@@ -967,3 +967,101 @@ STASIS_ELEMENTAL_GOLDEN = Minion(
     'Stasis Elemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 8, 8,
     cost=4, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY
 )
+
+# Mech Pool
+# TODO: Implement effect: Whenever you summon a Mech during combat, gain +1 Attack and Divine Shield.
+DEFLECT_O_BOT = Minion(
+    'Deflect-o-Bot', CardClass.NEUTRAL, MinionRace.MECH, 3, 2,
+    cost=4, tier=3, abilities=CardAbility.DIVINE_SHIELD
+)
+# TODO: Implement effect: Whenever you summon a Mech during combat, gain +2 Attack and Divine Shield.
+DEFLECT_O_BOT_GOLDEN = Minion(
+    'Deflect-o-Bot', CardClass.NEUTRAL, MinionRace.MECH, 6, 4,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.DIVINE_SHIELD
+)
+
+def _iron_sensei_on_end_turn(self, ctx) -> None:
+    """Handle the effect for the Iron Sensei minion.
+    Effect: At the end of your turn, give another friendly Mech +2/+2 (or +4/+4 if golden).
+
+    Note: the mech is chosen RANDOMLY since we do not have targetting implemented.
+    """
+    # Choose a random friendly Mech
+    minion = ctx.board.get_random_minion(race=MinionRace.MECH, kind='friendly', ignore=[self])
+    if minion is None:
+        return
+
+    if self.is_golden:
+        minion.add_buff(Buff(4, 4, CardAbility.NONE))
+    else:
+        minion.add_buff(Buff(2, 2, CardAbility.NONE))
+
+IRON_SENSEI = Minion(
+    'Iron Sensei', CardClass.ROGUE, MinionRace.MECH, 2, 2,
+    cost=3, tier=3, rarity=CardRarity.RARE,
+    _on_end_turn=_iron_sensei_on_end_turn
+)
+IRON_SENSEI_GOLDEN = Minion(
+    'Iron Sensei', CardClass.ROGUE, MinionRace.MECH, 4, 4,
+    cost=3, tier=3, rarity=CardRarity.RARE, is_golden=True,
+    _on_end_turn=_iron_sensei_on_end_turn
+)
+
+# TODO: Implement deathrattle (Summon a random 2-cost minion).
+PILOTED_SHREDDER = Minion(
+    'Piloted Shredder', CardClass.NEUTRAL, MinionRace.MECH, 4, 3,
+    cost=4, tier=3, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+# TODO: Implement deathrattle (Summon two random 2-cost minions).
+PILOTED_SHREDDER_GOLDEN = Minion(
+    'Piloted Shredder', CardClass.NEUTRAL, MinionRace.MECH, 8, 6,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+def _screwjank_clunker_on_this_played(self, ctx) -> None:
+    """Handle the battlecry effect for the Screwjank Clunker minion.
+    Effect: Give a friendly Mech +2/+2 (or +4/+4 if golden).
+
+    Note: the mech is chosen RANDOMLY since we do not have targetting implemented.
+    """
+    # Choose a random friendly Mech
+    minion = ctx.board.get_random_minion(race=MinionRace.MECH, kind='friendly', ignore=[self])
+    if minion is None:
+        return
+
+    if self.is_golden:
+        minion.add_buff(Buff(4, 4, CardAbility.NONE))
+    else:
+        minion.add_buff(Buff(2, 2, CardAbility.NONE))
+
+
+SCREWJANK_CLUNKER = Minion(
+    'Screwjank Clunker', CardClass.WARRIOR, MinionRace.MECH, 2, 5,
+    cost=4, tier=3, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_screwjank_clunker_on_this_played
+)
+SCREWJANK_CLUNKER_GOLDEN = Minion(
+    'Screwjank Clunker', CardClass.WARRIOR, MinionRace.MECH, 4, 10,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_screwjank_clunker_on_this_played
+)
+
+# Microbot summoned by Replicating Menace
+MICROBOT = Minion(
+    'Microbot', CardClass.NEUTRAL, MinionRace.MECH, 1, 1,
+    tier=1, purchasable=False
+)
+MICROBOT_GOLDEN = Minion(
+    'Microbot', CardClass.NEUTRAL, MinionRace.MECH, 2, 2,
+    tier=1, is_golden=True, purchasable=False
+)
+
+REPLICATING_MENACE = Minion(
+    'Replicating Menace', CardClass.NEUTRAL, MinionRace.MECH, 3, 1,
+    cost=4, tier=3, abilities=CardAbility.MAGNETIC | CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+REPLICATING_MENACE_GOLDEN = Minion(
+    'Replicating Menace', CardClass.NEUTRAL, MinionRace.MECH, 6, 2,
+    cost=4, tier=3, is_golden=True,
+    abilities=CardAbility.MAGNETIC | CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
