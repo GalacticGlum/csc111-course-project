@@ -856,7 +856,7 @@ SOUL_JUGGLER = Minion(
     'Soul Juggler', CardClass.WARLOCK, MinionRace.NONE, 3, 3,
     cost=3, tier=3
 )
-# TODO: Implement effect: After a friendly Demon dies, deal 3 damage to a random enemy minion twice.
+# TODO: Implement effect: After a friendly Demon dies, deal 3 damage to a random enemy minion TWICE.
 SOUL_JUGGLER_GOLDEN = Minion(
     'Soul Juggler', CardClass.WARLOCK, MinionRace.NONE, 6, 6,
     cost=3, tier=3, is_golden=True
