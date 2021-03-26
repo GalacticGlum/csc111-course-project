@@ -1,6 +1,6 @@
 """Implementation of various minion cards.
 
-These minions are implemented for Hearthstone Path 20.0.
+These minions are implemented for Hearthstone Patch 20.0.
 Data Source: https://hearthstone.fandom.com/wiki/Battlegrounds#Minions_by_tier
 """
 import random
@@ -921,3 +921,5 @@ TWILIGHT_EMISSARY_GOLDEN = Minion(
     cost=6, tier=3, is_golden=True, abilities=CardAbility.TAUNT | CardAbility.BATTLECRY,
     _on_this_played=_twilight_emissary_on_this_played
 )
+
+# Elemental Pool
