@@ -1106,3 +1106,71 @@ FELFIN_NAVIGATOR_GOLDEN = Minion(
     cost=4, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
     _on_this_played=_felfin_navigator_on_this_played
 )
+
+# Pirate Pool
+def _bloodsail_cannoneer_on_this_played(self, ctx) -> None:
+    """Handle the battlecry effect for the Bloodsail Cannoneer minion.
+    Effect: Give your other Pirates +3 (or +6 if golden) Attack.
+    """
+    additional_attack = 6 if self.is_golden else 3
+    minions = ctx.board.get_minions(race=MinionRace.PIRATE, ignore=[self])
+    for minion in minions:
+        minion.add_buff(Buff(additional_attack, 0, CardAbility.NONE))
+
+BLOODSAIL_CANNONEER = Minion(
+    'Bloodsail Cannoneer', CardClass.NEUTRAL, MinionRace.PIRATE, 4, 3,
+    cost=4, tier=3, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_bloodsail_cannoneer_on_this_played
+)
+BLOODSAIL_CANNONEER_GOLDEN = Minion(
+    'Bloodsail Cannoneer', CardClass.NEUTRAL, MinionRace.PIRATE, 8, 6,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_bloodsail_cannoneer_on_this_played
+)
+
+def _salty_looter_on_any_played(self, ctx) -> None:
+    """Handle the effect for the Salty Looter minion when a card is played from the hand.
+    Effect: Whenever you play a Pirate, gain +1/+1 (or +2/+2 if golden).
+    """
+    if MinionRace.PIRATE not in ctx.played_minion.race:
+        return
+    if self.is_golden:
+        self.add_buff(Buff(2, 2, CardAbility.NONE))
+    else:
+        self.add_buff(Buff(1, 1, CardAbility.NONE))
+
+SALTY_LOOTER = Minion(
+    'Salty Looter', CardClass.ROGUE, MinionRace.PIRATE, 4, 4,
+    cost=4, tier=3,
+    _on_any_played=_salty_looter_on_any_played
+)
+SALTY_LOOTER_GOLDEN = Minion(
+    'Salty Looter', CardClass.ROGUE, MinionRace.PIRATE, 8, 8,
+    cost=4, tier=3, is_golden=True,
+    _on_any_played=_salty_looter_on_any_played
+)
+
+def _southsea_strongarm_on_this_played(self, ctx) -> None:
+    """Handle the battlecry effect for the Southsea Strongarm minion.
+    Effect: Give a friendly Pirate +1/+1 (or +2/+2 if golden) for each Pirate you bought this turn.
+
+    Note: the pirate is chosen RANDOMLY since we do not have targetting implemented.
+    """
+    minion = ctx.board.get_random_minion(kind='friendly', ignore=[self])
+    if minion is None:
+        return
+
+    n = len(ctx.board.get_fresh_minions(race=MinionRace.PIRATE))
+    buff_amount = n * (2 if self.is_golden else 1)
+    minion.add_buff(Buff(buff_amount, buff_amount, CardAbility.NONE))
+
+SOUTHSEA_STRONGARM = Minion(
+    'Southsea Strongarm', CardClass.NEUTRAL, MinionRace.PIRATE, 4, 3,
+    cost=5, tier=3, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_southsea_strongarm_on_this_played
+)
+SOUTHSEA_STRONGARM_GOLDEN = Minion(
+    'Southsea Strongarm', CardClass.NEUTRAL, MinionRace.PIRATE, 8, 6,
+    cost=5, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_southsea_strongarm_on_this_played
+)
