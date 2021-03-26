@@ -4,6 +4,7 @@ These minions are implemented for Hearthstone Path 20.0.
 Data Source: https://hearthstone.fandom.com/wiki/Battlegrounds#Minions_by_tier
 """
 import random
+import logging
 from typing import Dict
 
 from hsbg.models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
@@ -17,10 +18,16 @@ def get_all_minions(gold_suffix: str = '_golden') -> Dict[str, Minion]:
         gold_suffix: The suffix to add to keys representing minions that are golden.
     """
     all_minions = {}
-    for obj in globals().values():
+    globals_copy = globals().copy()
+    for obj in globals_copy.values():
         if not isinstance(obj, Minion):
             continue
         key = obj.name + (gold_suffix if obj.is_golden else '')
+
+        # Warn the user if duplicate minions were found!
+        if key in all_minions:
+            logging.warn(f'Found duplicate minion (\'{key}\')')
+
         all_minions[key] = obj
     return all_minions
 
@@ -811,7 +818,7 @@ CRYSTAL_WEAVER = Minion(
 )
 CRYSTAL_WEAVER_GOLDEN = Minion(
     'Crystalweaver', CardClass.WARLOCK, MinionRace.NONE, 10, 8,
-    cost=4, tier=3, abilities=CardAbility.BATTLECRY,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
     _on_this_played=_crystal_weaver_on_this_played
 )
 
