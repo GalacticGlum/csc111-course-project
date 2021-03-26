@@ -2,6 +2,12 @@
 
 These minions are implemented for Hearthstone Patch 20.0.
 Data Source: https://hearthstone.fandom.com/wiki/Battlegrounds#Minions_by_tier
+
+NOTE: This is a collection of all minions in the Battlegrounds pool as of Patch 20.0.
+      However, not all of these minions are implemented. They are merely defined here
+      for the future. Refer to the implemented_minions.txt file for a full list of all
+      minions with implementations in the Python recruitment phase simulator, and the
+      C++ combat phase simulator.
 """
 import random
 import logging
