@@ -1065,3 +1065,44 @@ REPLICATING_MENACE_GOLDEN = Minion(
     cost=4, tier=3, is_golden=True,
     abilities=CardAbility.MAGNETIC | CardAbility.DEATH_RATTLE | CardAbility.SUMMON
 )
+
+# Murloc Pool
+def _coldlight_seer_on_this_played(self, ctx) -> None:
+    """Handle the battlecry effect for the Coldlight Seer minion.
+    Effect: Give your other Murlocs +2 (or +4 if golden) health.
+    """
+    additional_health = 4 if self.is_golden else 2
+    minions = ctx.board.get_minions(race=MinionRace.MURLOC, ignore=[self])
+    for minion in minions:
+        minion.add_buff(Buff(0, additional_health, CardAbility.NONE))
+
+COLDLIGHT_SEER = Minion(
+    'Coldlight Seer', CardClass.NEUTRAL, MinionRace.MURLOC, 2, 3,
+    cost=3, tier=3, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_coldlight_seer_on_this_played
+)
+COLDLIGHT_SEER_GOLDEN = Minion(
+    'Coldlight Seer', CardClass.NEUTRAL, MinionRace.MURLOC, 4, 6,
+    cost=3, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_coldlight_seer_on_this_played
+)
+
+def _felfin_navigator_on_this_played(self, ctx) -> None:
+    """Handle the battlecry effect for the Felfin Navigator minion.
+    Effect: Give your other Murlocs +1/+1 (or +2/+2 if golden).
+    """
+    buff_amount = 2 if self.is_golden else 1
+    minions = ctx.board.get_minions(race=MinionRace.MURLOC, ignore=[self])
+    for minion in minions:
+        minion.add_buff(Buff(buff_amount, buff_amount, CardAbility.NONE))
+
+FELFIN_NAVIGATOR = Minion(
+    'Felfin Navigator', CardClass.NEUTRAL, MinionRace.MURLOC, 4, 4,
+    cost=4, tier=3, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_felfin_navigator_on_this_played
+)
+FELFIN_NAVIGATOR_GOLDEN = Minion(
+    'Felfin Navigator', CardClass.NEUTRAL, MinionRace.MURLOC, 8, 8,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_felfin_navigator_on_this_played
+)
