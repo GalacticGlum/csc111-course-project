@@ -365,8 +365,16 @@ RABID_SAUROLISK_GOLDEN = Minion(
 )
 
 # Demon Pool
-IMP = Minion('Imp', CardClass.WARLOCK, MinionRace.DEMON, 1, 1)
-IMP_GOLDEN = Minion('Imp', CardClass.WARLOCK, MinionRace.DEMON, 2, 2, is_golden=True)
+
+# Imp summoned by Imp Gang Boss and Imprisoner
+IMP = Minion(
+    'Imp', CardClass.WARLOCK, MinionRace.DEMON, 1, 1,
+    tier=1, purchasable=False
+)
+IMP_GOLDEN = Minion(
+    'Imp', CardClass.WARLOCK, MinionRace.DEMON, 2, 2,
+    tier=1, is_golden=True, purchasable=False
+)
 
 # TODO: Deathrattle (Summon a 1/1 imp)
 IMPRISONER = Minion(
@@ -617,7 +625,7 @@ def _managerie_mug_on_this_played(self, ctx) -> None:
     """Handle the battlecry effect for the Menagerie Mug effect.
     Effect: Give 3 random friendly minions of different minion types +1/+1 (or +2/+2 if golden).
     """
-    for minion in ctx.board.get_all_minions(kind='friendly', ignore=[self]):
+    for minion in ctx.board.get_minions(kind='friendly', ignore=[self]):
         if minion.race not in minions_by_race:
             minions_by_race[minion.race] = []
         minions_by_race[minion.race].append(minion)
@@ -771,4 +779,78 @@ RAT_PACK_GOLDEN = Minion(
     'Rat Pack', CardClass.HUNTER, MinionRace.BEAST, 4, 4,
     cost=3, tier=3, rarity=CardRarity.EPIC, is_golden=True,
     abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+# Demon Pool
+# TODO: Implement effect: Whenever this minion takes damage, summon a 1/1 Imp.
+IMP_GANG_BOSS = Minion(
+    'Imp Gang Boss', CardClass.WARLOCK, MinionRace.DEMON, 2, 4,
+    cost=3, tier=3, abilities=CardAbility.SUMMON
+)
+# TODO: Implement effect: Whenever this minion takes damage, summon a 2/2 Imp.
+IMP_GANG_BOSS_GOLDEN = Minion(
+    'Imp Gang Boss', CardClass.WARLOCK, MinionRace.DEMON, 4, 8,
+    cost=3, tier=3, is_golden=True, abilities=CardAbility.SUMMON
+)
+
+def _crystal_weaver_on_this_played(self, ctx) -> None:
+    """Handle the battlecry effect for the Crystalweaver minion.
+    Effect: Give your Demons +1/+1 (or +2/+2 if golden).
+    """
+    minions = ctx.board.get_minions(race=MinionRace.DEMON)
+    for minion in minions:
+        if self.is_golden:
+            minion.add_buff(Buff(2, 2, CardAbility.NONE))
+        else:
+            minion.add_buff(Buff(1, 1, CardAbility.NONE))
+
+CRYSTAL_WEAVER = Minion(
+    'Crystalweaver', CardClass.WARLOCK, MinionRace.NONE, 5, 4,
+    cost=4, tier=3, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_crystal_weaver_on_this_played
+)
+CRYSTAL_WEAVER_GOLDEN = Minion(
+    'Crystalweaver', CardClass.WARLOCK, MinionRace.NONE, 10, 8,
+    cost=4, tier=3, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_crystal_weaver_on_this_played
+)
+
+def _soul_devourer_on_this_played(self, ctx) -> None:
+    """Handle the battlecry effect for the Soul Devourer minion.
+    Effect (regular): Choose a friendly Demon. Remove it to gain its stats and 3 gold.
+    Effect (golden):  Choose a friendly Demon. Remove it to gain double its stats and 6 gold.
+    """
+    minion = ctx.board.get_random_minion(race=MinionRace.DEMON, kind='friendly', ignore=[self])
+    # Remove minion from board
+    ctx.board.remove_minion(minion)
+
+    multiplier = 2 if self.is_golden else 1
+    attack_buff = minion.current_attack * multiplier
+    health_buff = minion.current_health * multiplier
+
+    # Give stats to self
+    self.add_buff(Buff(attack_buff, health_buff, CardAbility.NONE))
+    # Give gold
+    ctx.board.give_gold(3 * multiplier)
+
+SOUL_DEVOURER = Minion(
+    'Soul Devourer', CardClass.NEUTRAL, MinionRace.DEMON, 3, 3,
+    cost=4, tier=3, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_soul_devourer_on_this_played
+)
+SOUL_DEVOURER_GOLDEN = Minion(
+    'Soul Devourer', CardClass.NEUTRAL, MinionRace.DEMON, 6, 6,
+    cost=4, tier=3, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_soul_devourer_on_this_played
+)
+
+# TODO: Implement effect: After a friendly Demon dies, deal 3 damage to a random enemy minion.
+SOUL_JUGGLER = Minion(
+    'Soul Juggler', CardClass.WARLOCK, MinionRace.NONE, 3, 3,
+    cost=3, tier=3
+)
+# TODO: Implement effect: After a friendly Demon dies, deal 3 damage to a random enemy minion twice.
+SOUL_JUGGLER_GOLDEN = Minion(
+    'Soul Juggler', CardClass.WARLOCK, MinionRace.NONE, 6, 6,
+    cost=3, tier=3, is_golden=True
 )
