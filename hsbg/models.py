@@ -46,6 +46,7 @@ class CardAbility(Flag):
     SUMMON = auto()
     GENERATE = auto()
     REBORN = auto()
+    CHARGE = auto()
 
 
 class MinionRace(Flag):
