@@ -19,8 +19,11 @@ from hsbg.models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Mi
 
 
 def get_all_minions(gold_suffix: str = '_golden') -> Dict[str, Minion]:
-    """Return a dict mapping the name of a minion to its instance.
-    The key is the name of the minion (with an additional suffix if the minion is golden).
+    """Return a dict mapping the name of each minion defined in the hsbg.minions module to
+    its Minion object instance.
+
+    Each key in the returned dict is the name of a minion (with an additional suffix if the
+    minion is golden, specified by the gold_suffix argument).
 
     Args:
         gold_suffix: The suffix to add to keys representing minions that are golden.
