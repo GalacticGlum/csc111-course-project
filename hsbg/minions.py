@@ -1422,3 +1422,55 @@ WILDFIRE_ELEMENTAL_GOLDEN = Minion(
 )
 
 # Mech Pool
+ANNOY_O_MODULE = Minion(
+    'Annoy-o-Module', CardClass.PALADIN, MinionRace.MECH, 2, 4,
+    cost=4, tier=4, rarity=CardRarity.RARE,
+    abilities=CardAbility.MAGNETIC | CardAbility.DIVINE_SHIELD | CardAbility.TAUNT
+)
+ANNOY_O_MODULE_GOLDEN = Minion(
+    'Annoy-o-Module', CardClass.PALADIN, MinionRace.MECH, 4, 8,
+    cost=4, tier=4, rarity=CardRarity.RARE, is_golden=True,
+    abilities=CardAbility.MAGNETIC | CardAbility.DIVINE_SHIELD | CardAbility.TAUNT
+)
+
+# Robosaur summoned by Mechano Egg
+ROBOSAUR = Minion(
+    'Robosaur', CardClass.PALADIN, MinionRace.MECH, 8, 8,
+    cost=8, tier=1, purchasable=False
+)
+ROBOSAUR_GOLDEN = Minion(
+    'Robosaur', CardClass.PALADIN, MinionRace.MECH, 16, 16,
+    cost=8, tier=1, is_golden=True, purchasable=False
+)
+
+# TODO: Implement deathrattle (Summon an 8/8 Robosaur).
+MECHANO_EGG = Minion(
+    'Mechano-Egg', CardClass.PALADIN, MinionRace.MECH, 0, 5,
+    cost=5, tier=4, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+# TODO: Implement deathrattle (Summon an 16/16 Robosaur).
+MECHANO_EGG_GOLDEN = Minion(
+    'Mechano-Egg', CardClass.PALADIN, MinionRace.MECH, 0, 10,
+    cost=5, tier=4, is_golden=True, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+# Guard Bot summoned by Security Rover
+GUARD_BOT = Minion(
+    'Guard Bot', CardClass.WARRIOR, MinionRace.MECH, 2, 3,
+    cost=2, tier=1, abilities=CardAbility.TAUNT
+)
+GUARD_BOT_GOLDEN = Minion(
+    'Guard Bot', CardClass.WARRIOR, MinionRace.MECH, 4, 6,
+    cost=2, tier=1, is_golden=True, abilities=CardAbility.TAUNT
+)
+
+# TODO: Implement effect (Whenever this minion takes damage, summon a 2/3 Mech with Taunt).
+SECURITY_ROVER = Minion(
+    'Security Rover', CardClass.WARLOCK, MinionRace.MECH, 2, 6,
+    cost=6, tier=4, abilities=CardAbility.SUMMON
+)
+# TODO: Implement effect (Whenever this minion takes damage, summon a 4/6 Mech with Taunt).
+SECURITY_ROVER_GOLDEN = Minion(
+    'Security Rover', CardClass.WARLOCK, MinionRace.MECH, 4, 12,
+    cost=6, tier=4, is_golden=True, abilities=CardAbility.SUMMON
+)
