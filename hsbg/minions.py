@@ -1166,7 +1166,7 @@ def _southsea_strongarm_on_this_played(self: Minion, ctx) -> None:
     if minion is None:
         return
 
-    n = len(ctx.board.get_fresh_minions(race=MinionRace.PIRATE))
+    n = len(ctx.board.get_bought_minions_this_turn(race=MinionRace.PIRATE))
     buff_amount = n * (2 if self.is_golden else 1)
     minion.add_buff(Buff(buff_amount, buff_amount, CardAbility.NONE))
 
@@ -1380,4 +1380,41 @@ HERALD_OF_FLAME = Minion(
 HERALD_OF_FLAME_GOLDEN = Minion(
     'Herald of Flame', CardClass.WARLOCK, MinionRace.DRAGON, 10, 12,
     cost=5, tier=4, is_golden=True, abilities=CardAbility.OVERKILL
+)
+
+# Elemental Pool
+def _majordomo_executus_on_end_turn(self: Minion, ctx) -> None:
+    """Handle the effect for the Majordomo Executus minion.
+    Effect: At the end of your turn, give your left-most minion +1/+1 (or +2/+2 if golden).
+            Repeat for each Elemental you played this turn.
+    """
+    # Get the left most minion
+    minion = ctx.board.get_minion(0)
+    # Apply buff once, and then additionally for each elemental played this turn.
+    multiplier = len(ctx.board.get_minions_played_this_turn(race=MinionRace.ELEMENTAL)) + 1
+    base_buff = 2 if self.is_golden else 1
+    minion.add_buff(Buff(multiplier * base_buff, multiplier * base_buff, CardAbility.NONE))
+
+MAJORDOMO_EXECUTUS = Minion(
+    'Majordomo Executus', CardClass.NEUTRAL, MinionRace.DRAGON, 6, 3,
+    cost=6, tier=4, rarity=CardRarity.LEGENDARY,
+    _on_end_turn=_majordomo_executus_on_end_turn
+)
+MAJORDOMO_EXECUTUS_GOLDEN = Minion(
+    'Majordomo Executus', CardClass.NEUTRAL, MinionRace.DRAGON, 12, 6,
+    cost=6, tier=4, rarity=CardRarity.LEGENDARY, is_golden=True,
+    _on_end_turn=_majordomo_executus_on_end_turn
+)
+
+# TODO: Implement effect: After this attacks and kills a minion,
+#       deal excess damage to a random adjacent minion.
+WILDFIRE_ELEMENTAL = Minion(
+    'Wildfire Elemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 7, 3,
+    cost=6, tier=4
+)
+# TODO: Implement effect: After this attacks and kills a minion,
+#       deal excess damage to both adjacent minions.
+WILDFIRE_ELEMENTAL_GOLDEN = Minion(
+    'Wildfire Elemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 14, 6,
+    cost=6, tier=4, is_golden=True
 )
