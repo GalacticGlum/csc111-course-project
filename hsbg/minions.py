@@ -89,12 +89,12 @@ FIENDISH_SERVANT_GOLDEN = Minion(
 VULGAR_HOMUNCULUS = Minion(
     'Vulgar Homunculus', CardClass.WARLOCK, MinionRace.DEMON, 2, 4,
     cost=2, abilities=CardAbility.TAUNT | CardAbility.BATTLECRY,
-    _on_this_played=lambda self, ctx: ctx.board.attack_hero(2, kind='friendly')
+    _on_this_played=lambda self, ctx: ctx.board.attack_hero(2)
 )
 VULGAR_HOMUNCULUS_GOLDEN = Minion(
     'Vulgar Homunculus', CardClass.WARLOCK, MinionRace.DEMON, 4, 8,
     cost=2, is_golden=True, abilities=CardAbility.TAUNT | CardAbility.BATTLECRY,
-    _on_this_played=lambda self, ctx: ctx.board.attack_hero(2, kind='friendly')
+    _on_this_played=lambda self, ctx: ctx.board.attack_hero(2)
 )
 
 def _wrath_weaver_on_any_played(self: Minion, ctx) -> None:
@@ -108,7 +108,7 @@ def _wrath_weaver_on_any_played(self: Minion, ctx) -> None:
     else:
         buff = Buff(4, 4, CardAbility.NONE)
 
-    ctx.board.attack_hero(1, kind='friendly')
+    ctx.board.attack_hero(1)
     self.add_buff(buff)
 
 WRATH_WEAVER = Minion(
@@ -191,7 +191,7 @@ def _micro_mummy_on_end_turn(self: Minion, ctx) -> None:
     Effect: At the end of your turn, give another random friendly
     minion +1 (or +2 if golden) Attack.
     """
-    minion = ctx.board.get_random_minion(kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(ignore=[self])
     if minion is None:
         return
     if self.is_golden:
@@ -251,7 +251,7 @@ def _rockpool_hunter_on_this_played(self: Minion, ctx) -> None:
     Note: the murloc is chosen RANDOMLY since we do not have targetting implemented.
     """
     # Choose a random friendly Murloc
-    minion = ctx.board.get_random_minion(race=MinionRace.MURLOC, kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(race=MinionRace.MURLOC, ignore=[self])
     if minion is None:
         return
 
@@ -410,7 +410,7 @@ def _nathrezim_overseer_on_this_played(self: Minion, ctx) -> None:
     Note: the demon is chosen RANDOMLY since we do not have targetting implemented.
     """
     # Choose a random friendly Demon
-    minion = ctx.board.get_random_minion(race=MinionRace.DEMON, kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(race=MinionRace.DEMON, ignore=[self])
     if minion is None:
         return
 
@@ -511,8 +511,7 @@ def _party_elemental_on_any_played(self: Minion, ctx) -> None:
 
     times = 2 if self.is_golden else 1
     for _ in range(times):
-        minion = ctx.board.get_random_minion(race=MinionRace.ELEMENTAL,
-                                             kind='friendly', ignore=[self])
+        minion = ctx.board.get_random_minion(race=MinionRace.ELEMENTAL, ignore=[self])
         if minion is None:
             return
         # Give +1/+1
@@ -640,7 +639,7 @@ def _managerie_mug_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Menagerie Mug effect.
     Effect: Give 3 random friendly minions of different minion types +1/+1 (or +2/+2 if golden).
     """
-    for minion in ctx.board.get_minions(kind='friendly', ignore=[self]):
+    for minion in ctx.board.get_minions(ignore=[self]):
         if minion.race not in minions_by_race:
             minions_by_race[minion.race] = []
         minions_by_race[minion.race].append(minion)
@@ -753,7 +752,7 @@ def _houndmaster_on_this_played(self: Minion, ctx) -> None:
     Note: the beast is chosen RANDOMLY since we do not have targetting implemented.
     """
     # Choose a random friendly Beast
-    minion = ctx.board.get_random_minion(race=MinionRace.BEAST, kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(race=MinionRace.BEAST, ignore=[self])
     if minion is None:
         return
 
@@ -835,7 +834,7 @@ def _soul_devourer_on_this_played(self: Minion, ctx) -> None:
     Effect (regular): Choose a friendly Demon. Remove it to gain its stats and 3 gold.
     Effect (golden):  Choose a friendly Demon. Remove it to gain double its stats and 6 gold.
     """
-    minion = ctx.board.get_random_minion(race=MinionRace.DEMON, kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(race=MinionRace.DEMON, ignore=[self])
     # Remove minion from board
     ctx.board.remove_minion(minion)
 
@@ -910,7 +909,7 @@ def _twilight_emissary_on_this_played(self: Minion, ctx) -> None:
     Note: the dragon is chosen RANDOMLY since we do not have targetting implemented.
     """
     # Choose a random friendly Murloc
-    minion = ctx.board.get_random_minion(race=MinionRace.DRAGON, kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(race=MinionRace.DRAGON, ignore=[self])
     if minion is None:
         return
 
@@ -995,7 +994,7 @@ def _iron_sensei_on_end_turn(self: Minion, ctx) -> None:
     Note: the mech is chosen RANDOMLY since we do not have targetting implemented.
     """
     # Choose a random friendly Mech
-    minion = ctx.board.get_random_minion(race=MinionRace.MECH, kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(race=MinionRace.MECH, ignore=[self])
     if minion is None:
         return
 
@@ -1033,7 +1032,7 @@ def _screwjank_clunker_on_this_played(self: Minion, ctx) -> None:
     Note: the mech is chosen RANDOMLY since we do not have targetting implemented.
     """
     # Choose a random friendly Mech
-    minion = ctx.board.get_random_minion(race=MinionRace.MECH, kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(race=MinionRace.MECH, ignore=[self])
     if minion is None:
         return
 
@@ -1164,7 +1163,7 @@ def _southsea_strongarm_on_this_played(self: Minion, ctx) -> None:
 
     Note: the pirate is chosen RANDOMLY since we do not have targetting implemented.
     """
-    minion = ctx.board.get_random_minion(kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(ignore=[self])
     if minion is None:
         return
 
@@ -1283,7 +1282,7 @@ def _virmen_sensei_on_this_played(self: Minion, ctx) -> None:
 
     Note: the beast is chosen RANDOMLY since we do not have targetting implemented.
     """
-    minion = ctx.board.get_random_minion(race=MinionRace.BEAST, kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(race=MinionRace.BEAST, ignore=[self])
     if minion is None:
         return
     if self.is_golden:
@@ -1343,7 +1342,7 @@ def _cobalt_scalebane_on_end_turn(self: Minion, ctx) -> None:
     Effect: At the end of your turn, give another random friendly minion
     +3 (or +6 if golden) Attack.
     """
-    minion = ctx.board.get_random_minion(kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(ignore=[self])
     if minion is None:
         return
     if self.is_golden:
@@ -1502,7 +1501,7 @@ def _toxfin_on_this_played(self: Minion, ctx) -> None:
     Note: the murloc is chosen RANDOMLY since we do not have targetting implemented.
     """
     # Choose a random friendly Murloc
-    minion = ctx.board.get_random_minion(race=MinionRace.MURLOC, kind='friendly', ignore=[self])
+    minion = ctx.board.get_random_minion(race=MinionRace.MURLOC, ignore=[self])
     if minion is None:
         return
     minion.add_buff(Buff(0, 0, CardAbility.POISONOUS))
@@ -1516,4 +1515,36 @@ TOXFIN_GOLDEN = Minion(
     'Toxfin', CardClass.NEUTRAL, MinionRace.MURLOC, 2, 4,
     cost=1, tier=4, is_golden=True, abilities=CardAbility.BATTLECRY,
     _on_this_played=_toxfin_on_this_played
+)
+
+# Pirate Pool
+def _goldgrubber_on_end_turn(self: Minion, ctx) -> None:
+    """Handle the effect for the Goldgrubber minion.
+    Effect: At the end of your turn, gain +2/+2 (or +4/+4 if golden)
+    for each friendly Golden minion.
+    """
+    multiplier = len(ctx.board.get_all_minions(is_golden=True))
+    base_buff = 4 if self.is_golden else 2
+    self.add_buff(Buff(multiplier * base_buff, multiplier * base_buff, CardAbility.NONE))
+
+GOLDGRUBBER = Minion(
+    'Goldgrubber', CardClass.NEUTRAL, MinionRace.PIRATE, 2, 2,
+    cost=5, tier=4,
+    _on_end_turn=_goldgrubber_on_end_turn
+)
+GOLDGRUBBER_GOLDEN = Minion(
+    'Goldgrubber', CardClass.NEUTRAL, MinionRace.PIRATE, 4, 4,
+    cost=5, tier=4, is_golden=True,
+    _on_end_turn=_goldgrubber_on_end_turn
+)
+
+# TODO: Implement effect: Whenever another friendly Pirate attacks, give it +2/+2.
+RIPSNARL_CAPTAIN = Minion(
+    'Ripsnarl Captain', CardClass.NEUTRAL, MinionRace.PIRATE, 4, 5,
+    cost=4, tier=4
+)
+# TODO: Implement effect: Whenever another friendly Pirate attacks, give it +4/+4.
+RIPSNARL_CAPTAIN_GOLDEN = Minion(
+    'Ripsnarl Captain', CardClass.NEUTRAL, MinionRace.PIRATE, 8, 10,
+    cost=4, tier=4, is_golden=True
 )
