@@ -1474,3 +1474,46 @@ SECURITY_ROVER_GOLDEN = Minion(
     'Security Rover', CardClass.WARLOCK, MinionRace.MECH, 4, 12,
     cost=6, tier=4, is_golden=True, abilities=CardAbility.SUMMON
 )
+
+# Murloc Pool
+
+# TODO: Implement battlecry (If you control another Murloc, DISCOVER a Murloc).
+# NOTE: Discover is a tricky thing to implement, so we will probably skip it!
+#
+# See https://www.reddit.com/r/hearthstone/comments/dzgrea/discover_mechanic/
+# for details into how the discover mechanic is implemented (i.e. what pool of cards
+# it selects from).
+PRIMALFIN_LOOKOUT = Minion(
+    'Primalfin Lookout', CardClass.NEUTRAL, MinionRace.MURLOC, 3, 3,
+    cost=3, tier=4, abilities=CardAbility.BATTLECRY | CardAbility,
+    # _on_this_played=???
+)
+# TODO: Implement battlecry (If you control another Murloc, DISCOVER two Murlocs).
+PRIMALFIN_LOOKOUT_GOLDEN = Minion(
+    'Primalfin Lookout', CardClass.NEUTRAL, MinionRace.MURLOC, 6, 6,
+    cost=3, tier=4, is_golden=True, abilities=CardAbility.BATTLECRY | CardAbility,
+    # _on_this_played=???
+)
+
+def _toxfin_on_this_played(self: Minion, ctx) -> None:
+    """Handle the battlecry effect for the Toxfin minion.
+    Effect: Give a friendly Murloc Poisonous.
+
+    Note: the murloc is chosen RANDOMLY since we do not have targetting implemented.
+    """
+    # Choose a random friendly Murloc
+    minion = ctx.board.get_random_minion(race=MinionRace.MURLOC, kind='friendly', ignore=[self])
+    if minion is None:
+        return
+    minion.add_buff(Buff(0, 0, CardAbility.POISONOUS))
+
+TOXFIN = Minion(
+    'Toxfin', CardClass.NEUTRAL, MinionRace.MURLOC, 1, 2,
+    cost=1, tier=4, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_toxfin_on_this_played
+)
+TOXFIN_GOLDEN = Minion(
+    'Toxfin', CardClass.NEUTRAL, MinionRace.MURLOC, 2, 4,
+    cost=1, tier=4, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_toxfin_on_this_played
+)

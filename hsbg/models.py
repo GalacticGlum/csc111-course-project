@@ -38,7 +38,7 @@ class CardAbility(Flag):
     NONE = 0
     TAUNT = auto()
     DIVINE_SHIELD = auto()
-    POISON = auto()
+    POISONOUS = auto()
     WINDFURY = auto()
     MEGA_WINDFURY = auto()
     BATTLECRY = auto()
@@ -50,6 +50,7 @@ class CardAbility(Flag):
     CHARGE = auto()
     MAGNETIC = auto()
     OVERKILL = auto()
+    DISCOVER = auto()
 
 
 class MinionRace(Flag):
