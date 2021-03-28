@@ -1548,3 +1548,88 @@ RIPSNARL_CAPTAIN_GOLDEN = Minion(
     'Ripsnarl Captain', CardClass.NEUTRAL, MinionRace.PIRATE, 8, 10,
     cost=4, tier=4, is_golden=True
 )
+
+# Neutral Pool
+# TODO: Implement effect: After a friendly minion loses Divine Shield, gain +2 Attack.
+BOLVAR_FIREBLOOD = Minion(
+    'Bolvar. Fireblood', CardClass.PALADIN, MinionRace.NONE, 1, 7,
+    cost=5, tier=4, rarity=CardRarity.LEGENDARY, abilities=CardAbility.DIVINE_SHIELD
+)
+# TODO: Implement effect: After a friendly minion loses Divine Shield, gain +4 Attack.
+BOLVAR_FIREBLOOD_GOLDEN = Minion(
+    'Bolvar. Fireblood', CardClass.PALADIN, MinionRace.NONE, 2, 14,
+    cost=5, tier=4, rarity=CardRarity.LEGENDARY, is_golden=True,
+    abilities=CardAbility.DIVINE_SHIELD
+)
+
+# TODO: Implement effect: Whenever a friendly Taunt minion is attacked, gain +1/+1 PERMANENTLY.
+CHAMPION_OF_YSHAARJ = Minion(
+    'Champion of Y\'Shaarj', CardClass.NEUTRAL, MinionRace.NONE, 4, 4,
+    cost=4, tier=4
+)
+# TODO: Implement effect: Whenever a friendly Taunt minion is attacked, gain +2/+2 PERMANENTLY.
+CHAMPION_OF_YSHAARJ_GOLDEN = Minion(
+    'Champion of Y\'Shaarj', CardClass.NEUTRAL, MinionRace.NONE, 8, 8,
+    cost=4, tier=4, is_golden=True
+)
+
+def _defender_of_argus_on_this_played(self: Minion, ctx) -> None:
+    """Handle the battlecry effect for the Defender of Argus minion.
+    Effect: Give adjacent minions +1/+1 (or +2/+2 if golden) and Taunt.
+    """
+    minions = ctx.board.get_minions_adjacent_to(self)
+    for minion in minions:
+        if self.is_golden:
+            minion.add_buff(Buff(2, 2, CardAbility.TAUNT))
+        else:
+            minion.add_buff(Buff(1, 1, CardAbility.TAUNT))
+
+DEFENDER_OF_ARGUS = Minion(
+    'Defender of Argus', CardClass.NEUTRAL, MinionRace.NONE, 2, 3,
+    cost=4, tier=4, rarity=CardRarity.RARE, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_defender_of_argus_on_this_played
+)
+DEFENDER_OF_ARGUS_GOLDEN = Minion(
+    'Defender of Argus', CardClass.NEUTRAL, MinionRace.NONE, 4, 6,
+    cost=4, tier=4, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_defender_of_argus_on_this_played
+)
+
+def _managerie_jug_on_this_played(self: Minion, ctx) -> None:
+    """Handle the battlecry effect for the Menagerie Jug effect.
+    Effect: Give 3 random friendly minions of different minion types +2/+2 (or +4/+4 if golden).
+    """
+    for minion in ctx.board.get_minions(ignore=[self]):
+        if minion.race not in minions_by_race:
+            minions_by_race[minion.race] = []
+        minions_by_race[minion.race].append(minion)
+
+    keys = random.sample(minions.keys(), k=3)
+    for key in keys:
+        minion = random.choice(minions_by_race[key])
+        if self.is_golden:
+            minion.add_buff(Buff(4, 4, CardAbility.NONE))
+        else:
+            minion.add_buff(Buff(2, 2, CardAbility.NONE))
+
+MENAGERIE_JUG = Minion(
+    'Menagerie Jug', CardClass.NEUTRAL, MinionRace.NONE, 3, 3,
+    cost=5, tier=4, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_managerie_jug_on_this_played
+)
+MENAGERIE_JUG_GOLDEN = Minion(
+    'Menagerie Jug', CardClass.NEUTRAL, MinionRace.NONE, 6, 6,
+    cost=5, tier=4, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_managerie_jug_on_this_played
+)
+
+# TODO: Implement effect: After a friendly minion with Taunt dies, give its neighbours +2/+2.
+QIRAJI_HARBINGER = Minion(
+    'Qiraji Harbinger', CardClass.NEUTRAL, MinionRace.NONE, 5, 5,
+    cost=6, tier=4
+)
+# TODO: Implement effect: After a friendly minion with Taunt dies, give its neighbours +4/+4.
+QIRAJI_HARBINGER_GOLDEN = Minion(
+    'Qiraji Harbinger', CardClass.NEUTRAL, MinionRace.NONE, 10, 10,
+    cost=6, tier=4, is_golden=True
+)
