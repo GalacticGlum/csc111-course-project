@@ -5,9 +5,11 @@ Data Source: https://hearthstone.fandom.com/wiki/Battlegrounds#Minions_by_tier
 
 NOTE: This is a collection of all minions in the Battlegrounds pool as of Patch 20.0.
       However, not all of these minions are implemented. They are merely defined here
-      for the future. Refer to the implemented_minions.txt file for a full list of all
-      minions with implementations in the Python recruitment phase simulator, and the
-      C++ combat phase simulator.
+      in case that they should be implemented in the future.
+
+      Refer to the implemented_minions.txt file for a full list of all minions with
+      implementations in the Python recruitment phase simulator, and the C++ combat phase
+      simulator.
 """
 import random
 import logging
@@ -1418,3 +1420,5 @@ WILDFIRE_ELEMENTAL_GOLDEN = Minion(
     'Wildfire Elemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 14, 6,
     cost=6, tier=4, is_golden=True
 )
+
+# Mech Pool
