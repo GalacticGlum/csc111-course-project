@@ -95,7 +95,7 @@ VULGAR_HOMUNCULUS_GOLDEN = Minion(
     _on_this_played=lambda self, ctx: ctx.board.attack_hero(2, kind='friendly')
 )
 
-def _wrath_weaver_on_any_played(self, ctx) -> None:
+def _wrath_weaver_on_any_played(self: Minion, ctx) -> None:
     """Handle the effect for the Wrath Weaver minion when a card is played from the hand.
     Effect: After you play a demon, deal 1 damage to your hero, and gain +2/+2 (or +4/+4 if golden).
     """
@@ -184,7 +184,7 @@ MICRO_MACHINE_GOLDEN = Minion(
     _on_new_turn=lambda self, ctx: self.add_buff(Buff(2, 0, CardAbility.NONE))
 )
 
-def _micro_mummy_on_end_turn(self, ctx) -> None:
+def _micro_mummy_on_end_turn(self: Minion, ctx) -> None:
     """Handle the Micro Mummy effect on the end of a turn.
     Effect: At the end of your turn, give another random friendly
     minion +1 (or +2 if golden) Attack.
@@ -210,7 +210,7 @@ MICRO_MUMMY_GOLDEN = Minion(
 )
 
 # Murloc Pool
-def _murloc_tidecaller_on_card_summoned(self, ctx) -> None:
+def _murloc_tidecaller_on_card_summoned(self: Minion, ctx) -> None:
     """Handle the Murloc Tidecaller effect.
     Effect: Whenever you summon a Murloc, gain +1 (or +2 if golden) Attack."""
     if MinionRace.MURLOC not in ctx.summoned_minion.race:
@@ -242,7 +242,7 @@ MURLOC_TIDEHUNTER_GOLDEN = Minion(
     _on_this_played=lambda self, ctx: ctx.board.summon('Murloc Scout', is_golden=True)
 )
 
-def _rockpool_hunter_on_this_played(self, ctx) -> None:
+def _rockpool_hunter_on_this_played(self: Minion, ctx) -> None:
     """Handle the Rockpool Hunter battlecry effect.
     Effect: Give a friendly Murloc +1/+1 (or +2/+2 if golden).
 
@@ -270,7 +270,7 @@ ROCKPOOL_HUNTER_GOLDEN = Minion(
 )
 
 # Pirate Pool
-def _deck_swabbie_on_this_played(self, ctx) -> None:
+def _deck_swabbie_on_this_played(self: Minion, ctx) -> None:
     """Handle the Deck Swabbie battlecry effect.
     Effect: Reduce the cost of upgrading Bob's Tavern by (1) (or (2) if golden).
     """
@@ -334,7 +334,7 @@ KINDLY_GRANDMOTHER_GOLDEN = Minion(
     cost=2, tier=2, is_golden=True, abilities=CardAbility.DEATH_RATTLE
 )
 
-def _pack_leader_on_card_summoned(self, ctx) -> None:
+def _pack_leader_on_card_summoned(self: Minion, ctx) -> None:
     """Handle the Pack Leader effect.
     Effect: Whenever you summon a Beast, give it +2 (or +4 if golden) Attack."""
     if MinionRace.BEAST not in ctx.summoned_minion.race:
@@ -355,7 +355,7 @@ PACK_LEADER_GOLDEN = Minion(
     _on_card_summoned=_pack_leader_on_card_summoned
 )
 
-def _rabid_saurolisk_on_any_played(self, ctx) -> None:
+def _rabid_saurolisk_on_any_played(self: Minion, ctx) -> None:
     """Handle the Rabid Saurolisk effect.
     Effect: After you play a minion with Deathrattle, gain +1/+2 (or +2/+4 if golden).
     """
@@ -401,7 +401,7 @@ IMPRISONER_GOLDEN = Minion(
     abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE | CardAbility.SUMMON
 )
 
-def _nathrezim_overseer_on_this_played(self, ctx) -> None:
+def _nathrezim_overseer_on_this_played(self: Minion, ctx) -> None:
     """Handle the Nathrezim Overseer battlecry effect.
     Effect: Give a friendly Demon +2/+2 (or +4/+4 if golden).
 
@@ -442,7 +442,7 @@ GLYPH_GUARDIAN_GOLDEN = Minion(
     cost=3, tier=2, is_golden=True
 )
 
-def _steward_of_time_on_this_sold(self, ctx) -> None:
+def _steward_of_time_on_this_sold(self: Minion, ctx) -> None:
     """Handle the effect for the Steward of Time minion.
     Effect: When you sell this minion, give all minions in Bob's Tavern +1/+1 (or +2/+2 if golden).
     """
@@ -475,7 +475,7 @@ WAXRIDER_TOGWAGGLE_GOLDEN = Minion(
 )
 
 # Elemental Pool
-def _molten_rock_on_any_played(self, ctx) -> None:
+def _molten_rock_on_any_played(self: Minion, ctx) -> None:
     """Handle the effect for the Molten Rock minion.
     Effect: After you play an Elemental, gain +1 (or +2 if golden) Health.
     """
@@ -497,7 +497,7 @@ MOLTEN_ROCK_GOLDEN = Minion(
     _on_any_played=_molten_rock_on_any_played
 )
 
-def _party_elemental_on_any_played(self, ctx) -> None:
+def _party_elemental_on_any_played(self: Minion, ctx) -> None:
     """Handle the effect for the Party Elemental minion.
     Effect: After you play an Elemental, give another random friendly Elemental +1/+1
     (or +2/+2 if golden).
@@ -559,7 +559,7 @@ KABOOM_BOT_GOLDEN = Minion(
     cost=3, tier=2, is_golden=True, abilities=CardAbility.DEATH_RATTLE
 )
 
-def _metaltooth_leaper_on_this_played(self, ctx) -> None:
+def _metaltooth_leaper_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Metaltooth Leaper minion.
     Effect: Give your other Mechs +2 (or +4 if golden) Attack.
     """
@@ -634,7 +634,7 @@ YO_HO_OGRE_GOLDEN = Minion(
 )
 
 # Neutral Pool
-def _managerie_mug_on_this_played(self, ctx) -> None:
+def _managerie_mug_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Menagerie Mug effect.
     Effect: Give 3 random friendly minions of different minion types +1/+1 (or +2/+2 if golden).
     """
@@ -744,7 +744,7 @@ MONSTROUS_MACAW_GOLDEN = Minion(
     cost=3, tier=3, is_golden=True
 )
 
-def _houndmaster_on_this_played(self, ctx) -> None:
+def _houndmaster_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Houndmaster minion.
     Effect: Give a friendly Beast +2/+2 (or +4/+4 if golden) and Taunt.
 
@@ -806,7 +806,7 @@ IMP_GANG_BOSS_GOLDEN = Minion(
     cost=3, tier=3, is_golden=True, abilities=CardAbility.SUMMON
 )
 
-def _crystal_weaver_on_this_played(self, ctx) -> None:
+def _crystal_weaver_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Crystalweaver minion.
     Effect: Give your Demons +1/+1 (or +2/+2 if golden).
     """
@@ -828,7 +828,7 @@ CRYSTAL_WEAVER_GOLDEN = Minion(
     _on_this_played=_crystal_weaver_on_this_played
 )
 
-def _soul_devourer_on_this_played(self, ctx) -> None:
+def _soul_devourer_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Soul Devourer minion.
     Effect (regular): Choose a friendly Demon. Remove it to gain its stats and 3 gold.
     Effect (golden):  Choose a friendly Demon. Remove it to gain double its stats and 6 gold.
@@ -878,7 +878,7 @@ BRONZE_WARDEN_GOLDEN = Minion(
     cost=4, tier=3, is_golden=True, abilities=CardAbility.DIVINE_SHIELD | CardAbility.REBORN
 )
 
-def _hangry_dragon_on_new_turn(self, ctx) -> None:
+def _hangry_dragon_on_new_turn(self: Minion, ctx) -> None:
     """Handle the effect for the Hangry Dragon minion.
     Effect: At the start of your turn, gain +2/+2 (or +4/+4 if golden) if you won the last combat.
     """
@@ -901,7 +901,7 @@ HANGRY_DRAGON_GOLDEN = Minion(
     _on_new_turn=_hangry_dragon_on_new_turn
 )
 
-def _twilight_emissary_on_this_played(self, ctx) -> None:
+def _twilight_emissary_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Twilight Emissary minion.
     Effect: Give a friendly Dragon +2/+2 (or +4/+4 if golden).
 
@@ -929,7 +929,7 @@ TWILIGHT_EMISSARY_GOLDEN = Minion(
 )
 
 # Elemental Pool
-def _arcane_assistant_on_this_played(self, ctx) -> None:
+def _arcane_assistant_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Arcane Assistant minion.
     Effect: Give your Elementals +1/+1 (or +2/+2 if golden).
     """
@@ -986,7 +986,7 @@ DEFLECT_O_BOT_GOLDEN = Minion(
     cost=4, tier=3, is_golden=True, abilities=CardAbility.DIVINE_SHIELD
 )
 
-def _iron_sensei_on_end_turn(self, ctx) -> None:
+def _iron_sensei_on_end_turn(self: Minion, ctx) -> None:
     """Handle the effect for the Iron Sensei minion.
     Effect: At the end of your turn, give another friendly Mech +2/+2 (or +4/+4 if golden).
 
@@ -1024,7 +1024,7 @@ PILOTED_SHREDDER_GOLDEN = Minion(
     cost=4, tier=3, is_golden=True, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
 )
 
-def _screwjank_clunker_on_this_played(self, ctx) -> None:
+def _screwjank_clunker_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Screwjank Clunker minion.
     Effect: Give a friendly Mech +2/+2 (or +4/+4 if golden).
 
@@ -1073,7 +1073,7 @@ REPLICATING_MENACE_GOLDEN = Minion(
 )
 
 # Murloc Pool
-def _coldlight_seer_on_this_played(self, ctx) -> None:
+def _coldlight_seer_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Coldlight Seer minion.
     Effect: Give your other Murlocs +2 (or +4 if golden) health.
     """
@@ -1093,7 +1093,7 @@ COLDLIGHT_SEER_GOLDEN = Minion(
     _on_this_played=_coldlight_seer_on_this_played
 )
 
-def _felfin_navigator_on_this_played(self, ctx) -> None:
+def _felfin_navigator_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Felfin Navigator minion.
     Effect: Give your other Murlocs +1/+1 (or +2/+2 if golden).
     """
@@ -1114,7 +1114,7 @@ FELFIN_NAVIGATOR_GOLDEN = Minion(
 )
 
 # Pirate Pool
-def _bloodsail_cannoneer_on_this_played(self, ctx) -> None:
+def _bloodsail_cannoneer_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Bloodsail Cannoneer minion.
     Effect: Give your other Pirates +3 (or +6 if golden) Attack.
     """
@@ -1134,7 +1134,7 @@ BLOODSAIL_CANNONEER_GOLDEN = Minion(
     _on_this_played=_bloodsail_cannoneer_on_this_played
 )
 
-def _salty_looter_on_any_played(self, ctx) -> None:
+def _salty_looter_on_any_played(self: Minion, ctx) -> None:
     """Handle the effect for the Salty Looter minion when a card is played from the hand.
     Effect: Whenever you play a Pirate, gain +1/+1 (or +2/+2 if golden).
     """
@@ -1156,7 +1156,7 @@ SALTY_LOOTER_GOLDEN = Minion(
     _on_any_played=_salty_looter_on_any_played
 )
 
-def _southsea_strongarm_on_this_played(self, ctx) -> None:
+def _southsea_strongarm_on_this_played(self: Minion, ctx) -> None:
     """Handle the battlecry effect for the Southsea Strongarm minion.
     Effect: Give a friendly Pirate +1/+1 (or +2/+2 if golden) for each Pirate you bought this turn.
 
@@ -1201,7 +1201,7 @@ ARM_OF_THE_EMPIRE_GOLDEN = Minion(
     #_on_end_combat_phase=???
 )
 
-def _khadgar_on_card_summoned(self, ctx) -> None:
+def _khadgar_on_card_summoned(self: Minion, ctx) -> None:
     """Handle the Khadgar minion effect.
     Effect (regular): Your cards that summon minions summon twice as many.
     Effect (golden):  Your cards that summon minions summon three times as many.
@@ -1236,4 +1236,66 @@ WARDEN_OF_OLD = Minion(
 WARDEN_OF_OLD_GOLDEN = Minion(
     'Warden of Old', CardClass.NEUTRAL, MinionRace.NEUTRAL, 6, 6,
     cost=4, tier=3, is_golden=True, abilities=CardAbility.DEATH_RATTLE | CardAbility.GENERATE
+)
+
+################################################################################
+# Tier 4 cards
+################################################################################
+# Beast Pool
+
+# TODO: Implement effect: Also damages the minions next to whomever this attacks.
+CAVE_HYDRA = Minion(
+    'Cave Hydra', CardClass.HUNTER, MinionRace.BEAST, 2, 4,
+    cost=3, tier=4
+)
+CAVE_HYDRA_GOLDEN = Minion(
+    'Cave Hydra', CardClass.HUNTER, MinionRace.BEAST, 4, 8,
+    cost=3, tier=4, is_golden=True
+)
+
+# Hyena summoned by Savannah Highmane
+HYENA = Minion(
+    'Hyena', CardClass.HUNTER, MinionRace.BEAST, 2, 2,
+    cost=2, tier=1, purchasable=False
+)
+HYENA_GOLDEN = Minion(
+    'Hyena', CardClass.HUNTER, MinionRace.BEAST, 4, 4,
+    cost=2, tier=1, is_golden=True, purchasable=False
+)
+
+# TODO: Implement deathrattle (Summon two 2/2 Hyenas).
+SAVANNAH_HIGHMANE = Minion(
+    'Savannah Highmane', CardClass.HUNTER, MinionRace.BEAST, 6, 5,
+    cost=6, tier=4, rarity=CardRarity.RARE, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+# TODO: Implement deathrattle (Summon two 4/4 Hyenas).
+SAVANNAH_HIGHMANE_GOLDEN = Minion(
+    'Savannah Highmane', CardClass.HUNTER, MinionRace.BEAST, 12, 10,
+    cost=6, tier=4, rarity=CardRarity.RARE, is_golden=True,
+    abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+def _virmen_sensei_on_this_played(self: Minion, ctx) -> None:
+    """Handle the battlecry effect for the Virmen Sensei minion.
+    Effect: Give a friendly Beast +2/+2 (or +4/+4 if golden).
+
+    Note: the beast is chosen RANDOMLY since we do not have targetting implemented.
+    """
+    minion = ctx.board.get_random_minion(race=MinionRace.BEAST, kind='friendly', ignore=[self])
+    if minion is None:
+        return
+    if self.is_golden:
+        minion.add_buff(Buff(4, 4, CardAbility.NONE))
+    else:
+        minion.add_buff(Buff(2, 2, CardAbility.NONE))
+
+VIRMEN_SENSEI = Minion(
+    'Virmen Sensei', CardClass.DRUID, MinionRace.NONE, 4, 5,
+    cost=5, tier=4, rarity=CardRarity.RARE, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_virmen_sensei_on_this_played
+)
+VIRMEN_SENSEI_GOLDEN = Minion(
+    'Virmen Sensei', CardClass.DRUID, MinionRace.NONE, 8, 10,
+    cost=5, tier=4, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_virmen_sensei_on_this_played
 )
