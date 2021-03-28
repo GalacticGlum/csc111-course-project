@@ -49,6 +49,7 @@ class CardAbility(Flag):
     REBORN = auto()
     CHARGE = auto()
     MAGNETIC = auto()
+    OVERKILL = auto()
 
 
 class MinionRace(Flag):

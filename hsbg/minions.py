@@ -1334,3 +1334,50 @@ SIEGEBREAKER_GOLDEN = Minion(
     'Siegebreaker', CardClass.WARLOCK, MinionRace.DEMON, 10, 16,
     cost=7, tier=4, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.TAUNT
 )
+
+# Dragon Pool
+def _cobalt_scalebane_on_end_turn(self: Minion, ctx) -> None:
+    """Handle the Cobalt Scalebane effect on the end of a turn.
+    Effect: At the end of your turn, give another random friendly minion
+    +3 (or +6 if golden) Attack.
+    """
+    minion = ctx.board.get_random_minion(kind='friendly', ignore=[self])
+    if minion is None:
+        return
+    if self.is_golden:
+        minion.add_buff(Buff(6, 0, CardAbility.NONE))
+    else:
+        minion.add_buff(Buff(3, 0, CardAbility.NONE))
+
+COBALT_SCALEBANE = Minion(
+    'Cobalt Scalebane', CardClass.NEUTRAL, MinionRace.DRAGON, 5, 5,
+    cost=5, tier=4,
+    _on_end_turn=_cobalt_scalebane_on_end_turn
+)
+COBALT_SCALEBANE_GOLDEN = Minion(
+    'Cobalt Scalebane', CardClass.NEUTRAL, MinionRace.DRAGON, 10, 10,
+    cost=5, tier=4, is_golden=True,
+    _on_end_turn=_cobalt_scalebane_on_end_turn
+)
+
+# TODO: Implement effect: After a friendly minion loses Divine Shield, gain +2/+2.
+DRAKONID_ENFORCER = Minion(
+    'Drakonid Enforcer', CardClass.NEUTRAL, MinionRace.DRAGON, 3, 6,
+    cost=6, tier=4
+)
+# TODO: Implement effect: After a friendly minion loses Divine Shield, gain +4/+4.
+DRAKONID_ENFORCER_GOLDEN = Minion(
+    'Drakonid Enforcer', CardClass.NEUTRAL, MinionRace.DRAGON, 6, 12,
+    cost=6, tier=4, is_golden=True
+)
+
+# TODO: Implement overkill (Deal 3 damage to the left-most enemy minion).
+HERALD_OF_FLAME = Minion(
+    'Herald of Flame', CardClass.WARLOCK, MinionRace.DRAGON, 5, 6,
+    cost=5, tier=4, abilities=CardAbility.OVERKILL
+)
+# TODO: Implement overkill (Deal 6 damage to the left-most enemy minion).
+HERALD_OF_FLAME_GOLDEN = Minion(
+    'Herald of Flame', CardClass.WARLOCK, MinionRace.DRAGON, 10, 12,
+    cost=5, tier=4, is_golden=True, abilities=CardAbility.OVERKILL
+)
