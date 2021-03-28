@@ -1299,3 +1299,38 @@ VIRMEN_SENSEI_GOLDEN = Minion(
     cost=5, tier=4, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.BATTLECRY,
     _on_this_played=_virmen_sensei_on_this_played
 )
+
+# Demon Pool
+
+# TODO: Implement effect: After you summon a Demon, gain +1/+1 PERMANENTLY.
+BIGFERNAL = Minion(
+    'Bigfernal', CardClass.NEUTRAL, MinionRace.DEMON, 4, 4,
+    cost=5, tier=4
+)
+# TODO: Implement effect: After you summon a Demon, gain +2/+2 PERMANENTLY.
+BIGFERNAL_GOLDEN = Minion(
+    'Bigfernal', CardClass.NEUTRAL, MinionRace.DEMON, 8, 8,
+    cost=5, tier=4, is_golden=True
+)
+
+# TODO: Implement deathrattle (Summon two 3/2 imps).
+RING_MATRON = Minion(
+    'Ring Matron', CardClass.WARLOCK, MinionRace.DEMON, 6, 4,
+    cost=6, tier=4, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
+)
+# TODO: Implement deathrattle (Summon two 6/4 imps).
+RING_MATRON_GOLDEN = Minion(
+    'Ring Matron', CardClass.WARLOCK, MinionRace.DEMON, 12, 8,
+    cost=6, tier=4, is_golden=True, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
+)
+
+# TODO: Implement effect: Your other demons have +1 Attack.
+SIEGEBREAKER = Minion(
+    'Siegebreaker', CardClass.WARLOCK, MinionRace.DEMON, 5, 8,
+    cost=7, tier=4, rarity=CardRarity.RARE, abilities=CardAbility.TAUNT
+)
+# TODO: Implement effect: Your other demons have +2 Attack.
+SIEGEBREAKER_GOLDEN = Minion(
+    'Siegebreaker', CardClass.WARLOCK, MinionRace.DEMON, 10, 16,
+    cost=7, tier=4, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.TAUNT
+)
