@@ -380,6 +380,25 @@ class TavernGameBoard:
         self._gold -= amount
         return True
 
+    def give_gold(self, amount: int) -> None:
+        """Give the player gold.
+
+        Preconditions:
+            - amount > 0
+
+        >>> board = TavernGameBoard()
+        >>> board.give_gold(5)
+        >>> board.gold == 5
+        True
+        >>> board.give_gold(4)
+        >>> board.gold == 9
+        True
+        >>> board.give_gold(10)  # Max gold is 10
+        >>> board.gold == 10
+        True
+        """
+        self._gold = min(self._gold + amount, MAX_TAVERN_GOLD)
+
     def buy_minion(self, index: int) -> bool:
         """Buy the minion (recruit) at the given index. Return whether the minion could be bought.
         Do nothing if there is no minion at the given index, or if there is not enough gold.
@@ -463,6 +482,21 @@ class TavernGameBoard:
             minion = minion.clone()
 
         self._hand[index] = minion
+        return True
+
+    def sell_minion(self, index: int) -> bool:
+        """Sell the minion on the board at the given index. Return whether the minion could be sold.
+        Do nothing if there is no minion at the given index.
+
+        TODO: Add docstrings
+        """
+        if index < 0 or index >= len(self._board) or self._board[index] is None:
+            return False
+
+        minion = self._board[index]
+        self._board[index] = None
+        self._pool.insert(minion)
+        self.give_gold(self._minion_sell_price)
         return True
 
     @property
