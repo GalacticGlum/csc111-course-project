@@ -35,8 +35,8 @@ class TavernGameBoard:
         """Initialize the TavernGameBoard.
 
         Args:
-            hero_health: The initial health of the hero.
-            tavern_tier: The tier of the tavern.
+            hero_health: The starting health of the hero.
+            tavern_tier: The starting tier of the tavern.
         """
         self._hero_health = hero_health
         self._tavern_tier = tavern_tier
