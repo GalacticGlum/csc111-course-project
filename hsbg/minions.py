@@ -85,12 +85,14 @@ class MinionPool:
     def find_all(self, **kwargs: dict) -> List[Minion]:
         """Find all the minions matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
+
+        Note: the returned list contains COPIES of the minions in the pool.
         """
         matches = []
         for minion in self._all_minions.values():
             if any(getattr(minion, key) != value for key, value in kwargs.items()):
                 continue
-            matches.append(minion)
+            matches.append(minion.clone())
         return matches
 
     def find(self, **kwargs: dict) -> Optional[Minion]:
