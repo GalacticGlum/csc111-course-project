@@ -47,7 +47,7 @@ class TavernGameBoard:
     _recruits: List[Optional[Minion]]
 
     def __init__(self, hero_health: int = 40, tavern_tier: int = 1) -> None:
-        """Initialize the TavernGameBoard.
+        """Initialise the TavernGameBoard.
 
         Args:
             hero_health: The starting health of the hero.
@@ -95,6 +95,30 @@ class TavernGameBoard:
 
         self._tavern_tier += 1
         return True
+
+    def attack_hero(self, damage: int) -> None:
+        """Attack the tavern hero with the given amount of damage.
+
+        >>> board = TavernGameBoard()  # Initialise board with 40 health!
+        >>> board.attack_hero(10)
+        >>> board.hero_health
+        30
+        """
+        self._hero_health -= damage
+
+    @property
+    def is_dead(self) -> bool:
+        """Return whether the hero is dead.
+
+        >>> board = TavernGameBoard()  # Initialise board with 40 health!
+        >>> board.attack_hero(31)
+        >>> board.is_dead
+        False
+        >>> board.attack_hero(20)
+        >>> board.is_dead
+        True
+        """
+        return self._hero_health <= 0
 
     def _spend_gold(self, amount: int) -> bool:
         """Return whether the given amount of gold can be spent. If it can be,
@@ -148,7 +172,7 @@ class BattlegroundsGame:
     _boards: List[TavernGameBoard]
 
     def __init__(self, num_players: int = 8) -> None:
-        """Initialize the BattlegroundsGame with the given number of players.
+        """Initialise the BattlegroundsGame with the given number of players.
         Raise ValueError if num_players is negative or odd.
 
         Args:
@@ -160,7 +184,7 @@ class BattlegroundsGame:
             raise ValueError(f'{num_players} is an invalid number of players!')
 
         self._num_players = num_players
-        # Initialize an empty tavern for each player.
+        # Initialise an empty tavern for each player.
         self._boards = [TavernGameBoard() for _ in range(num_players)]
 
 
