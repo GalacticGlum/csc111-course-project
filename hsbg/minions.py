@@ -13,7 +13,7 @@ NOTE: This is a collection of all minions in the Battlegrounds pool as of Patch 
 """
 import random
 import logging
-from typing import Dict
+from typing import List, Dict, Optional
 
 from hsbg.models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
 
@@ -42,6 +42,63 @@ def get_all_minions(gold_suffix: str = '_golden') -> Dict[str, Minion]:
         all_minions[key] = obj
     return all_minions
 
+
+# A dict mapping each tier to the number of copies of each minion with that tier.
+TIER_NUM_COPIES = {
+    1: 18,
+    2: 15,
+    3: 13,
+    4: 11,
+    5: 9,
+    6: 6
+}
+
+
+class MinionPool:
+    """A class representing the pool of available minions."""
+    # Private Instance Attributes:
+    #   - _all_minions: A dict containing all the minions mapped by name.
+    #   - _pool: A list of minions representing the current pool.
+    #   - _gold_suffix: The suffix used to denote gold copies of minions.
+    _all_minions: Dict[str, Minion]
+    _pool: List[Minion]
+    _gold_suffix: str
+
+    def __init__(self, gold_suffix: str = '_golden') -> None:
+        self._all_minions = {}
+        self._pool = []
+        self._gold_suffix = gold_suffix
+
+        minions = get_all_minions(gold_suffix=gold_suffix)
+        # Build the pool
+        for key, minion in minions.items():
+            self._all_minions[key] = minion
+
+            # Don't include unpurchasable minions or golden copies in the pool.
+            if not minion.purchasable or minion.is_golden:
+                continue
+
+            copies = TIER_NUM_COPIES[minion.tier]
+            for _ in range(copies):
+                self._pool.append(minion.clone())
+
+    def find_all(self, **kwargs: dict) -> List[Minion]:
+        """Find all the minions matching the given keyword arguments.
+        Each keyword argument should be an attribute of the Minion class.
+        """
+        matches = []
+        for minion in self._all_minions.values():
+            if any(getattr(minion, key) != value for key, value in kwargs.items()):
+                continue
+            matches.append(minion)
+        return matches
+
+    def find(self, **kwargs: dict) -> Optional[Minion]:
+        """Find the first minion matching the given keyword arguments.
+        Each keyword argument should be an attribute of the Minion class.
+        """
+        minions = self.find_all(**kwargs)
+        return None if len(minions) == 0 else minions[0]
 
 ################################################################################
 # Tier 1 cards
