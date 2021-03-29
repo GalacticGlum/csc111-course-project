@@ -161,13 +161,16 @@ class TavernGameBoard:
 
         >>> board = TavernGameBoard()
         >>> board.next_turn()
+
         >>> previous_recruits = list(board._recruits)
         >>> board.next_turn()
         >>> previous_recruits == board._recruits
         False
+
         >>> board.freeze()
         >>> board._is_frozen
         True
+
         >>> previous_recruits = list(board._recruits)
         >>> board.next_turn()
         >>> previous_recruits == board._recruits
@@ -271,7 +274,7 @@ class BattlegroundsGame:
         self._num_players = num_players
         # Initialise an empty tavern for each player.
         self._pool = MinionPool()
-        self._boards = [TavernGameBoard(self._pool) for _ in range(num_players)]
+        self._boards = [TavernGameBoard(pool=self._pool) for _ in range(num_players)]
 
 
 if __name__ == '__main__':
