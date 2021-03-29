@@ -69,4 +69,5 @@ class BattlegroundsGame:
             raise ValueError(f'{num_players} is an invalid number of players!')
 
         self._num_players = num_players
+        # Initialize an empty tavern for each player.
         self._boards = [TavernGameBoard() for _ in range(num_players)]
