@@ -100,6 +100,21 @@ class MinionPool:
         minions = self.find_all(**kwargs)
         return None if len(minions) == 0 else minions[0]
 
+    def get_golden(self, name: str) -> Minion:
+        """Return a golden copy of the minion with the given name.
+        Raise a ValueError if there is no minion with that name, or if it has no golden copy.
+        """
+        if name not in self._all_minions:
+            raise ValueError(f'Could not find minion with name \'{name}\' in the pool.')
+
+        golden_copy_name = name + self._gold_suffix
+        if golden_copy_name not in self._all_minions:
+            raise ValueError(f'The minion with name \'{name}\' has no golden copy.')
+
+        return self._all_minions[golden_copy_name].clone()
+
+
+
 ################################################################################
 # Tier 1 cards
 ################################################################################
