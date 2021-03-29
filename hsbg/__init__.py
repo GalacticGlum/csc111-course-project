@@ -1,12 +1,24 @@
 """A simulator for Hearthstone Battlegrounds."""
 from typing import List, Optional
 
-from hsbg.minions import Minion
+from hsbg.minions import Minion, MinionPool
 
 # The maximum number of minions a player can have in their hand.
 MAX_HAND_SIZE = 10
 # The maximum number of minions that can be on the board in a tavern.
 MAX_TAVERN_BOARD_SIZE = 7
+# The number of recruits to offer the player at the start of the game.
+INITIAL_NUM_RECRUITS = 3
+# A list mapping each tavern tier to the additional number of recruits gained at that tier.
+# The element at index i indicates the additional recruits gained after upgrading FROM tier i.
+RECRUIT_NUM_PROGRESSION = [
+    0,  # Padding element
+    1,  # One new recruit after upgrading from tier 1
+    0,  # No new recruit after upgrading from tier 2
+    1,  # One new recruit after upgrading from tier 3
+    0,  # No onew recruit after upgrading from tier 4
+    1  # One new recruit after upgrading from tier 5
+]
 # The maximum number of recruits that can be on the board in a tavern.
 MAX_TAVERN_RECRUIT_SIZE = 6
 # The maximum number of gold the player can have.
@@ -14,7 +26,7 @@ MAX_TAVERN_GOLD = 10
 # The amount of gold the player gets per turn.
 GOLD_PER_TURN = 1
 
-# A dict mapping each tavern tier to its upgrade cost.
+# A list mapping each tavern tier to its upgrade cost.
 # The element at index i indicates the cost of upgrading FROM a tavern with tier i.
 TAVERN_UPGRADE_COSTS = [
     0,  # Padding element
@@ -37,19 +49,26 @@ class TavernGameBoard:
     #   - _gold: The current gold that the player has.
     #   - _hand: A list of minions in the hand.
     #   - _board: A list of minions on the board.
+    #   - _num_recruits: The number of recruits offered to the player currently.
     #   - _recruits: A list of current recruits.
+    #   - _is_frozen: Whether the recruit selection is currently frozen.
+    #   - _pool: The pool of minions to select recruits from.
     _turn_number: int
     _hero_health: int
     _tavern_tier: int
     _gold: int
     _hand: List[Optional[Minion]]
     _board: List[Optional[Minion]]
+    _num_recruits: int
     _recruits: List[Optional[Minion]]
+    _is_frozen: bool
+    _pool: MinionPool
 
-    def __init__(self, hero_health: int = 40, tavern_tier: int = 1) -> None:
+    def __init__(self, pool: MinionPool, hero_health: int = 40, tavern_tier: int = 1) -> None:
         """Initialise the TavernGameBoard.
 
         Args:
+            pool: The pool of minions to select recruits from.
             hero_health: The starting health of the hero.
             tavern_tier: The starting tier of the tavern.
         """
@@ -60,7 +79,12 @@ class TavernGameBoard:
 
         self._hand = [None] * MAX_HAND_SIZE
         self._board = [None] * MAX_TAVERN_BOARD_SIZE
+
+        self._num_recruits = INITIAL_NUM_RECRUITS
         self._recruits = [None] * MAX_TAVERN_RECRUIT_SIZE
+        self._is_frozen = False
+
+        self._pool = pool
 
     def next_turn(self) -> None:
         """Reset the tavern to the start of the next turn.
@@ -81,6 +105,25 @@ class TavernGameBoard:
         """
         self._turn_number += 1
         self._gold = min(self._turn_number * GOLD_PER_TURN, MAX_TAVERN_GOLD)
+        self.refresh_recruits()
+        if self._is_frozen:
+            self._is_frozen = False
+
+    def refresh_recruits(self) -> bool:
+        """Refresh the selection of recruits. Do nothing if the selection is frozen.
+        Return whether the recruits were refreshed.
+        """
+        if self._is_frozen:
+            return False
+
+        # Insert non-None minions back into the pool.
+        self._pool.insert([minion for minion in self._recruits if minion is not None])
+        # Roll new minions from pool
+        minions = self._pool.get_random(n=self._num_recruits, max_tier=self._tavern_tier)
+        # Fill recruit list from left to right
+        for i, minion in enumerate(minions):
+            self._recruits[i] = minion
+        return True
 
     def upgrade_tavern(self) -> bool:
         """Upgrade the tavern. Return whether the upgrade was successful.
@@ -109,6 +152,7 @@ class TavernGameBoard:
             return False
 
         self._tavern_tier += 1
+        self._num_recruits += RECRUIT_NUM_PROGRESSION[self._tavern_tier]
         return True
 
     def attack_hero(self, damage: int) -> None:
@@ -183,8 +227,10 @@ class BattlegroundsGame:
     # Private Instance Attributes
     #   - _num_players: The number of players at the start of the game.
     #   - _boards: The recruitment game board for each player.
+    #   - _pool: The pool of minions shared across all players.
     _num_players: int
     _boards: List[TavernGameBoard]
+    _pool: MinionPool
 
     def __init__(self, num_players: int = 8) -> None:
         """Initialise the BattlegroundsGame with the given number of players.
@@ -200,7 +246,8 @@ class BattlegroundsGame:
 
         self._num_players = num_players
         # Initialise an empty tavern for each player.
-        self._boards = [TavernGameBoard() for _ in range(num_players)]
+        self._pool = MinionPool()
+        self._boards = [TavernGameBoard(self._pool) for _ in range(num_players)]
 
 
 if __name__ == '__main__':
