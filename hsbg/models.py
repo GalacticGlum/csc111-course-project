@@ -68,17 +68,6 @@ class MinionRace(Flag):
     ALL = ~0
 
 
-# class MinionKeyword(Flag):
-#     """A keyword on a minion card."""
-#     NONE = 0
-#     TARGETED = auto()
-#     PLAYER_IMMUNITY = auto()
-#     BATTLECRY = auto()
-#     MAGNETIC = auto()
-#     DEATH_RATTLE = auto()
-#     SPECIAL_ATTACK = auto()
-
-
 @dataclass
 class Buff:
     """A buff.
