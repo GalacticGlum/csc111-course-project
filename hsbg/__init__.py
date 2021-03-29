@@ -19,6 +19,8 @@ RECRUIT_NUM_PROGRESSION = [
     0,  # No onew recruit after upgrading from tier 4
     1  # One new recruit after upgrading from tier 5
 ]
+# The amount of gold a refresh costs.
+TAVERN_REFRESH_COST = 1
 # The maximum number of recruits that can be on the board in a tavern.
 MAX_TAVERN_RECRUIT_SIZE = 6
 # The maximum number of gold the player can have.
@@ -111,8 +113,8 @@ class TavernGameBoard:
             self._is_frozen = False
 
     def _refresh_recruits(self) -> bool:
-        """Refresh the selection of recruits. Do nothing if the selection is frozen.
-        Return whether the recruits were refreshed.
+        """Refresh the selection of recruits without spending gold.
+        Do nothing if the selection is frozen. Return whether the recruits were refreshed.
         """
         if self._is_frozen:
             return False
@@ -126,8 +128,24 @@ class TavernGameBoard:
             self._recruits[i] = minion
         return True
 
+    def refresh_recruits(self) -> bool:
+        """Refresh the selection of recruits. Do nothing if the selection is frozen,
+        or if the player does not have enough gold. Return whether the recruits were refreshed.
+        """
+        if not self._can_spend_gold(TAVERN_REFRESH_COST):
+            # We can't refresh since we don't have enough gold!
+            return False
+        if not self._refresh_recruits():
+            # The refresh was not successful!
+            return False
+
+        # The refresh was successful so subtract the amount from the gold total.
+        self._spend_gold(TAVERN_REFRESH_COST)
+        return True
+
     def upgrade_tavern(self) -> bool:
-        """Upgrade the tavern. Return whether the upgrade was successful.
+        """Upgrade the tavern. Do nothing if the tavern cannot be upgraded anymore,
+        or if the player does not have enough gold. Return whether the upgrade was successful.
 
         >>> board = TavernGameBoard()
         >>> board.next_turn()
@@ -206,6 +224,20 @@ class TavernGameBoard:
         """
         return self._hero_health <= 0
 
+    def _can_spend_gold(self, amount: int) -> bool:
+        """Return whether the given amount of gold can be spent.
+
+        >>> board = TavernGameBoard()
+        >>> board._can_spend_gold(1)  # No turns have been started, so we have 0 gold!
+        False
+        >>> board.next_turn()  # We have 1 gold
+        >>> board._can_spend_gold(100)
+        False
+        >>> board._can_spend_gold(1)
+        True
+        """
+        return self._gold >= amount
+
     def _spend_gold(self, amount: int) -> bool:
         """Return whether the given amount of gold can be spent. If it can be,
         mutate the TavernGameBoard by subtracting that amount from the current gold total.
@@ -221,7 +253,7 @@ class TavernGameBoard:
         >>> board.gold == 0
         True
         """
-        if self._gold < amount:
+        if not self._can_spend_gold(amount):
             return False
 
         self._gold -= amount
