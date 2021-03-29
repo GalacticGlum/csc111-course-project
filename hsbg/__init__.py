@@ -63,7 +63,18 @@ class TavernGameBoard:
         self._recruits = [None] * MAX_TAVERN_RECRUIT_SIZE
 
     def next_turn(self) -> None:
-        """Reset the tavern to the start of the next turn."""
+        """Reset the tavern to the start of the next turn.
+
+        >>> board = TavernGameBoard()
+        >>> board.next_turn()
+        >>> board._spend_gold(1)
+        True
+        >>> board.gold == 0
+        True
+        >>> board.next_turn()
+        >>> board.gold == 2
+        True
+        """
         self._turn_number += 1
         self._gold = min(self._turn_number * GOLD_PER_TURN, MAX_TAVERN_GOLD)
 
