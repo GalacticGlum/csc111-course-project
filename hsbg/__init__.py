@@ -106,11 +106,11 @@ class TavernGameBoard:
         """
         self._turn_number += 1
         self._gold = min(self._turn_number * GOLD_PER_TURN, MAX_TAVERN_GOLD)
-        self.refresh_recruits()
+        self._refresh_recruits()
         if self._is_frozen:
             self._is_frozen = False
 
-    def refresh_recruits(self) -> bool:
+    def _refresh_recruits(self) -> bool:
         """Refresh the selection of recruits. Do nothing if the selection is frozen.
         Return whether the recruits were refreshed.
         """
@@ -249,8 +249,7 @@ class TavernGameBoard:
 
 
 class BattlegroundsGame:
-    """A class representing the state of a Hearthstone Battlegrounds game.
-    """
+    """A class representing the state of a Hearthstone Battlegrounds game."""
     # Private Instance Attributes
     #   - _num_players: The number of players at the start of the game.
     #   - _boards: The recruitment game board for each player.
