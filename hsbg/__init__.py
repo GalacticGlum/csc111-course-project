@@ -44,7 +44,7 @@ class TavernGameBoard:
 
         self._hand = [None] * MAX_HAND_SIZE
         self._board = [None] * MAX_TAVERN_BOARD_SIZE
-        self._recruits = [NONE] * MAX_TAVERN_RECRUIT_SIZE
+        self._recruits = [None] * MAX_TAVERN_RECRUIT_SIZE
 
 
 class BattlegroundsGame:
