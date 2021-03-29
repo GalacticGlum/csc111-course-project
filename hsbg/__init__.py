@@ -42,6 +42,56 @@ TAVERN_UPGRADE_COSTS = [
 MAX_TAVERN_TIER = 6
 
 
+class TurnClock:
+    """A mechanism for calling a function after a given amount of turns.
+
+    Instance Attributes:
+        duration: The number of turns until the clock is complete.
+
+    >>> clock = TurnClock(2)
+    >>> clock.step()  # Turn 1
+    False
+    >>> clock.step()  # Turn 2
+    True
+    """
+    # Private Instance Attributes:
+    #   - _remaining: The number of turns remaining.
+    #   - _on_complete: A function called when the clock is complete.
+
+    def __init__(self, duration: int, on_complete: Optional[callable] = None) -> None:
+        """Initialise the TurnClock with a duration.
+
+        Args:
+            duration: The number of turns until the clock is complete.
+            on_complete: A function to call when the clock is complete.
+                         This is called on the turn that the clock is complete.
+        """
+        self.duration = duration
+        self._on_complete = on_complete
+        self.reset()
+
+    def step(self, n: int = 1) -> bool:
+        """Step the clock by the given number of turns. Return whether the clock is complete."""
+        if self.done:
+            return True
+
+        self._remaining -= n
+        done = self.done
+        if done and self._on_complete is not None:
+            self._on_complete()
+
+        return done
+
+    def reset(self) -> None:
+        """Reset the clock."""
+        self._remaining = self.duration
+
+    @property
+    def done(self) -> bool:
+        """Return whether the clock is complete."""
+        return self._remaining <= 0
+
+
 class TavernGameBoard:
     """A class representing the state of a tavern game board for a single player."""
     # Private Instance Attributes:
@@ -56,7 +106,7 @@ class TavernGameBoard:
     #   - _recruits: A list of current recruits.
     #   - _is_frozen: Whether the recruit selection is currently frozen.
     #   - _refresh_cost: The current cost of refreshing the recruitment pool.
-    #   - _refresh_cost_turns: The number of turns remaining if there is a custom refresh cost set.
+    #   - _refresh_cost_clock: Clock to manage when to change the refresh cost.
     _turn_number: int
     _hero_health: int
     _tavern_tier: int
@@ -70,7 +120,7 @@ class TavernGameBoard:
     _is_frozen: bool
 
     _refresh_cost: int
-    _refresh_cost_turns: Optional[int]
+    _refresh_cost_clock: Optional[TurnClock]
 
     def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40, tavern_tier: int = 1) \
             -> None:
@@ -95,7 +145,7 @@ class TavernGameBoard:
         self._is_frozen = False
 
         self._refresh_cost = TAVERN_REFRESH_COST
-        self._refresh_cost_turns = None
+        self._refresh_cost_clock = None
 
     def next_turn(self) -> None:
         """Reset the tavern to the start of the next turn.
@@ -121,12 +171,8 @@ class TavernGameBoard:
             self._is_frozen = False
 
         # Update refresh cost
-        if self._refresh_cost_turns is not None:
-            if self._refresh_cost_turns <= 0:
-                self._refresh_cost = TAVERN_REFRESH_COST
-                self._refresh_cost_turns = None
-            else:
-                self._refresh_cost_turns -= 1
+        if self._refresh_cost_clock is not None:
+            self._refresh_cost_clock.step()
 
     def _refresh_recruits(self) -> bool:
         """Refresh the selection of recruits without spending gold.
@@ -192,8 +238,13 @@ class TavernGameBoard:
         1
         """
         self._refresh_cost = amount
-        self._refresh_cost_turns = turns
+        if turns is not None:
+            self._refresh_cost_clock = TurnClock(turns + 1, on_complete=self._reset_refresh_cost)
 
+    def _reset_refresh_cost(self) -> None:
+        """Reset the refresh cost to the default value. This also clears the refresh cost clock."""
+        self._refresh_cost = TAVERN_REFRESH_COST
+        self._refresh_cost_clock = None
 
     def upgrade_tavern(self) -> bool:
         """Upgrade the tavern. Do nothing if the tavern cannot be upgraded anymore,
