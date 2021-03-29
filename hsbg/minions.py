@@ -1487,13 +1487,13 @@ SECURITY_ROVER_GOLDEN = Minion(
 # it selects from).
 PRIMALFIN_LOOKOUT = Minion(
     'Primalfin Lookout', CardClass.NEUTRAL, MinionRace.MURLOC, 3, 3,
-    cost=3, tier=4, abilities=CardAbility.BATTLECRY | CardAbility,
+    cost=3, tier=4, abilities=CardAbility.BATTLECRY | CardAbility.DISCOVER,
     # _on_this_played=???
 )
 # TODO: Implement battlecry (If you control another Murloc, DISCOVER two Murlocs).
 PRIMALFIN_LOOKOUT_GOLDEN = Minion(
     'Primalfin Lookout', CardClass.NEUTRAL, MinionRace.MURLOC, 6, 6,
-    cost=3, tier=4, is_golden=True, abilities=CardAbility.BATTLECRY | CardAbility,
+    cost=3, tier=4, is_golden=True, abilities=CardAbility.BATTLECRY | CardAbility.DISCOVER,
     # _on_this_played=???
 )
 
