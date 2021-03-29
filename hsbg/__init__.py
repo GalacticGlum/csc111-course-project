@@ -131,6 +131,19 @@ class TavernGameBoard:
     def refresh_recruits(self) -> bool:
         """Refresh the selection of recruits. Do nothing if the selection is frozen,
         or if the player does not have enough gold. Return whether the recruits were refreshed.
+
+        >>> board = TavernGameBoard()
+        >>> board.refresh_recruits()  # No turns have been started, so we have 0 gold!
+        False
+        >>> board.next_turn()
+        >>> board.refresh_recruits()
+        True
+        >>> board.gold == 0
+        True
+        >>> board.next_turn()
+        >>> board.freeze()
+        >>> board.refresh_recruits()
+        False
         """
         if not self._can_spend_gold(TAVERN_REFRESH_COST):
             # We can't refresh since we don't have enough gold!
@@ -174,7 +187,7 @@ class TavernGameBoard:
         self._num_recruits += RECRUIT_NUM_PROGRESSION[self._tavern_tier]
         return True
 
-    def freeze(self) -> bool:
+    def freeze(self) -> None:
         """Freeze the selection of recruit minions.
 
         >>> board = TavernGameBoard()
@@ -196,7 +209,7 @@ class TavernGameBoard:
         """
         self._is_frozen = True
 
-    def unfreeze(self) -> bool:
+    def unfreeze(self) -> None:
         """Unfreeze the selection of recruit minions."""
         self._is_frozen = False
 
