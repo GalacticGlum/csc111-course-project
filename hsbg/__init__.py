@@ -64,7 +64,8 @@ class TavernGameBoard:
     _is_frozen: bool
     _pool: MinionPool
 
-    def __init__(self, pool: MinionPool, hero_health: int = 40, tavern_tier: int = 1) -> None:
+    def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40, tavern_tier: int = 1) \
+            -> None:
         """Initialise the TavernGameBoard.
 
         Args:
@@ -84,7 +85,7 @@ class TavernGameBoard:
         self._recruits = [None] * MAX_TAVERN_RECRUIT_SIZE
         self._is_frozen = False
 
-        self._pool = pool
+        self._pool = pool or MinionPool()
 
     def next_turn(self) -> None:
         """Reset the tavern to the start of the next turn.
@@ -156,7 +157,22 @@ class TavernGameBoard:
         return True
 
     def freeze(self) -> bool:
-        """Freeze the selection of recruit minions."""
+        """Freeze the selection of recruit minions.
+
+        >>> board = TavernGameBoard()
+        >>> board.next_turn()
+        >>> previous_recruits = list(board._recruits)
+        >>> board.next_turn()
+        >>> previous_recruits == board._recruits
+        False
+        >>> board.freeze()
+        >>> board._is_frozen
+        True
+        >>> previous_recruits = list(board._recruits)
+        >>> board.next_turn()
+        >>> previous_recruits == board._recruits
+        True
+        """
         self._is_frozen = True
 
     def unfreeze(self) -> bool:
