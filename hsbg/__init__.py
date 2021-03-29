@@ -155,9 +155,13 @@ class TavernGameBoard:
         self._num_recruits += RECRUIT_NUM_PROGRESSION[self._tavern_tier]
         return True
 
-    def toggle_freeze(self) -> bool:
-        """Toggle freezing the available recruit minions."""
-        self._is_frozen = not self._is_frozen
+    def freeze(self) -> bool:
+        """Freeze the selection of recruit minions."""
+        self._is_frozen = True
+
+    def unfreeze(self) -> bool:
+        """Unfreeze the selection of recruit minions."""
+        self._is_frozen = False
 
     def attack_hero(self, damage: int) -> None:
         """Attack the tavern hero with the given amount of damage.
