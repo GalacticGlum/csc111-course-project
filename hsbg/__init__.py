@@ -43,7 +43,7 @@ MAX_TAVERN_TIER = 6
 
 
 class TurnClock:
-    """A mechanism for calling a function after a given amount of turns.
+    """Tracks the passage of time in terms of turns.
 
     Instance Attributes:
         duration: The number of turns until the clock is complete.
