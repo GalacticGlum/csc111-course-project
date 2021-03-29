@@ -80,7 +80,7 @@ class MinionPool:
 
             copies = TIER_NUM_COPIES[minion.tier]
             for _ in range(copies):
-                self._pool.append(minion.clone())
+                self._pool.append(minion)
 
     def find_all(self, **kwargs: dict) -> List[Minion]:
         """Find all the minions matching the given keyword arguments.
@@ -117,7 +117,9 @@ class MinionPool:
         >>> pool.size == previous_pool_size
         True
         >>> minions = pool.get_random(n=10, max_tier=3)
-        >>> all(x.tier <= 3 for x in minions)
+        >>> all(x.tier <= 3 for x in minions)  # Test max tier
+        True
+        >>> pool.size == previous_pool_size - 10  # Test that minions were removed.
         True
         """
         def _predicate(x: Minion) -> bool:
@@ -133,7 +135,8 @@ class MinionPool:
             # Remove each minion from the pool
             for minion in minions:
                 self._pool.remove(minion)
-        return minions
+        # Make a clone of each minion
+        return [minion.clone() for minion in minions]
 
     def get_golden(self, name: str) -> Minion:
         """Return a golden copy of the minion with the given name.
