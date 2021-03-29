@@ -100,6 +100,41 @@ class MinionPool:
         minions = self.find_all(**kwargs)
         return None if len(minions) == 0 else minions[0]
 
+    def get_random(self, n: int = 1, max_tier: Optional[int] = None, remove: bool = True,
+                   predicate: Optional[callable] = None) -> List[Minion]:
+        """Return a list of random minions from the pool.
+
+        Args:
+            n: The number of minions to get.
+            max_tier: The maximum tier of any minion in the returned list.
+            remove: Whether to remove the minions from the pool.
+            predicate: A function that takes in a minion and returns a boolean.
+                       Used to filter out minions.
+
+        >>> pool = MinionPool()
+        >>> previous_pool_size = pool.size
+        >>> _ = pool.get_random(remove=False)
+        >>> pool.size == previous_pool_size
+        True
+        >>> minions = pool.get_random(n=10, max_tier=3)
+        >>> all(x.tier <= 3 for x in minions)
+        True
+        """
+        def _predicate(x: Minion) -> bool:
+            if max_tier is not None and x.tier > max_tier:
+                return False
+            if predicate is not None:
+                return predicate(x)
+            return True
+
+        pool_subset = list(filter(_predicate, self._pool))
+        minions = random.sample(pool_subset, k=n)
+        if remove:
+            # Remove each minion from the pool
+            for minion in minions:
+                self._pool.remove(minion)
+        return minions
+
     def get_golden(self, name: str) -> Minion:
         """Return a golden copy of the minion with the given name.
         Raise a ValueError if there is no minion with that name, or if it has no golden copy.
@@ -112,6 +147,11 @@ class MinionPool:
             raise ValueError(f'The minion with name \'{name}\' has no golden copy.')
 
         return self._all_minions[golden_copy_name].clone()
+
+    @property
+    def size(self) -> int:
+        """Return the number of minions in the pool (including copies)."""
+        return len(self._pool)
 
 
 
@@ -1708,3 +1748,8 @@ QIRAJI_HARBINGER_GOLDEN = Minion(
     'Qiraji Harbinger', CardClass.NEUTRAL, MinionRace.NONE, 10, 10,
     cost=6, tier=4, is_golden=True
 )
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
