@@ -51,20 +51,26 @@ class TavernGameBoard:
     #   - _gold: The current gold that the player has.
     #   - _hand: A list of minions in the hand.
     #   - _board: A list of minions on the board.
+    #   - _pool: The pool of minions to select recruits from.
     #   - _num_recruits: The number of recruits offered to the player currently.
     #   - _recruits: A list of current recruits.
     #   - _is_frozen: Whether the recruit selection is currently frozen.
-    #   - _pool: The pool of minions to select recruits from.
+    #   - _refresh_cost: The current cost of refreshing the recruitment pool.
+    #   - _refresh_cost_turns: The number of turns remaining if there is a custom refresh cost set.
     _turn_number: int
     _hero_health: int
     _tavern_tier: int
     _gold: int
     _hand: List[Optional[Minion]]
     _board: List[Optional[Minion]]
+    _pool: MinionPool
+
     _num_recruits: int
     _recruits: List[Optional[Minion]]
     _is_frozen: bool
-    _pool: MinionPool
+
+    _refresh_cost: int
+    _refresh_cost_turns: Optional[int]
 
     def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40, tavern_tier: int = 1) \
             -> None:
@@ -82,12 +88,14 @@ class TavernGameBoard:
 
         self._hand = [None] * MAX_HAND_SIZE
         self._board = [None] * MAX_TAVERN_BOARD_SIZE
+        self._pool = pool or MinionPool()
 
         self._num_recruits = INITIAL_NUM_RECRUITS
         self._recruits = [None] * MAX_TAVERN_RECRUIT_SIZE
         self._is_frozen = False
 
-        self._pool = pool or MinionPool()
+        self._refresh_cost = TAVERN_REFRESH_COST
+        self._refresh_cost_turns = None
 
     def next_turn(self) -> None:
         """Reset the tavern to the start of the next turn.
@@ -111,6 +119,14 @@ class TavernGameBoard:
         self._refresh_recruits()
         if self._is_frozen:
             self._is_frozen = False
+
+        # Update refresh cost
+        if self._refresh_cost_turns is not None:
+            if self._refresh_cost_turns <= 0:
+                self._refresh_cost = TAVERN_REFRESH_COST
+                self._refresh_cost_turns = None
+            else:
+                self._refresh_cost_turns -= 1
 
     def _refresh_recruits(self) -> bool:
         """Refresh the selection of recruits without spending gold.
@@ -145,7 +161,7 @@ class TavernGameBoard:
         >>> board.refresh_recruits()
         False
         """
-        if not self._can_spend_gold(TAVERN_REFRESH_COST):
+        if not self._can_spend_gold(self._refresh_cost):
             # We can't refresh since we don't have enough gold!
             return False
         if not self._refresh_recruits():
@@ -153,8 +169,31 @@ class TavernGameBoard:
             return False
 
         # The refresh was successful so subtract the amount from the gold total.
-        self._spend_gold(TAVERN_REFRESH_COST)
+        self._spend_gold(self._refresh_cost)
         return True
+
+    def set_refresh_cost(self, amount: int, turns: Optional[int] = 1) -> None:
+        """Set the recruit refresh cost.
+
+        Args:
+            amount: The new cost of refreshing the recruitment pool.
+            turns: The amount of turns to keep this cost.
+                   If None, then the new refresh cost is indefinite.
+
+        >>> board = TavernGameBoard()
+        >>> board.set_refresh_cost(100, turns=1)
+        >>> board.refresh_cost
+        100
+        >>> board.next_turn()
+        >>> board.refresh_cost
+        100
+        >>> board.next_turn()
+        >>> board.refresh_cost
+        1
+        """
+        self._refresh_cost = amount
+        self._refresh_cost_turns = turns
+
 
     def upgrade_tavern(self) -> bool:
         """Upgrade the tavern. Do nothing if the tavern cannot be upgraded anymore,
@@ -199,7 +238,7 @@ class TavernGameBoard:
         False
 
         >>> board.freeze()
-        >>> board._is_frozen
+        >>> board.is_frozen
         True
 
         >>> previous_recruits = list(board._recruits)
@@ -210,7 +249,14 @@ class TavernGameBoard:
         self._is_frozen = True
 
     def unfreeze(self) -> None:
-        """Unfreeze the selection of recruit minions."""
+        """Unfreeze the selection of recruit minions.
+
+        >>> board = TavernGameBoard()
+        >>> board.freeze()
+        >>> board.unfreeze()
+        >>> board.is_frozen
+        False
+        """
         self._is_frozen = False
 
     def attack_hero(self, damage: int) -> None:
@@ -291,6 +337,16 @@ class TavernGameBoard:
     def gold(self) -> int:
         """Return the current gold that the player has."""
         return self._gold
+
+    @property
+    def is_frozen(self) -> bool:
+        """Return whether the recruit selection is currently frozen."""
+        return self._is_frozen
+
+    @property
+    def refresh_cost(self) -> int:
+        """Return the current cost of refreshing the recruitment pool."""
+        return self._refresh_cost
 
 
 class BattlegroundsGame:
