@@ -67,11 +67,15 @@ class TavernGameBoard:
 
         >>> board = TavernGameBoard()
         >>> board.next_turn()
+        >>> board.turn_number == 1
+        True
         >>> board._spend_gold(1)
         True
         >>> board.gold == 0
         True
         >>> board.next_turn()
+        >>> board.turn_number == 2
+        True
         >>> board.gold == 2
         True
         """
