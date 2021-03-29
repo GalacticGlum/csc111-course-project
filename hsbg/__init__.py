@@ -41,6 +41,10 @@ TAVERN_UPGRADE_COSTS = [
 # The maximum tavern tier
 MAX_TAVERN_TIER = 6
 
+# Minion buy and sell price
+TAVERN_MINION_BUY_PRICE = 3
+TAVERN_MINION_SELL_PRICE = 1
+
 
 class TurnClock:
     """Tracks the passage of time in terms of turns.
@@ -107,6 +111,8 @@ class TavernGameBoard:
     #   - _is_frozen: Whether the recruit selection is currently frozen.
     #   - _refresh_cost: The current cost of refreshing the recruitment pool.
     #   - _refresh_cost_clock: Clock to manage when to change the refresh cost.
+    #   - _minion_buy_price: The amount of gold it costs to buy a minion.
+    #   - _minion_sell_price: The amount of gold the player gets when they sell a minion.
     _turn_number: int
     _hero_health: int
     _tavern_tier: int
@@ -121,6 +127,9 @@ class TavernGameBoard:
 
     _refresh_cost: int
     _refresh_cost_clock: Optional[TurnClock]
+
+    _minion_buy_price: int
+    _minion_sell_price: int
 
     def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40, tavern_tier: int = 1) \
             -> None:
@@ -146,6 +155,9 @@ class TavernGameBoard:
 
         self._refresh_cost = TAVERN_REFRESH_COST
         self._refresh_cost_clock = None
+
+        self._minion_buy_price = TAVERN_MINION_BUY_PRICE
+        self._minion_sell_price = TAVERN_MINION_SELL_PRICE
 
     def next_turn(self) -> None:
         """Reset the tavern to the start of the next turn.
@@ -282,16 +294,13 @@ class TavernGameBoard:
 
         >>> board = TavernGameBoard()
         >>> board.next_turn()
-
         >>> previous_recruits = list(board._recruits)
         >>> board.next_turn()
         >>> previous_recruits == board._recruits
         False
-
         >>> board.freeze()
         >>> board.is_frozen
         True
-
         >>> previous_recruits = list(board._recruits)
         >>> board.next_turn()
         >>> previous_recruits == board._recruits
@@ -358,6 +367,8 @@ class TavernGameBoard:
         >>> board.next_turn()  # We have 1 gold
         >>> board._spend_gold(100)
         False
+        >>> board.gold == 1
+        True
         >>> board._spend_gold(1)
         True
         >>> board.gold == 0
@@ -367,6 +378,91 @@ class TavernGameBoard:
             return False
 
         self._gold -= amount
+        return True
+
+    def buy_minion(self, index: int) -> bool:
+        """Buy the minion (recruit) at the given index. Return whether the minion could be bought.
+        Do nothing if there is no minion at the given index, or if there is not enough gold.
+
+        >>> board = TavernGameBoard()
+        >>> for _ in range(3): board.next_turn()  # Go to turn 3 so we have 3 gold.
+        >>> minion = board.recruits[0]
+        >>> board.buy_minion(0)
+        True
+        >>> board.hand[0] == minion
+        True
+        >>> board.recruits[0] == None
+        True
+        >>> board.gold == 0
+        True
+        >>> board.buy_minion(1)
+        False
+        >>> board.next_turn()
+        >>> board.buy_minion(4)  # We only have 3 available recruits
+        False
+        >>> board.buy_minion(100)  # Index is out of range
+        False
+        >>> board.gold == 4
+        True
+        """
+        if index < 0 or index >= len(self.recruits) or self._recruits[index] is None:
+            return False
+
+        minion = self._recruits[index]
+        if not self._spend_gold(self._minion_buy_price):
+            # We can't buy the minion since we don't have enough gold!
+            return False
+
+        self._recruits[index] = None
+        self.add_minion_to_hand(minion)
+        return True
+
+    def add_minion_to_hand(self, minion: Minion, index: Optional[int] = None, clone: bool = True) \
+            -> bool:
+        """Add the given minion to the hand. Return whether the minion could be added to the hand.
+
+        Args:
+            index: The index to place the minion. If None, places the minion at the right-most
+                   available position (i.e. the first index in the hand that is empty).
+            clone: Whether to clone the minion before adding it to hand.
+                   Note that the cloned minion does NOT keep the buffs of the original.
+
+        >>> board = TavernGameBoard()
+        >>> minion = board._pool.find(name='Murloc Tidehunter')
+        >>> all(x == None for x in board.hand)  # Empty hand
+        True
+        >>> board.add_minion_to_hand(minion)
+        True
+        >>> board.hand[0] == minion
+        True
+        >>> minion = board._pool.find(name='Vulgar Homunculus')
+        >>> board.add_minion_to_hand(minion, index=3)
+        True
+        >>> board.hand[3] == minion
+        True
+        >>> board.add_minion_to_hand(minion, index=3)  # There is already a minion here
+        False
+        >>> board.add_minion_to_hand(minion, index=10)  # This index is out of range
+        False
+        """
+        if index is not None and (index < 0 or index >= len(self._hand) \
+                                  or self._hand[index] is not None):
+            # We can't add the minion to hand since the index is out of range,
+            # or the given index is not empty.
+            return False
+
+        if index is None:
+            try:
+                # Find the first element in the list that is None
+                index = self._hand.index(None)
+            except ValueError:
+                # None could not be found in the list. The hand is full!
+                return False
+
+        if clone:
+            minion = minion.clone()
+
+        self._hand[index] = minion
         return True
 
     @property
@@ -398,6 +494,27 @@ class TavernGameBoard:
     def refresh_cost(self) -> int:
         """Return the current cost of refreshing the recruitment pool."""
         return self._refresh_cost
+
+    @property
+    def hand(self) -> List[Minion]:
+        """Return a list containing copies of the minions in the player's hand.
+        Elements that are None mean that there is no minion in the hand at that index.
+        """
+        return [None if x is None else x.clone() for x in self._hand]
+
+    @property
+    def board(self) -> List[Minion]:
+        """Return a list containing copies of the minions on the board.
+        Elements that are None mean that there is no minion on the board at that index.
+        """
+        return [None if x is None else x.clone() for x in self._board]
+
+    @property
+    def recruits(self) -> List[Minion]:
+        """Return a list containing copies of the minions available for purchase.
+        Elements that are None mean that there is no recruit at that index.
+        """
+        return [None if x is None else x.clone() for x in self._recruits]
 
 
 class BattlegroundsGame:
