@@ -13,7 +13,7 @@ NOTE: This is a collection of all minions in the Battlegrounds pool as of Patch 
 """
 import random
 import logging
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 
 from hsbg.models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
 
@@ -151,11 +151,17 @@ class MinionPool:
 
         return self._all_minions[golden_copy_name].clone()
 
+    def insert(self, values: Union[Minion, List[Minion]]) -> None:
+        """Insert the given minions into the pool."""
+        if isinstance(values, Minion):
+            values = [values]
+        for minion in values:
+            self._pool.append(minion.clone())
+
     @property
     def size(self) -> int:
         """Return the number of minions in the pool (including copies)."""
         return len(self._pool)
-
 
 
 ################################################################################
@@ -1574,11 +1580,11 @@ MECHANO_EGG_GOLDEN = Minion(
 # Guard Bot summoned by Security Rover
 GUARD_BOT = Minion(
     'Guard Bot', CardClass.WARRIOR, MinionRace.MECH, 2, 3,
-    cost=2, tier=1, abilities=CardAbility.TAUNT
+    cost=2, tier=1, purchasable=False, abilities=CardAbility.TAUNT
 )
 GUARD_BOT_GOLDEN = Minion(
     'Guard Bot', CardClass.WARRIOR, MinionRace.MECH, 4, 6,
-    cost=2, tier=1, is_golden=True, abilities=CardAbility.TAUNT
+    cost=2, tier=1, purchasable=False, is_golden=True, abilities=CardAbility.TAUNT
 )
 
 # TODO: Implement effect (Whenever this minion takes damage, summon a 2/3 Mech with Taunt).
