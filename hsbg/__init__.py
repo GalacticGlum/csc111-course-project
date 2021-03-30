@@ -603,24 +603,24 @@ class TavernGameBoard:
 
     @property
     def hand(self) -> List[Minion]:
-        """Return a list containing copies of the minions in the player's hand.
+        """Return a list of the minions in the player's hand.
         Elements that are None mean that there is no minion in the hand at that index.
         """
-        return [None if x is None else x.clone() for x in self._hand]
+        return self._hand
 
     @property
     def board(self) -> List[Minion]:
-        """Return a list containing copies of the minions on the board.
+        """Return a list of the minions on the board.
         Elements that are None mean that there is no minion on the board at that index.
         """
-        return [None if x is None else x.clone() for x in self._board]
+        return self._board
 
     @property
     def recruits(self) -> List[Minion]:
-        """Return a list containing copies of the minions available for purchase.
+        """Return a list of the minions available for purchase.
         Elements that are None mean that there is no recruit at that index.
         """
-        return [None if x is None else x.clone() for x in self._recruits]
+        return self._recruits
 
 
 class BattlegroundsGame:
