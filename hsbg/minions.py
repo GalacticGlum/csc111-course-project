@@ -285,15 +285,24 @@ WATER_DROPLET_GOLDEN = Minion(
     cost=3, is_golden=True, purchasable=False
 )
 
+def _sellemental_on_this_sold(self: Minion, board: 'TavernGameBoard') -> None:
+    """Handle the effect for the Sellemental minion.
+    Effect: When you sell this, add a 2/2 Elemental to your hand (or 2 if golden).
+    """
+    n = 2 if self.is_golden else 1
+    minion = board.pool.find(name='Water Droplet')
+    for _ in range(n):
+        board.add_minion_to_hand(minion)
+
 SELLEMENTAL = Minion(
     'Sellemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 2, 2,
     cost=3, abilities=CardAbility.GENERATE,
-    _on_this_sold=lambda self, board: board.add_card_to_hand('Water Droplet', num=1)
+    _on_this_sold=_sellemental_on_this_sold
 )
 SELLEMENTAL_GOLDEN = Minion(
     'Sellemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 2, 2,
     cost=3, abilities=CardAbility.GENERATE, is_golden=True,
-    _on_this_sold=lambda self, board: board.add_card_to_hand('Water Droplet', num=2)
+    _on_this_sold=_sellemental_on_this_sold
 )
 
 # Mech Pool
