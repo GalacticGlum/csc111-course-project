@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import copy
 from enum import Enum, Flag, auto
-from typing import List, Optional
 from dataclasses import dataclass, field
+from typing import List, Optional, Callable
 from abc import ABC, abstractproperty, abstractmethod
 
 
@@ -106,7 +106,8 @@ class Minion:
     #   - _on_this_sold: A function called when this minion is sold.
     #   - _on_this_played: A function called when this minion is played from the hand.
     #   - _on_any_played: A function called when any card is played from the hand.
-    #   - _on_card_summoned: A function called when a card is summoned.
+    #   - _on_this_summoned: A function called when this card is summoned.
+    #   - _on_any_summoned: A function called when a card is summoned.
     #   - _on_new_turn: A function called on the start of a new turn.
     #   - _on_end_turn: A function called on the start of a new turn.
     name: str
@@ -125,13 +126,14 @@ class Minion:
     _buffs: List[Buff] = field(default_factory=list)
 
     # Events
-    _on_this_bought: Optional[callable] = None
-    _on_this_sold: Optional[callable] = None
-    _on_this_played: Optional[callable] = None
-    _on_any_played: Optional[callable] = None
-    _on_card_summoned: Optional[callable] = None
-    _on_new_turn: Optional[callable] = None
-    _on_end_turn: Optional[callable] = None
+    _on_this_bought: Optional[Callable[[Minion, TavernGameBoard], None]] = None
+    _on_this_sold: Optional[Callable[[Minion, TavernGameBoard], None]] = None
+    _on_this_played: Optional[Callable[[Minion, TavernGameBoard], None]] = None
+    _on_any_played: Optional[Callable[[Minion, TavernGameBoard, Minion], None]] = None
+    _on_this_summoned: Optional[Callable[[Minion, TavernGameBoard], None]] = None
+    _on_any_summoned: Optional[Callable[[Minion, TavernGameBoard, Minion], None]] = None
+    _on_new_turn: Optional[Callable[[Minion, TavernGameBoard], None]] = None
+    _on_end_turn: Optional[Callable[[Minion, TavernGameBoard], None]] = None
 
     @property
     def current_health(self) -> int:
@@ -199,22 +201,48 @@ class Minion:
         minion_copy = copy.copy(self)
         if not keep_buffs:
             # Clear buffs
-            minion_copy._buffs = dict()
+            minion_copy._buffs = []
         return minion_copy
 
-    def on_this_played(self, ctx: Any) -> None:
-        """Handle when THIS minion is played from the hand.
-        Mutates the given game state.
-        """
-        if self._on_this_played is not None:
-            self._on_this_played(self, ctx)
+    def on_this_bought(self, board: 'TavernGameBoard') -> None:
+        """Handle when THIS minion is bought."""
+        if self._on_this_bought is not None:
+            self._on_this_bought(self, board)
 
-    def on_any_played(self, ctx: Any) -> None:
-        """Handle when ANY minion is played from the hand.
-        Mutates the given game state.
-        """
+    def on_this_sold(self, board: 'TavernGameBoard') -> None:
+        """Handle when THIS minion is sold."""
+        if self._on_this_sold is not None:
+            self._on_this_sold(self, board)
+
+    def on_this_played(self, board: 'TavernGameBoard') -> None:
+        """Handle when THIS minion is played from the hand."""
+        if self._on_this_played is not None:
+            self._on_this_played(self, board)
+
+    def on_any_played(self, board: 'TavernGameBoard', played_minion: Minion) -> None:
+        """Handle when ANY minion is played from the hand."""
         if self._on_any_played is not None:
-            self._on_any_played(self, ctx)
+            self._on_any_played(self, board, played_minion)
+
+    def on_this_summoned(self, board: 'TavernGameBoard') -> None:
+        """Handle when THIS minion is summoned onto the board."""
+        if self._on_this_summoned is not None:
+            self._on_this_summoned(self, board)
+
+    def on_any_summoned(self, board: 'TavernGameBoard', summoned_minion: Minion) -> None:
+        """Handle when ANY minion is summoned onto the board."""
+        if self._on_any_summoned is not None:
+            self._on_any_summoned(self, board, summoned_minion)
+
+    def on_new_turn(self, board: 'TavernGameBoard') -> None:
+        """Handle the start of a turn."""
+        if self._on_new_turn is not None:
+            self._on_new_turn(self, board)
+
+    def on_end_turn(self, board: 'TavernGameBoard') -> None:
+        """Handle the end of a turn."""
+        if self._on_end_turn is not None:
+            self._on_end_turn(self, board)
 
 
 if __name__ == '__main__':

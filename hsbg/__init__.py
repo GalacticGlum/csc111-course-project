@@ -1,7 +1,9 @@
 """A simulator for Hearthstone Battlegrounds."""
+import random
 from typing import List, Optional
 
 from hsbg.minions import Minion, MinionPool
+from utils import filter_minions
 
 # The maximum number of minions a player can have in their hand.
 MAX_HAND_SIZE = 10
@@ -176,6 +178,10 @@ class TavernGameBoard:
         >>> board.gold == 2
         True
         """
+        if self._turn_number > 0:
+            # Call the end turn events
+            self._handle_on_end_turn()
+
         self._turn_number += 1
         self._gold = min(self._turn_number * GOLD_PER_TURN, MAX_TAVERN_GOLD)
         self._refresh_recruits()
@@ -185,6 +191,25 @@ class TavernGameBoard:
         # Update refresh cost
         if self._refresh_cost_clock is not None:
             self._refresh_cost_clock.step()
+
+        # Call the new turn events
+        self._handle_on_new_turn()
+
+    def _handle_on_new_turn(self):
+        """Call the _on_new_turn event on minions in the hand and on the board."""
+        minions = self._hand + self._board
+        for x in minions:
+            if x is None:
+                continue
+            x.on_new_turn(self)
+
+    def _handle_on_end_turn(self):
+        """Call the _on_end_turn event on minions in the hand and on the board."""
+        minions = self._hand + self._board
+        for x in minions:
+            if x is None:
+                continue
+            x.on_end_turn(self)
 
     def _refresh_recruits(self) -> bool:
         """Refresh the selection of recruits without spending gold.
@@ -437,7 +462,10 @@ class TavernGameBoard:
             return False
 
         self._recruits[index] = None
-        self.add_minion_to_hand(minion)
+        if not self.add_minion_to_hand(minion, clone=False):
+            return False
+
+        minion.on_this_bought(self)
         return True
 
     def add_minion_to_hand(self, minion: Minion, index: Optional[int] = None, clone: bool = True) \
@@ -451,14 +479,14 @@ class TavernGameBoard:
                    Note that the cloned minion does NOT keep the buffs of the original.
 
         >>> board = TavernGameBoard()
-        >>> minion = board._pool.find(name='Murloc Tidehunter')
+        >>> minion = board.pool.find(name='Murloc Tidehunter')
         >>> all(x == None for x in board.hand)  # Empty hand
         True
         >>> board.add_minion_to_hand(minion)
         True
         >>> board.hand[0] == minion
         True
-        >>> minion = board._pool.find(name='Vulgar Homunculus')
+        >>> minion = board.pool.find(name='Vulgar Homunculus')
         >>> board.add_minion_to_hand(minion, index=3)
         True
         >>> board.hand[3] == minion
@@ -515,9 +543,12 @@ class TavernGameBoard:
         self._board[index] = None
         self._pool.insert(minion)
         self.give_gold(self._minion_sell_price)
+        minion.on_this_sold(self)
+
         return True
 
-    def play_minion(self, index: int, board_index: Optional[int] = None) -> bool:
+    def play_minion(self, index: int, board_index: Optional[int] = None, call_events: bool = True)\
+            -> bool:
         """Play the minion from the hand at the given index. Do nothing if there is no minion in
         the hand at the given index, or if the board is full. Return whether the minion could be played.
 
@@ -526,24 +557,25 @@ class TavernGameBoard:
             board_index: The index on the board to place the minion. If None, out of range, or the
                          given index refers to a non-empty position on the board then the first
                          empty position is used instead.
+            call_events: Whether to call events on the played minion.
 
         >>> board = TavernGameBoard()
         >>> for _ in range(10):  # Go to turn 10 so we have 10 gold.
         ...     board.next_turn()
-        >>> recruits = board.recruits
+        >>> recruits = list(board.recruits)
         >>> all(board.buy_minion(i) for i in range(3))  # Buy all recruits
         True
         >>> board.play_minion(0)
         True
-        >>> board.board[0] == recruits[0]
+        >>> board.board[0].name == recruits[0].name
         True
         >>> board.play_minion(1, board_index=4)  # Empty position
         True
-        >>> board.board[4] == recruits[1]
+        >>> board.board[4].name == recruits[1].name
         True
         >>> board.play_minion(2, board_index=4)  # Non-empty position
         True
-        >>> board.board[1] == recruits[2]
+        >>> board.board[1].name == recruits[2].name
         True
         >>> board.play_minion(5)  # No minion in the hand at that index
         False
@@ -555,21 +587,141 @@ class TavernGameBoard:
             # or the given index refers to an empty position.
             return False
 
-        if board_index is None or board_index < 0 or board_index >= len(self._board) \
-                               or self._board[board_index] is not None:
+        minion = self._hand[index]
+        self._hand[index] = None
+        self.summon_minion(minion, board_index, clone=False, call_events=False)
+
+        # Call events
+        if call_events:
+            minion.on_this_played(self)
+            self._handle_on_any_played(minion)
+
+        return True
+
+    def summon_minion(self, minion: Minion, index: Optional[int] = None, clone: bool = True,
+                      call_events: bool = True) -> bool:
+        """Summon the given minion onto the board at the given index. Do nothing if the board is full.
+        Return whether the minion could be summoned.
+
+        Args:
+            minion: The minion to summon.
+            index: The index on the board to place the minion. If None, out of range, or the
+                   given index refers to a non-empty position on the board then the first
+                   empty position is used instead.
+            clone: Whether to clone the minion before summoning it. Note that the cloned minion
+                   does NOT keep any buffs.
+            call_events: Whether to call events on the summoned minion.
+        """
+        if index is None or index < 0 or index >= len(self._board) \
+                         or self._board[index] is not None:
             # The board index is None, out of range, or refers to a non-empty position.
             # Use the first non-empty position instead.
             try:
                 # Find the first element in the list that is None
-                board_index = self._board.index(None)
+                index = self._board.index(None)
             except ValueError:
                 # None could not be found in the list. The board is full!
                 return False
 
-        minion = self._hand[index]
-        self._hand[index] = None
-        self._board[board_index] = minion
+        if clone:
+            self._board[index] = minion.clone()
+        else:
+            self._board[index] = minion
+
+        if call_events:
+            minion.on_this_summoned(self)
+            self._handle_on_any_summoned(minion)
+
         return True
+
+    def _handle_on_any_played(self, played_minion: Minion) -> None:
+        """Call the _on_any_played event on minions in the hand and on the board."""
+        minions = self._hand + self._board
+        for x in minions:
+            if x is None:
+                continue
+            x.on_any_played(self, played_minion)
+
+    def _handle_on_any_summoned(self, summoned_minion: Minion) -> None:
+        """Call the _on_any_summoned event on minions in the hand and on the board."""
+        minions = self._hand + self._board
+        for x in minions:
+            if x is None:
+                continue
+            x.on_any_summoned(self, summoned_minion)
+
+    def get_minions_on_board(self, clone: bool = False, ignore: Optional[List[Minion]] = None,
+                             **kwargs) -> List[Minion]:
+        """Find all the minions on the board matching the given keyword arguments.
+        Each keyword argument should be an attribute of the Minion class.
+
+        Args:
+            clone: Whether to clone the minions.
+            ignore: A list of minions to ignore.
+            **kwargs: Keyword arguments corresponding to minion attributes to match.
+
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Murloc Scout')
+        >>> minion_b = board.pool.find(name='Tabbycat', is_golden=True)
+        >>> board.add_minion_to_hand(minion_a) and board.add_minion_to_hand(minion_b)
+        True
+        >>> board.play_minion(0) and board.play_minion(1)
+        True
+        >>> board.get_minions_on_board() == [minion_a, minion_b]
+        True
+        >>> board.get_minions_on_board(is_golden=True) == [minion_b]
+        True
+        >>> board.get_minions_on_board(name='Eamon Ma') == []
+        True
+        >>> board.get_minions_on_board(ignore=[minion_a]) == [minion_b]
+        True
+        """
+        ignore = ignore or []
+        minions = [x for x in self.board if x is not None and x not in ignore]
+        return filter_minions(minions, clone=clone, **kwargs)
+
+    def get_random_minions_on_board(self, n, clone: bool = False,
+                                    ignore: Optional[List[Minion]] = None, **kwargs) \
+            -> List[Minion]:
+        """Get a list of random minions on the board matching the given keyword arguments.
+        Each keyword argument should be an attribute of the Minion class.
+
+        Args:
+            n: The number of minions to get.
+            clone: Whether to clone the minions.
+            ignore: A list of minions to ignore.
+            **kwargs: Keyword arguments corresponding to minion attributes to match.
+
+        >>> random.seed(69)
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Murloc Scout')
+        >>> minion_b = board.pool.find(name='Tabbycat', is_golden=True)
+        >>> board.add_minion_to_hand(minion_a) and board.add_minion_to_hand(minion_b)
+        True
+        >>> board.play_minion(0) and board.play_minion(1)
+        True
+        >>> board.get_random_minions_on_board(2) == [minion_a, minion_b]
+        True
+        >>> board.get_random_minions_on_board(1) == [minion_a]
+        True
+        """
+        minions = self.get_minions_on_board(clone=clone, ignore=ignore, **kwargs)
+        return random.sample(minions, k=min(n, len(minions)))
+
+    def get_random_minion_on_board(self, clone: bool = False,
+                                    ignore: Optional[List[Minion]] = None, **kwargs) -> Minion:
+        """Get a random minion on the board matching the given keyword arguments.
+        Each keyword argument should be an attribute of the Minion class.
+
+        Note: this is the same the get_random_minions_on_board function, but returns a
+              single Minion object instead of a list of Minion objects.
+
+        Args:
+            clone: Whether to clone the minions.
+            ignore: A list of minions to ignore.
+            **kwargs: Keyword arguments corresponding to minion attributes to match.
+        """
+        return self.get_random_minions_on_board(n=1, clone=clone, ignore=ignore, **kwargs)[0]
 
     @property
     def turn_number(self) -> int:
@@ -621,6 +773,11 @@ class TavernGameBoard:
         Elements that are None mean that there is no recruit at that index.
         """
         return self._recruits
+
+    @property
+    def pool(self) -> MinionPool:
+        """Return the pool of minions to select recruits from."""
+        return self._pool
 
 
 class BattlegroundsGame:
