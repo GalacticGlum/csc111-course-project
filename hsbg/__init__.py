@@ -268,10 +268,13 @@ class TavernGameBoard:
         False
         >>> board.tavern_tier == 1
         True
-        >>> for _ in range(4): board.next_turn()
+        >>> for _ in range(4):
+        ...     board.next_turn()
         >>> board.upgrade_tavern()  # We now have 5 gold
         True
         >>> board.tavern_tier == 2
+        True
+        >>> board._num_recruits == 4
         True
         >>> board.gold == 0
         True
@@ -285,8 +288,8 @@ class TavernGameBoard:
             # We can't upgrade since we don't have enough gold!
             return False
 
-        self._tavern_tier += 1
         self._num_recruits += RECRUIT_NUM_PROGRESSION[self._tavern_tier]
+        self._tavern_tier += 1
         return True
 
     def freeze(self) -> None:
@@ -404,7 +407,8 @@ class TavernGameBoard:
         Do nothing if there is no minion at the given index, or if there is not enough gold.
 
         >>> board = TavernGameBoard()
-        >>> for _ in range(3): board.next_turn()  # Go to turn 3 so we have 3 gold.
+        >>> for _ in range(3):  # Go to turn 3 so we have 3 gold.
+        ...     board.next_turn()
         >>> minion = board.recruits[0]
         >>> board.buy_minion(0)
         True
@@ -485,10 +489,24 @@ class TavernGameBoard:
         return True
 
     def sell_minion(self, index: int) -> bool:
-        """Sell the minion on the board at the given index. Return whether the minion could be sold.
-        Do nothing if there is no minion at the given index.
+        """Sell the minion on the board at the given index. Do nothing if there is no minion on the
+        board at the given index. Return whether the minion could be sold.
 
-        TODO: Add docstrings
+        >>> board = TavernGameBoard()
+        >>> for _ in range(3):  # Go to turn 3 so we have 3 gold.
+        ...     board.next_turn()
+        >>> board.buy_minion(0) and board.play_minion(0)  # We have 0 gold after buying
+        True
+        >>> board.sell_minion(0)
+        True
+        >>> board.gold == 1
+        True
+        >>> board.board[0] == None
+        True
+        >>> board.sell_minion(1)  # Empty position
+        False
+        >>> board.sell_minion(100)  # Out of range
+        False
         """
         if index < 0 or index >= len(self._board) or self._board[index] is None:
             return False
@@ -497,6 +515,60 @@ class TavernGameBoard:
         self._board[index] = None
         self._pool.insert(minion)
         self.give_gold(self._minion_sell_price)
+        return True
+
+    def play_minion(self, index: int, board_index: Optional[int] = None) -> bool:
+        """Play the minion from the hand at the given index. Do nothing if there is no minion in
+        the hand at the given index, or if the board is full. Return whether the minion could be played.
+
+        Args:
+            index: The index of the minion to play from the hand.
+            board_index: The index on the board to place the minion. If None, out of range, or the
+                         given index refers to a non-empty position on the board then the first
+                         empty position is used instead.
+
+        >>> board = TavernGameBoard()
+        >>> for _ in range(10):  # Go to turn 10 so we have 10 gold.
+        ...     board.next_turn()
+        >>> recruits = board.recruits
+        >>> all(board.buy_minion(i) for i in range(3))  # Buy all recruits
+        True
+        >>> board.play_minion(0)
+        True
+        >>> board.board[0] == recruits[0]
+        True
+        >>> board.play_minion(1, board_index=4)  # Empty position
+        True
+        >>> board.board[4] == recruits[1]
+        True
+        >>> board.play_minion(2, board_index=4)  # Non-empty position
+        True
+        >>> board.board[1] == recruits[2]
+        True
+        >>> board.play_minion(5)  # No minion in the hand at that index
+        False
+        >>> board.play_minion(100)  # Out of range
+        False
+        """
+        if index < 0 or index >= len(self._hand) or self._hand[index] is None:
+            # We can't add the minion to hand since the index is out of range,
+            # or the given index refers to an empty position.
+            return False
+
+        if board_index is None or board_index < 0 or board_index >= len(self._board) \
+                               or self._board[board_index] is not None:
+            # The board index is None, out of range, or refers to a non-empty position.
+            # Use the first non-empty position instead.
+            try:
+                # Find the first element in the list that is None
+                board_index = self._board.index(None)
+            except ValueError:
+                # None could not be found in the list. The board is full!
+                return False
+
+        minion = self._hand[index]
+        self._hand[index] = None
+        self._board[board_index] = minion
         return True
 
     @property
