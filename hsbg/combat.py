@@ -81,14 +81,14 @@ class Battle:
         >>> output = '''
         ... --------------------------------
         ... win: 76.9%, tie: 0.0%, lose: 23.1%
-        ... mean score: 11.875, median score: 16
+        ... mean score: 11.875, median score: -16
         ... percentiles: -12 -10 -3 16 16 16 16 20 20 20 20
         ... mean damage taken: 1.764
         ... your expected health afterwards: 29.236, 3.14% chance to die
         ... mean damage dealt: 14.408
         ... their expected health afterwards: 10.592, 5.2% chance to die
         ... --------------------------------'''
-        >>> expected = Battle(0.769, 0, 0.231, 11.875, 16, 1.764, 14.408,\
+        >>> expected = Battle(0.769, 0, 0.231, 11.875, -16, 1.764, 14.408,\
                               29.236, 10.592, 0.0314, 0.052)
         >>> expected == Battle.parse_simulator_output(output)
         True
@@ -105,7 +105,7 @@ class Battle:
                               to include while matching.
             """
             # Matches for "<name>: <float><value_suffix>"
-            pattern = f'(?<={name}:\s)\d+.?\d*{value_suffix}'
+            pattern = f'(?<={name}:\s)-?\d+.?\d*{value_suffix}'
             match = re.search(pattern, output)
             if match is None:
                 raise ValueError(f'Could not parse field with name \'{name}\' in: {output}')
