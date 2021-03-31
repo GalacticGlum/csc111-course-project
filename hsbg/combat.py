@@ -33,6 +33,7 @@ CARD_ABILITY_TO_STR = {
     CardAbility.WINDFURY: 'windfury'
 }
 
+
 def run_hsbg_simulator(board_config: str, bin_path: Union[Path, str] = _DEFAULT_HSBG_SIM_PATH) \
         -> None:
     """Invoke the C++ Hearthstone Battlegrounds simulator on the given board configuration.
@@ -80,13 +81,13 @@ def _make_board_minion_state(board: TavernGameBoard) -> str:
     * 2/7 Rockpool Hunter
     * 4/6 golden Coldlight Seer
     >>> from hsbg.models import Buff, CardAbility
-    >>> board.board[4].add_buff(Buff(0, 0, CardAbility.TAUNT | CardAbility.DIVINE_SHIELD))
+    >>> board.board[4].add_buff(Buff(1, 0, CardAbility.TAUNT | CardAbility.DIVINE_SHIELD))
     >>> print(_make_board_minion_state(board))
     * 2/2 golden Alleycat
     * 2/2 golden Tabbycat
     * 2/6 Murloc Scout
     * 2/7 Rockpool Hunter
-    * 4/6 golden Coldlight Seer, taunt, divine shield
+    * 5/6 golden Coldlight Seer, taunt, divine shield
     """
     lines = []
     for minion in board.board:
