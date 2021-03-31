@@ -32,7 +32,8 @@ CARD_ABILITY_TO_STR = {
     CardAbility.TAUNT: 'taunt',
     CardAbility.DIVINE_SHIELD: 'divine shield',
     CardAbility.POISONOUS: 'poisonous',
-    CardAbility.WINDFURY: 'windfury'
+    CardAbility.WINDFURY: 'windfury',
+    CardAbility.REBORN: 'reborn'
 }
 
 
@@ -108,7 +109,7 @@ class Battle:
             pattern = f'(?<={name}:\s)-?\d+.?\d*{value_suffix}'
             match = re.search(pattern, output)
             if match is None:
-                raise ValueError(f'Could not parse field with name \'{name}\' in: {output}')
+                raise ValueError(f'Could not parse field with name \'{name}\' in:\n{output}')
             return float(match.group(0).replace(value_suffix, '').strip())
 
         def _get_death_probability(kind: str) -> float:
@@ -125,7 +126,7 @@ class Battle:
 
             match = re.search(pattern, output)
             if match is None:
-                raise ValueError(f'Could not find death probability for {kind} hero in {output}.')
+                raise ValueError(f'Could not find death probability for {kind} hero in:\n{output}.')
 
             parts = match.group(0).split(',')
             probability = parts[1].strip()
@@ -191,8 +192,13 @@ def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT
     stdout, _ = map(lambda x: x.decode(), process.communicate())
     # Remove the temp file
     Path(temp_file.name).unlink()
-    # TODO: Implement error checking
-    return Battle.parse_simulator_output(stdout)
+    # Check for errors
+    errors = list(re.finditer(r'(?<=Error:\s).*', stdout))
+    if len(errors) > 0:
+        sim_errors = '\n'.join([f'* {error.group(0)}' for error in errors])
+        raise ValueError(f'Encountered {len(errors)} errors while parsing battle config.\n{sim_errors}')
+    else:
+        return Battle.parse_simulator_output(stdout)
 
 
 def battle_to_str(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> str:
