@@ -556,7 +556,7 @@ def _nathrezim_overseer_on_this_played(self: Minion, board: TavernGameBoard) -> 
     Note: the demon is chosen RANDOMLY since we do not have targetting implemented.
     """
     # Choose a random friendly Demon
-    minion = board.get_random_minion_on_board(race=MinionRace.DEMON, kind='friendly', ignore=[self])
+    minion = board.get_random_minion_on_board(race=MinionRace.DEMON, ignore=[self])
     if minion is None:
         return
 
@@ -713,7 +713,7 @@ def _metaltooth_leaper_on_this_played(self: Minion, board: TavernGameBoard) -> N
     Effect: Give your other Mechs +2 (or +4 if golden) Attack.
     """
     additional_attack = 4 if self.is_golden else 2
-    minions = board.get_minions_on_board(race=MinionRace.MECH, kind='friendly', ignore=[self])
+    minions = board.get_minions_on_board(race=MinionRace.MECH, ignore=[self])
     for minion in minions:
         minion.add_buff(Buff(additional_attack, 0, CardAbility.NONE))
 
@@ -1317,7 +1317,7 @@ def _southsea_strongarm_on_this_played(self: Minion, board: TavernGameBoard) -> 
     if minion is None:
         return
 
-    n = len(board.get_bought_minions_this_turn(kind='friendly', race=MinionRace.PIRATE))
+    n = len(board.get_bought_minions_this_turn(race=MinionRace.PIRATE))
     buff_amount = n * (2 if self.is_golden else 1)
     minion.add_buff(Buff(buff_amount, buff_amount, CardAbility.NONE))
 
@@ -1545,7 +1545,7 @@ def _majordomo_executus_on_end_turn(self: Minion, board: TavernGameBoard) -> Non
     if minion is None:
         return
     # Apply buff once, and then additionally for each elemental played this turn.
-    multiplier = len(board.get_minions_played_this_turn(race=MinionRace.ELEMENTAL, kind='friendly')) + 1
+    multiplier = len(board.get_minions_played_this_turn(race=MinionRace.ELEMENTAL)) + 1
     base_buff = 2 if self.is_golden else 1
     minion.add_buff(Buff(multiplier * base_buff, multiplier * base_buff, CardAbility.NONE))
 
@@ -1676,7 +1676,7 @@ def _goldgrubber_on_end_turn(self: Minion, board: TavernGameBoard) -> None:
     Effect: At the end of your turn, gain +2/+2 (or +4/+4 if golden)
     for each friendly Golden minion.
     """
-    multiplier = len(board.get_all_minions(is_golden=True, kind='friendly'))
+    multiplier = len(board.get_minions_on_board(is_golden=True))
     base_buff = 4 if self.is_golden else 2
     self.add_buff(Buff(multiplier * base_buff, multiplier * base_buff, CardAbility.NONE))
 
@@ -1753,7 +1753,7 @@ def _managerie_jug_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     Effect: Give 3 random friendly minions of different minion types +2/+2 (or +4/+4 if golden).
     """
     minions_by_race = {}
-    for minion in board.get_minions_on_board(kind='friendly', ignore=[self]):
+    for minion in board.get_minions_on_board(ignore=[self]):
         if minion.race not in minions_by_race:
             minions_by_race[minion.race] = []
         minions_by_race[minion.race].append(minion)
