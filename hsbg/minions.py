@@ -786,12 +786,13 @@ def _managerie_mug_on_this_played(self: Minion, board: 'TavernGameBoard') -> Non
     """Handle the battlecry effect for the Menagerie Mug effect.
     Effect: Give 3 random friendly minions of different minion types +1/+1 (or +2/+2 if golden).
     """
+    minions_by_race = {}
     for minion in board.get_minions_on_board(ignore=[self]):
         if minion.race not in minions_by_race:
             minions_by_race[minion.race] = []
         minions_by_race[minion.race].append(minion)
 
-    keys = random.sample(minions.keys(), k=3)
+    keys = random.sample(minions_by_race.keys(), k=min(3, len(minions_by_race)))
     for key in keys:
         minion = random.choice(minions_by_race[key])
         if self.is_golden:
@@ -1750,12 +1751,13 @@ def _managerie_jug_on_this_played(self: Minion, board: 'TavernGameBoard') -> Non
     """Handle the battlecry effect for the Menagerie Jug effect.
     Effect: Give 3 random friendly minions of different minion types +2/+2 (or +4/+4 if golden).
     """
+    minions_by_race = {}
     for minion in board.get_minions_on_board(kind='friendly', ignore=[self]):
         if minion.race not in minions_by_race:
             minions_by_race[minion.race] = []
         minions_by_race[minion.race].append(minion)
 
-    keys = random.sample(minions.keys(), k=3)
+    keys = random.sample(minions_by_race.keys(), k=min(3, len(minions_by_race)))
     for key in keys:
         minion = random.choice(minions_by_race[key])
         if self.is_golden:
