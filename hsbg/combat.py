@@ -46,8 +46,8 @@ class Battle:
         - lose_probability: The probability of losing this battle.
         - mean_score: The mean score across all simulations of the battle.
         - median_score: The median score across all simulations of the battle.
-        - mean_damage_taken: The mean damage taken across all simulations of the battle.
-        - mean_damage_dealt: The mean damage dealt across all simulations of the battle.
+        - mean_damage_taken: The mean damage taken (by the friendly hero) across all simulations of the battle.
+        - mean_damage_dealt: The mean damage dealt (to the enemy hero) across all simulations of the battle.
         - expected_hero_health: The expected health of the hero after this battle.
         - expected_enemy_hero_health: The expected health of the enemy hero after this battle.
         - death_probability: The probability of the hero dying after this battle.
@@ -131,9 +131,19 @@ class Battle:
                       expected_hero_health, expected_enemy_hero_health, 0, 0)
 
 
-def simulate_combat(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> Battle:
-    """Simulate a battle between the given friendly and enemy boards."""
+def simulate_combat(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard, n: int = 1000) \
+        -> Battle:
+    """Simulate a battle between the given friendly and enemy boards.
+    Return a Battle object containing match statistics averaged over all the runs.
+
+    Args:
+        friendly_board: The state of the friendly player's board.
+        enemy_board: The state of the enemy player's board.
+        n: The number of times to simulate the battle.
+    """
     battle_config = battle_to_str(friendly_board, enemy_board)
+    # Add run command
+    battle_config += f'\nrun {n}'
     return run_hsbg_simulator(battle_config)
 
 
@@ -146,6 +156,7 @@ def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT
         battle_config: A series of commands that define the friendly and enemy board states.
         bin_path: The path to the binary file of the C++ simulator.
     """
+    # Create temp file.
     with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False) as temp_file:
         temp_file.write(battle_config)
 
