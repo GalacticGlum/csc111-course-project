@@ -132,7 +132,6 @@ class Battle:
             probability = round(float(probability) / 100, len(probability) + 1)
             return probability
 
-
         # Get win, tie, and lose probabilities
         win_probability = _get_field('win', value_suffix='%') / 100
         tie_probability = _get_field('tie', value_suffix='%') / 100
