@@ -1,5 +1,6 @@
-"""Interface for the C++ combat phase simulator."""
+"""A simulator of the combat phase in Hearthstone Battlegrounds."""
 from __future__ import annotations
+import re
 import platform
 import tempfile
 import subprocess
@@ -36,35 +37,133 @@ CARD_ABILITY_TO_STR = {
 
 
 @dataclass
-class CombatPhaseResult:
+class Battle:
     """The result of the combat phase simulator.
 
     Instance Attributes:
-        - win_probability: The probability of the friendly player winning.
+        - win_probability: The probability of winning this battle.
         - tie_probability: The probability of a tie.
-        - lose_probability: The probability of the friendly player losing.
-        - mean_score: The mean score across
+        - lose_probability: The probability of losing this battle.
+        - mean_score: The mean score across all simulations of the battle.
+        - median_score: The median score across all simulations of the battle.
+        - mean_damage_taken: The mean damage taken across all simulations of the battle.
+        - mean_damage_dealt: The mean damage dealt across all simulations of the battle.
+        - expected_hero_health: The expected health of the hero after this battle.
+        - expected_enemy_hero_health: The expected health of the enemy hero after this battle.
+        - death_probability: The probability of the hero dying after this battle.
+        - enemy_death_probability: The probability of the enemy hero dying after this battle.
+
+    Representation Invariants:
+        - 0 <= self.win_probability <= 1
+        - 0 <= self.tie_probability <= 1
+        - 0 <= self.lose_probability <= 1
+        - self.win_probability + self.tie_probability + self.lose_probability == 1
+        - 0 <= self.death_probability <= 1
+        - 0 <= self.enemy_death_probability <= 1
+    """
+    win_probability: float
+    tie_probability: float
+    lose_probability: float
+    mean_score: float
+    median_score: float
+    mean_damage_taken: float
+    mean_damage_dealt: float
+    expected_hero_health: float
+    expected_enemy_hero_health: float
+    death_probability: float
+    enemy_death_probability: float
+
+    @staticmethod
+    def parse_simulator_output(output: str) -> Battle:
+        """Return the Battle representing a string-based representation of the battle result.
+        The output argument should match the output format of the C++ simulator.
+
+        >>> output = '''
+        ... --------------------------------
+        ... win: 76.9%, tie: 0.0%, lose: 23.1%
+        ... mean score: 11.875, median score: 16
+        ... percentiles: -12 -10 -3 16 16 16 16 20 20 20 20
+        ... mean damage taken: 1.764
+        ... your expected health afterwards: 29.236, 3.14% chance to die
+        ... mean damage dealt: 14.408
+        ... their expected health afterwards: 10.592, 5.2% chance to die
+        ... --------------------------------'''
+        >>> expected = Battle(0.769, 0, 0.231, 11.875, 16, 1.764, 14.408,\
+                              29.236, 10.592, 3.14, 5.2)
+        >>> expected == Battle.parse_simulator_output(output)
+        True
         """
+        def _get_field(name: str, value_suffix: str = '') -> float:
+            """Get the value of a field in the simulator output string.
+            Raise a ValueError if it could not be found.
+
+            Note: A field is substring of the form: "<name>: <float>"
+
+            Args:
+                name: The name of the field.
+                value_suffix: A suffix after the numerical value (e.g. '%' or '$')
+                              to include while matching.
+            """
+            # Matches for "<name>: <float><value_suffix>"
+            pattern = f'(?<={name}:\s)\d+.?\d*{value_suffix}'
+            match = re.search(pattern, output)
+            if match is None:
+                raise ValueError(f'Could not parse field with name \'{name}\' from: {output}')
+            return float(match.group(0).replace(value_suffix, '').strip())
+
+        # Get win, tie, and lose probabilities
+        win_probability = _get_field('win', value_suffix='%') / 100
+        tie_probability = _get_field('tie', value_suffix='%') / 100
+        lose_probability = _get_field('lose', value_suffix='%') / 100
+
+        # Get score stats
+        mean_score = _get_field('mean score')
+        median_score = _get_field('median score')
+
+        # Get damage stats
+        mean_damage_taken = _get_field('mean damage taken')
+        mean_damage_dealt = _get_field('mean damage dealt')
+        expected_hero_health = _get_field('your expected health afterwards')
+        expected_enemy_hero_health = _get_field('their expected health afterwards')
+
+        return Battle(win_probability, tie_probability, lose_probability,
+                      mean_score, median_score, mean_damage_taken, mean_damage_dealt,
+                      expected_hero_health, expected_enemy_hero_health, 0, 0)
 
 
-def run_hsbg_simulator(board_config: str, bin_path: Union[Path, str] = _DEFAULT_HSBG_SIM_PATH) \
-        -> None:
-    """Invoke the C++ Hearthstone Battlegrounds simulator on the given board configuration.
-    Note: this function creates a temporary file to store the board configuration.
+def simulate_combat(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> Battle:
+    """Simulate a battle between the given friendly and enemy boards."""
+    battle_config = battle_to_str(friendly_board, enemy_board)
+    return run_hsbg_simulator(battle_config)
+
+
+def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT_HSBG_SIM_PATH) \
+        -> Battle:
+    """Invoke the C++ Hearthstone Battlegrounds simulator on the given battle configuration.
+    Note: this function creates a temporary file to store the battle configuration.
 
     Args:
-        board_config: A series of commands that define the board state.
+        battle_config: A series of commands that define the friendly and enemy board states.
         bin_path: The path to the C++ simulator binary.
     """
     with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False) as temp_file:
-        temp_file.write(board_config)
+        temp_file.write(battle_config)
 
     command = f'{bin_path} {temp_file.name}'
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, _ = map(lambda x: x.decode(), process.communicate())
     # Remove the temp file
     Path(temp_file.name).unlink()
-    return stdout
+    # TODO: Implement error checking
+    return Battle.parse_simulator_output(stdout)
+
+
+def battle_to_str(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> str:
+    """Return the series of simulator commands that define the given battle."""
+    return 'Board\n{}\nVS\n{}'.format(
+        game_board_to_str(friendly_board),
+        game_board_to_str(enemy_board)
+    )
 
 
 def game_board_to_str(board: TavernGameBoard) -> str:
@@ -131,19 +230,6 @@ def game_board_to_str(board: TavernGameBoard) -> str:
         lines.append(line)
 
     return '\n'.join(lines)
-
-
-def battle_to_str(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> str:
-    """Return the series of simulator commands that define the given battle."""
-    return 'Board\n{}\nVS\n{}'.format(
-        game_board_to_str(friendly_board),
-        game_board_to_str(enemy_board)
-    )
-
-
-def simulate_combat(board: TavernGameBoard) -> None:
-    """Run the combat phase simulator on the given game board."""
-    raise NotImplementedError
 
 
 if __name__ == '__main__':
