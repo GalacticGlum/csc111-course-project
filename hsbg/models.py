@@ -204,42 +204,42 @@ class Minion:
             minion_copy._buffs = []
         return minion_copy
 
-    def on_this_bought(self, board: 'TavernGameBoard') -> None:
+    def on_this_bought(self, board: TavernGameBoard) -> None:
         """Handle when THIS minion is bought."""
         if self._on_this_bought is not None:
             self._on_this_bought(self, board)
 
-    def on_this_sold(self, board: 'TavernGameBoard') -> None:
+    def on_this_sold(self, board: TavernGameBoard) -> None:
         """Handle when THIS minion is sold."""
         if self._on_this_sold is not None:
             self._on_this_sold(self, board)
 
-    def on_this_played(self, board: 'TavernGameBoard') -> None:
+    def on_this_played(self, board: TavernGameBoard) -> None:
         """Handle when THIS minion is played from the hand."""
         if self._on_this_played is not None:
             self._on_this_played(self, board)
 
-    def on_any_played(self, board: 'TavernGameBoard', played_minion: Minion) -> None:
+    def on_any_played(self, board: TavernGameBoard, played_minion: Minion) -> None:
         """Handle when ANY minion is played from the hand."""
         if self._on_any_played is not None:
             self._on_any_played(self, board, played_minion)
 
-    def on_this_summoned(self, board: 'TavernGameBoard') -> None:
+    def on_this_summoned(self, board: TavernGameBoard) -> None:
         """Handle when THIS minion is summoned onto the board."""
         if self._on_this_summoned is not None:
             self._on_this_summoned(self, board)
 
-    def on_any_summoned(self, board: 'TavernGameBoard', summoned_minion: Minion) -> None:
+    def on_any_summoned(self, board: TavernGameBoard, summoned_minion: Minion) -> None:
         """Handle when ANY minion is summoned onto the board."""
         if self._on_any_summoned is not None:
             self._on_any_summoned(self, board, summoned_minion)
 
-    def on_new_turn(self, board: 'TavernGameBoard') -> None:
+    def on_new_turn(self, board: TavernGameBoard) -> None:
         """Handle the start of a turn."""
         if self._on_new_turn is not None:
             self._on_new_turn(self, board)
 
-    def on_end_turn(self, board: 'TavernGameBoard') -> None:
+    def on_end_turn(self, board: TavernGameBoard) -> None:
         """Handle the end of a turn."""
         if self._on_end_turn is not None:
             self._on_end_turn(self, board)

@@ -1,9 +1,11 @@
 """A simulator for Hearthstone Battlegrounds."""
+from __future__ import annotations
 import random
 from typing import List, Optional
 
-from hsbg.minions import Minion, MinionPool
 from utils import filter_minions
+from hsbg.minions import MinionPool
+
 
 # The maximum number of minions a player can have in their hand.
 MAX_HAND_SIZE = 10

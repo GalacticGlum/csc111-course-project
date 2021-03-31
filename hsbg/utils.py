@@ -1,7 +1,6 @@
 """Utility functions."""
+from __future__ import annotations
 from typing import Iterable, List
-
-from hsbg.models import Minion
 
 
 def filter_minions(minions: Iterable[Minion], clone: bool = False, **kwargs: dict) -> List[Minion]:
