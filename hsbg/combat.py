@@ -144,7 +144,7 @@ def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT
 
     Args:
         battle_config: A series of commands that define the friendly and enemy board states.
-        bin_path: The path to the C++ simulator binary.
+        bin_path: The path to the binary file of the C++ simulator.
     """
     with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False) as temp_file:
         temp_file.write(battle_config)
