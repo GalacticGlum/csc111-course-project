@@ -195,7 +195,7 @@ def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT
     # Check for errors
     errors = list(re.finditer(r'(?<=Error:\s).*', stdout))
     if len(errors) > 0:
-        sim_errors = '\n'.join([f'* {error.group(0)}' for error in errors])
+        sim_errors = '\n'.join([f'- {error.group(0)}' for error in errors])
         raise ValueError(f'Encountered {len(errors)} errors while parsing battle config.\n{sim_errors}')
     else:
         return Battle.parse_simulator_output(stdout)
