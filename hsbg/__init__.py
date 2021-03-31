@@ -3,7 +3,7 @@ from __future__ import annotations
 import random
 from typing import List, Optional
 
-from utils import filter_minions
+from hsbg.utils import filter_minions
 from hsbg.minions import MinionPool
 
 

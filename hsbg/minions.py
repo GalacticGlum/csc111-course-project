@@ -16,7 +16,7 @@ import random
 import logging
 from typing import List, Dict, Optional, Union
 
-from utils import filter_minions
+from hsbg.utils import filter_minions
 from hsbg.models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
 
 
