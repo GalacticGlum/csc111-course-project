@@ -3,6 +3,7 @@ from __future__ import annotations
 import platform
 import tempfile
 import subprocess
+from dataclasses import dataclass
 
 from typing import Union
 from pathlib import Path
@@ -32,6 +33,18 @@ CARD_ABILITY_TO_STR = {
     CardAbility.POISONOUS: 'poisonous',
     CardAbility.WINDFURY: 'windfury'
 }
+
+
+@dataclass
+class CombatPhaseResult:
+    """The result of the combat phase simulator.
+
+    Instance Attributes:
+        - win_probability: The probability of the friendly player winning.
+        - tie_probability: The probability of a tie.
+        - lose_probability: The probability of the friendly player losing.
+        - mean_score: The mean score across
+        """
 
 
 def run_hsbg_simulator(board_config: str, bin_path: Union[Path, str] = _DEFAULT_HSBG_SIM_PATH) \
@@ -67,6 +80,8 @@ def _make_board_minion_state(board: TavernGameBoard) -> str:
     >>> all(board.play_minion(i) for i in range(len(minions)))
     True
     >>> print(_make_board_minion_state(board))
+    level 1
+    health 40
     * 2/2 golden Alleycat
     * 2/2 golden Tabbycat
     * 2/2 Murloc Scout
@@ -75,6 +90,8 @@ def _make_board_minion_state(board: TavernGameBoard) -> str:
     >>> board.add_minion_to_hand(coldlight_seer) and board.play_minion(0)
     True
     >>> print(_make_board_minion_state(board))
+    level 1
+    health 40
     * 2/2 golden Alleycat
     * 2/2 golden Tabbycat
     * 2/6 Murloc Scout
@@ -82,14 +99,23 @@ def _make_board_minion_state(board: TavernGameBoard) -> str:
     * 4/6 golden Coldlight Seer
     >>> from hsbg.models import Buff, CardAbility
     >>> board.board[4].add_buff(Buff(1, 0, CardAbility.TAUNT | CardAbility.DIVINE_SHIELD))
+    >>> board.give_gold(10)
+    >>> board.upgrade_tavern()
+    True
     >>> print(_make_board_minion_state(board))
+    level 2
+    health 40
     * 2/2 golden Alleycat
     * 2/2 golden Tabbycat
     * 2/6 Murloc Scout
     * 2/7 Rockpool Hunter
     * 5/6 golden Coldlight Seer, taunt, divine shield
     """
-    lines = []
+    lines = [
+        f'level {board.tavern_tier}',
+        f'health {board.hero_health}',
+    ]
+
     for minion in board.board:
         if minion is None:
             continue
