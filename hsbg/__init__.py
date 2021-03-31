@@ -715,6 +715,8 @@ class TavernGameBoard:
         """Get a random minion on the board matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
 
+        If no minion could be found, then return None.
+
         Note: this is the same the get_random_minions_on_board function, but returns a
               single Minion object instead of a list of Minion objects.
 
@@ -723,7 +725,11 @@ class TavernGameBoard:
             ignore: A list of minions to ignore.
             **kwargs: Keyword arguments corresponding to minion attributes to match.
         """
-        return self.get_random_minions_on_board(n=1, clone=clone, ignore=ignore, **kwargs)[0]
+        matches = self.get_random_minions_on_board(n=1, clone=clone, ignore=ignore, **kwargs)
+        if len(matches) == 0:
+            return None
+        else:
+            return matches[0]
 
     @property
     def turn_number(self) -> int:
