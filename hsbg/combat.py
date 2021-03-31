@@ -89,12 +89,12 @@ class Battle:
         ... their expected health afterwards: 10.592, 5.2% chance to die
         ... --------------------------------'''
         >>> expected = Battle(0.769, 0, 0.231, 11.875, 16, 1.764, 14.408,\
-                              29.236, 10.592, 3.14, 5.2)
+                              29.236, 10.592, 0.0314, 0.052)
         >>> expected == Battle.parse_simulator_output(output)
         True
         """
         def _get_field(name: str, value_suffix: str = '') -> float:
-            """Get the value of a field in the simulator output string.
+            """Return the value of a field in the simulator output string.
             Raise a ValueError if it could not be found.
 
             Note: A field is substring of the form: "<name>: <float>"
@@ -108,8 +108,30 @@ class Battle:
             pattern = f'(?<={name}:\s)\d+.?\d*{value_suffix}'
             match = re.search(pattern, output)
             if match is None:
-                raise ValueError(f'Could not parse field with name \'{name}\' from: {output}')
+                raise ValueError(f'Could not parse field with name \'{name}\' in: {output}')
             return float(match.group(0).replace(value_suffix, '').strip())
+
+        def _get_death_probability(kind: str) -> float:
+            """Return the probability of death for the given hero.
+            Raise a ValueError if it could not be found.
+
+            Preconditions:
+                - kind in {'friendly', 'enemy'}
+            """
+            if kind == 'friendly':
+                pattern = r'(?<=your expected health afterwards: ).*(?=% chance to die)'
+            else:
+                pattern = r'(?<=their expected health afterwards: ).*(?=% chance to die)'
+
+            match = re.search(pattern, output)
+            if match is None:
+                raise ValueError(f'Could not find death probability for {kind} hero in {output}.')
+
+            parts = match.group(0).split(',')
+            probability = parts[1].strip()
+            probability = round(float(probability) / 100, len(probability) + 1)
+            return probability
+
 
         # Get win, tie, and lose probabilities
         win_probability = _get_field('win', value_suffix='%') / 100
@@ -126,9 +148,14 @@ class Battle:
         expected_hero_health = _get_field('your expected health afterwards')
         expected_enemy_hero_health = _get_field('their expected health afterwards')
 
+        # Get death probabilities
+        death_probability = _get_death_probability('friendly')
+        enemy_death_probability = _get_death_probability('enemy')
+
         return Battle(win_probability, tie_probability, lose_probability,
                       mean_score, median_score, mean_damage_taken, mean_damage_dealt,
-                      expected_hero_health, expected_enemy_hero_health, 0, 0)
+                      expected_hero_health, expected_enemy_hero_health,
+                      death_probability, enemy_death_probability)
 
 
 def simulate_combat(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard, n: int = 1000) \
