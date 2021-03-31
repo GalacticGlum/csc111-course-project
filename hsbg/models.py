@@ -113,8 +113,8 @@ class Minion:
     name: str
     card_class: CardClass
     race: MinionRace
-    health: int
     attack: int
+    health: int
     cost: int = 1
     rarity: CardRarity = CardRarity.COMMON
     tier: int = 1
@@ -138,8 +138,7 @@ class Minion:
     @property
     def current_health(self) -> int:
         """Return the current health of this minion (including buffs)."""
-        total_health = self.health + sum(buff.health for buff in self._buffs)
-        return total_health
+        return self.health + sum(buff.health for buff in self._buffs)
 
     @property
     def current_attack(self) -> int:
