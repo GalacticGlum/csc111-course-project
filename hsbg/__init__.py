@@ -2,6 +2,7 @@
 from __future__ import annotations
 import random
 from typing import List, Optional
+from contextlib import contextmanager
 
 from hsbg.utils import filter_minions
 from hsbg.minions import MinionPool
@@ -794,9 +795,14 @@ class BattlegroundsGame:
     #   - _num_players: The number of players at the start of the game.
     #   - _boards: The recruitment game board for each player.
     #   - _pool: The pool of minions shared across all players.
+    #   - _active_player: The player currently completing their turn.
+    #   - _turn_completion: A list containing whether each player has completed their turn for this
+    #                       round. The i-th element gives the turn completion for player i.
     _num_players: int
     _boards: List[TavernGameBoard]
     _pool: MinionPool
+    _active_player: Optional[int] = None
+    _turn_completion: List[bool]
 
     def __init__(self, num_players: int = 8) -> None:
         """Initialise the BattlegroundsGame with the given number of players.
@@ -805,15 +811,84 @@ class BattlegroundsGame:
         Args:
             num_players: The number of players at the start of the game.
                          This MUST be an even positive integer.
-        """
-        # The number of players must be even!
-        if num_players <= 0 or num_players % 2 == 1:
-            raise ValueError(f'{num_players} is an invalid number of players!')
 
+        Preconditions:
+            - num_players > 0
+            - num_players % 2 == 0
+        """
         self._num_players = num_players
         # Initialise an empty tavern for each player.
         self._pool = MinionPool()
         self._boards = [TavernGameBoard(pool=self._pool) for _ in range(num_players)]
+        # Turn state
+        self._active_player = None
+        self._turn_completion = [False] * num_players
+
+    @contextmanager
+    def turn_for_player(self, player: int) -> TavernGameBoard:
+        """Start and end a turn for the given player. Return the TavernGameBoard of the player.
+        Raise a ValueError if the turn could not be started.
+
+        Preconditions:
+            - 0 <= player < self.num_players
+        """
+        try:
+            self.start_turn_for_player(player)
+            yield self.active_board
+        finally:
+            self.end_turn()
+
+    def start_turn_for_player(self, player: int) -> None:
+        """Start the turn for the given player.
+        Raise a ValueError if the turn could not be started.
+
+        Preconditions:
+            - 0 <= player < self.num_players
+        """
+        if self.is_turn_in_progress:
+            raise ValueError('A turn is currently in progress!')
+        if self.has_completed_turn(player):
+            raise ValueError(f'Player {player} has already completed their turn for this round.')
+
+        self._active_player = player
+        self.active_board.next_turn()
+
+    def end_turn(self) -> None:
+        """End the turn for the currently active player.
+        Raise a ValueError if no player's turn is active.
+        """
+        if not self.is_turn_in_progress:
+            raise ValueError('No player is currently in a turn!')
+        self._turn_completion[self._active_player] = True
+        self._active_player = None
+
+    def get_board(self, player: int) -> TavernGameBoard:
+        """Return the game board for the given player.
+
+        Preconditions:
+            - 0 <= player < self.num_players
+        """
+        return self._boards[player]
+
+    @property
+    def active_board(self) -> Optional[TavernGameBoard]:
+        """Return the game board of the player currently completing their turn,
+        or None if no player is completing their turn.
+        """
+        return None if self._active_player is None else self.get_board(self._active_player)
+
+    @property
+    def is_turn_in_progress(self) -> bool:
+        """Return whether a turn is currently in progress."""
+        return self._active_player is not None
+
+    def has_completed_turn(self, player: int) -> bool:
+        """Return whether the given player has completed their turn.
+
+        Preconditions:
+            - 0 <= player < self.num_players
+        """
+        return self._turn_completion[player]
 
 
 if __name__ == '__main__':
