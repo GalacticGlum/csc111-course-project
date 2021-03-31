@@ -84,19 +84,19 @@ class MinionPool:
             for _ in range(copies):
                 self._pool.append(minion)
 
-    def find_all(self, **kwargs: dict) -> List[Minion]:
+    def find_all(self, limit: Optional[int] = None, **kwargs: dict) -> List[Minion]:
         """Find all the minions matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
 
         Note: the returned list contains COPIES of the minions in the pool.
         """
-        return filter_minions(self._all_minions.values(), clone=True, **kwargs)
+        return filter_minions(self._all_minions.values(), clone=True, limit=limit, **kwargs)
 
     def find(self, **kwargs: dict) -> Optional[Minion]:
         """Find the first minion matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
         """
-        minions = self.find_all(**kwargs)
+        minions = self.find_all(limit=1, **kwargs)
         return None if len(minions) == 0 else minions[0]
 
     def get_random(self, n: int = 1, max_tier: Optional[int] = None, remove: bool = True,
