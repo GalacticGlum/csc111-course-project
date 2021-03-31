@@ -67,8 +67,8 @@ def run_hsbg_simulator(board_config: str, bin_path: Union[Path, str] = _DEFAULT_
     return stdout
 
 
-def _make_board_minion_state(board: TavernGameBoard) -> str:
-    """Return the minions on given the board in a string format.
+def game_board_to_str(board: TavernGameBoard) -> str:
+    """Return the given TavernGameBoard in a string-based format.
 
     >>> from hsbg import TavernGameBoard
     >>> board = TavernGameBoard()
@@ -79,7 +79,7 @@ def _make_board_minion_state(board: TavernGameBoard) -> str:
     True
     >>> all(board.play_minion(i) for i in range(len(minions)))
     True
-    >>> print(_make_board_minion_state(board))
+    >>> print(game_board_to_str(board))
     level 1
     health 40
     * 2/2 golden Alleycat
@@ -89,7 +89,7 @@ def _make_board_minion_state(board: TavernGameBoard) -> str:
     >>> coldlight_seer = board.pool.find(name='Coldlight Seer', is_golden=True)
     >>> board.add_minion_to_hand(coldlight_seer) and board.play_minion(0)
     True
-    >>> print(_make_board_minion_state(board))
+    >>> print(game_board_to_str(board))
     level 1
     health 40
     * 2/2 golden Alleycat
@@ -102,7 +102,7 @@ def _make_board_minion_state(board: TavernGameBoard) -> str:
     >>> board.give_gold(10)
     >>> board.upgrade_tavern()
     True
-    >>> print(_make_board_minion_state(board))
+    >>> print(game_board_to_str(board))
     level 2
     health 40
     * 2/2 golden Alleycat
@@ -133,11 +133,11 @@ def _make_board_minion_state(board: TavernGameBoard) -> str:
     return '\n'.join(lines)
 
 
-def _make_config_from_board(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> str:
-    """Return the series of simulator commands that define the given board state."""
+def battle_to_str(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> str:
+    """Return the series of simulator commands that define the given battle."""
     return 'Board\n{}\nVS\n{}'.format(
-        _make_board_minion_state(friendly_board),
-        _make_board_minion_state(enemy_board)
+        game_board_to_str(friendly_board),
+        game_board_to_str(enemy_board)
     )
 
 
