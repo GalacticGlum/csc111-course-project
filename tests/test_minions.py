@@ -310,3 +310,47 @@ def test_golden_deck_swabbie_battlecry() -> None:
     board.give_gold(7)
     board.upgrade_tavern()
     assert board.tavern_tier == 3 and board.gold == 0
+
+
+def test_pack_leader_1() -> None:
+    """Test the effect for the Pack Leader minion when a Beast is summoned."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PACK_LEADER)
+    board.play_minion(0)
+
+    board.summon_minion(minions.TABBYCAT)
+    tabbycat = board.board[1]
+    assert tabbycat.current_attack == 3 and tabbycat.current_health == 1
+
+
+def test_pack_leader_2() -> None:
+    """Test the effect for the Pack Leader minion when a non-Beast is summoned."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PACK_LEADER)
+    board.play_minion(0)
+
+    board.summon_minion(minions.IMP)
+    tabbycat = board.board[1]
+    assert tabbycat.current_attack == 1 and tabbycat.current_health == 1
+
+
+def test_golden_pack_leader_1() -> None:
+    """Test the effect for the golden Pack Leader minion when a Beast is summoned."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PACK_LEADER_GOLDEN)
+    board.play_minion(0)
+
+    board.summon_minion(minions.TABBYCAT)
+    tabbycat = board.board[1]
+    assert tabbycat.current_attack == 5 and tabbycat.current_health == 1
+
+
+def test_golden_pack_leader_2() -> None:
+    """Test the effect for the golden Pack Leader minion when a non-Beast is summoned."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PACK_LEADER_GOLDEN)
+    board.play_minion(0)
+
+    board.summon_minion(minions.IMP)
+    tabbycat = board.board[1]
+    assert tabbycat.current_attack == 1 and tabbycat.current_health == 1
