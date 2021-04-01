@@ -70,6 +70,8 @@ class TavernGameBoard:
     #   - _num_recruits: The number of recruits offered to the player currently.
     #   - _recruits: A list of current recruits.
     #   - _is_frozen: Whether the recruit selection is currently frozen.
+    #   - _max_freeze_times: The maximum number of times freeze can be toggled in a turn.
+    #   - _times_frozen: The number of times freeze has been toggled this turn.
     #   - _refresh_cost: The current cost of refreshing the recruitment pool.
     #   - _refresh_cost_clock: Clock to manage when to change the refresh cost.
     #   - _tavern_upgrade_discount: A discount applied to the next tavern upgrade.
@@ -89,6 +91,8 @@ class TavernGameBoard:
     _num_recruits: int
     _recruits: List[Optional[Minion]]
     _is_frozen: bool
+    _max_freeze_times: Optional[int]
+    _times_frozen: int
 
     _refresh_cost: int
     _refresh_cost_clock: Optional[TurnClock]
@@ -101,14 +105,15 @@ class TavernGameBoard:
 
     _battle_history: List[Battle]
 
-    def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40, tavern_tier: int = 1) \
-            -> None:
+    def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40,
+                 tavern_tier: int = 1, max_freeze_times: Optional[int] = None) -> None:
         """Initialise the TavernGameBoard.
 
         Args:
             pool: The pool of minions to select recruits from.
             hero_health: The starting health of the hero.
             tavern_tier: The starting tier of the tavern.
+            max_freeze_times: The maximum number of times freeze can be toggled in a turn.
         """
         self._turn_number = 0
         self._hero_health = hero_health
@@ -121,7 +126,10 @@ class TavernGameBoard:
 
         self._num_recruits = INITIAL_NUM_RECRUITS
         self._recruits = [None] * MAX_TAVERN_RECRUIT_SIZE
+
         self._is_frozen = False
+        self._max_freeze_times = max_freeze_times
+        self._times_frozen = 0
 
         self._reset_refresh_cost()
         self._reset_tavern_upgrade_discount()
@@ -157,6 +165,7 @@ class TavernGameBoard:
         self._refresh_recruits()
         if self._is_frozen:
             self._is_frozen = False
+        self._times_frozen = 0
 
         # Call the new turn events
         self._handle_on_new_turn()
@@ -207,6 +216,7 @@ class TavernGameBoard:
         True
         >>> board.next_turn()
         >>> board.freeze()
+        True
         >>> board.refresh_recruits()
         False
         """
@@ -325,8 +335,11 @@ class TavernGameBoard:
         self._tavern_upgrade_discount = 0
         self._tavern_upgrade_discount_clock = None
 
-    def freeze(self) -> None:
-        """Freeze the selection of recruit minions.
+    def freeze(self) -> bool:
+        """Freeze the selection of recruit minions. Do nothing if the number of times frozen
+        exceeds the limit, or if the recruits are already frozen.
+
+        Return whether the recruits could be frozen.
 
         >>> board = TavernGameBoard()
         >>> board.next_turn()
@@ -335,25 +348,51 @@ class TavernGameBoard:
         >>> previous_recruits == board._recruits
         False
         >>> board.freeze()
+        True
         >>> board.is_frozen
         True
         >>> previous_recruits = list(board._recruits)
         >>> board.next_turn()
         >>> previous_recruits == board._recruits
         True
-        """
-        self._is_frozen = True
-
-    def unfreeze(self) -> None:
-        """Unfreeze the selection of recruit minions.
-
-        >>> board = TavernGameBoard()
+        >>> board = TavernGameBoard(max_freeze_times=1)
         >>> board.freeze()
+        True
+        >>> board.freeze()
+        False
         >>> board.unfreeze()
+        True
+        >>> board.freeze()
+        False
+        >>> board.next_turn()
+        >>> board.freeze()
+        True
+        """
+        past_limit = self._max_freeze_times is not None and self._times_frozen >= self._max_freeze_times
+        if self._is_frozen or past_limit:
+            return False
+
+        self._times_frozen += 1
+        self._is_frozen = True
+        return True
+
+    def unfreeze(self) -> bool:
+        """Unfreeze the selection of recruit minions. Do nothing if the recruits are not frozen.
+        Return whther the recruits could be unfrozen.
+
+        >>> board = TavernGameBoard()
+        >>> board.freeze()
+        True
+        >>> board.unfreeze()
+        True
         >>> board.is_frozen
         False
         """
+        if not self._is_frozen:
+            return False
+
         self._is_frozen = False
+        return True
 
     def attack_hero(self, damage: int) -> None:
         """Attack the tavern hero with the given amount of damage.
