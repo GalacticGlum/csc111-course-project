@@ -1,7 +1,7 @@
 """Test the minion implementations."""
 import random
 
-from hsbg.models import CardAbility
+from hsbg.models import CardAbility, Buff
 from hsbg import TavernGameBoard, minions
 
 
@@ -980,3 +980,77 @@ def test_golden_soul_devourer_battlecry_4() -> None:
     minion = board.board[1]
     assert board.board[0] is not None and minion.current_attack == 6 and minion.current_health == 6
     assert board.gold == 6
+
+
+def test_hangry_dragon_effect_1() -> None:
+    """Test the effect for the Hangry Dragon minion."""
+    friendly_board = TavernGameBoard()
+    friendly_board.add_minion_to_hand(minions.HANGRY_DRAGON)
+    friendly_board.play_minion(0)
+
+    enemy_board = TavernGameBoard()
+    enemy_board.add_minion_to_hand(minions.ALLEYCAT)
+    enemy_board.play_minion(0)
+
+    friendly_board.battle(enemy_board)
+    friendly_board.next_turn()
+
+    minion = friendly_board.board[0]
+    assert minion.current_attack == 6 and minion.current_health == 6
+
+
+def test_hangry_dragon_effect_2() -> None:
+    """Test the effect for the Hangry Dragon minion."""
+    friendly_board = TavernGameBoard()
+    friendly_board.add_minion_to_hand(minions.HANGRY_DRAGON)
+    friendly_board.play_minion(0)
+
+    enemy_board = TavernGameBoard()
+
+    big_boi_murloc_scout = minions.MURLOC_SCOUT.clone()
+    big_boi_murloc_scout.add_buff(Buff(10, 10, CardAbility.NONE))
+    enemy_board.add_minion_to_hand(big_boi_murloc_scout, clone=False)
+    enemy_board.play_minion(0)
+
+    friendly_board.battle(enemy_board)
+    friendly_board.next_turn()
+
+    minion = friendly_board.board[0]
+    assert minion.current_attack == 4 and minion.current_health == 4
+
+
+def test_golden_hangry_dragon_effect_1() -> None:
+    """Test the effect for the golden Hangry Dragon minion."""
+    friendly_board = TavernGameBoard()
+    friendly_board.add_minion_to_hand(minions.HANGRY_DRAGON_GOLDEN)
+    friendly_board.play_minion(0)
+
+    enemy_board = TavernGameBoard()
+    enemy_board.add_minion_to_hand(minions.ALLEYCAT)
+    enemy_board.play_minion(0)
+
+    friendly_board.battle(enemy_board)
+    friendly_board.next_turn()
+
+    minion = friendly_board.board[0]
+    assert minion.current_attack == 12 and minion.current_health == 12
+
+
+def test_golden_hangry_dragon_effect_2() -> None:
+    """Test the effect for the golden Hangry Dragon minion."""
+    friendly_board = TavernGameBoard()
+    friendly_board.add_minion_to_hand(minions.HANGRY_DRAGON_GOLDEN)
+    friendly_board.play_minion(0)
+
+    enemy_board = TavernGameBoard()
+
+    big_boi_murloc_scout = minions.MURLOC_SCOUT.clone()
+    big_boi_murloc_scout.add_buff(Buff(10, 10, CardAbility.NONE))
+    enemy_board.add_minion_to_hand(big_boi_murloc_scout, clone=False)
+    enemy_board.play_minion(0)
+
+    friendly_board.battle(enemy_board)
+    friendly_board.next_turn()
+
+    minion = friendly_board.board[0]
+    assert minion.current_attack == 8 and minion.current_health == 8
