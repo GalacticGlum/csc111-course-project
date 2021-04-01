@@ -685,6 +685,41 @@ class TavernGameBoard:
 
         return True
 
+    def remove_minion_from_board(self, index: int) -> Optional[Minion]:
+        """Remove the minion on the board at the given index. Do nothing if there is no minion at
+        the given index, or if the index is out of range.
+
+        Return the minion that was removed, or None if the removal was not successful.
+
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Murloc Scout')
+        >>> minion_b = board.pool.find(name='Tabbycat')
+        >>> board.summon_minion(minion_a)
+        True
+        >>> board.summon_minion(minion_b)
+        True
+        >>> board.remove_minion_from_board(0) == minion_a
+        True
+        >>> board.board[0] == None
+        True
+        >>> board.remove_minion_from_board(1) == minion_b
+        True
+        >>> board.board[1] == None
+        True
+        >>> board.remove_minion_from_board(2) == None  # Empty position
+        True
+        >>> board.remove_minion_from_board(10) == None  # Out of range
+        True
+        """
+        if index < 0 or index >= len(self._board) or self._board[index] is None:
+            # The index is out of range or refers to a non-empty position.
+            # Use the first non-empty position instead.
+            return None
+
+        minion = self._board[index]
+        self._board[index] = None
+        return minion
+
     def _handle_on_any_played(self, played_minion: Minion) -> None:
         """Call the _on_any_played event on minions in the hand and on the board."""
         minions = self._hand + self._board
@@ -779,6 +814,34 @@ class TavernGameBoard:
             return None
         else:
             return matches[0]
+
+    def get_index_of_minion_on_board(self, minion: Minion) -> Optional[int]:
+        """Return the board index of the given minion. If there are duplicate minions,
+        this returns the index of the leftmost duplicate.
+
+        Return None if the minion could not be found.
+
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Murloc Scout')
+        >>> minion_b = board.pool.find(name='Tabbycat')
+        >>> board.summon_minion(minion_a)
+        True
+        >>> board.summon_minion(minion_b)
+        True
+        >>> board.summon_minion(minion_a)
+        True
+        >>> board.get_index_of_minion_on_board(minion_a)
+        0
+        >>> board.get_index_of_minion_on_board(minion_b)
+        1
+        >>> minion_c = board.pool.find(name='Alleycat')
+        >>> board.get_index_of_minion_on_board(minion_c) == None
+        True
+        """
+        try:
+            return self.board.index(minion)
+        except ValueError:
+            return None
 
     def battle(self, enemy_board: TavernGameBoard) -> Battle:
         """Battle with the given enemy board. Return the battle statistics."""
