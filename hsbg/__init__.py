@@ -1,6 +1,8 @@
 """A simulator for Hearthstone Battlegrounds."""
 from __future__ import annotations
 import random
+from enum import IntEnum
+from dataclasses import dataclass
 from contextlib import contextmanager
 from typing import List, Optional, Dict
 
@@ -50,56 +52,6 @@ MAX_TAVERN_TIER = 6
 # Minion buy and sell price
 TAVERN_MINION_BUY_PRICE = 3
 TAVERN_MINION_SELL_PRICE = 1
-
-
-class TurnClock:
-    """Tracks the passage of time in terms of turns.
-
-    Instance Attributes:
-        duration: The number of turns until the clock is complete.
-
-    >>> clock = TurnClock(2)
-    >>> clock.step()  # Turn 1
-    False
-    >>> clock.step()  # Turn 2
-    True
-    """
-    # Private Instance Attributes:
-    #   - _remaining: The number of turns remaining.
-    #   - _on_complete: A function called when the clock is complete.
-
-    def __init__(self, duration: int, on_complete: Optional[callable] = None) -> None:
-        """Initialise the TurnClock with a duration.
-
-        Args:
-            duration: The number of turns until the clock is complete.
-            on_complete: A function to call when the clock is complete.
-                         This is called on the turn that the clock is complete.
-        """
-        self.duration = duration
-        self._on_complete = on_complete
-        self.reset()
-
-    def step(self, n: int = 1) -> bool:
-        """Step the clock by the given number of turns. Return whether the clock is complete."""
-        if self.done:
-            return True
-
-        self._remaining -= n
-        done = self.done
-        if done and self._on_complete is not None:
-            self._on_complete()
-
-        return done
-
-    def reset(self) -> None:
-        """Reset the clock."""
-        self._remaining = self.duration
-
-    @property
-    def done(self) -> bool:
-        """Return whether the clock is complete."""
-        return self._remaining <= 0
 
 
 class TavernGameBoard:
@@ -923,6 +875,56 @@ class TavernGameBoard:
         return self._pool
 
 
+class TurnClock:
+    """Tracks the passage of time in terms of turns.
+
+    Instance Attributes:
+        duration: The number of turns until the clock is complete.
+
+    >>> clock = TurnClock(2)
+    >>> clock.step()  # Turn 1
+    False
+    >>> clock.step()  # Turn 2
+    True
+    """
+    # Private Instance Attributes:
+    #   - _remaining: The number of turns remaining.
+    #   - _on_complete: A function called when the clock is complete.
+
+    def __init__(self, duration: int, on_complete: Optional[callable] = None) -> None:
+        """Initialise the TurnClock with a duration.
+
+        Args:
+            duration: The number of turns until the clock is complete.
+            on_complete: A function to call when the clock is complete.
+                         This is called on the turn that the clock is complete.
+        """
+        self.duration = duration
+        self._on_complete = on_complete
+        self.reset()
+
+    def step(self, n: int = 1) -> bool:
+        """Step the clock by the given number of turns. Return whether the clock is complete."""
+        if self.done:
+            return True
+
+        self._remaining -= n
+        done = self.done
+        if done and self._on_complete is not None:
+            self._on_complete()
+
+        return done
+
+    def reset(self) -> None:
+        """Reset the clock."""
+        self._remaining = self.duration
+
+    @property
+    def done(self) -> bool:
+        """Return whether the clock is complete."""
+        return self._remaining <= 0
+
+
 class BattlegroundsGame:
     """A class representing the state of a Hearthstone Battlegrounds game."""
     # Private Instance Attributes
@@ -1066,6 +1068,74 @@ class BattlegroundsGame:
     def round_number(self) -> int:
         """Return the current round."""
         return self._round_number
+
+
+@dataclass
+class Move:
+    """A class representing a move in Hearthstone Battlegrounds.
+
+    Instance Attributes:
+        - action: The type of this move.
+        - index: An optional index for specifying a minion to apply the action on.
+    """
+    action: MoveType
+    index: Optional[int] = None
+
+    @property
+    def move_id(self) -> int:
+        """Return the unique integer id of this move."""
+        return int(self.action) + (0 or self.index)
+
+    @staticmethod
+    def from_id(move_id: int) -> Move:
+        """Return the Move represented by the given id.
+
+        Preconditions:
+            - MoveType.UPGRADE <= move_id <= MoveType.END_TURN
+        """
+        if move_id == MoveType.UPGRADE:
+            return Move(MoveType.UPGRADE)
+        elif move_id == MoveType.REFRESH:
+            return Move(MoveType.REFRESH)
+        elif move_id == MoveType.FREEZE:
+            return Move(MoveType.FREEZE)
+        elif MoveType.BUY_MINION <= move_id < MoveType.SELL_MINION:
+            return Move(MoveType.BUY_MINION, move_id - MoveType.BUY_MINION)
+        elif MoveType.SELL_MINION <= move_id < MoveType.PLAY_MINION:
+            return Move(MoveType.SELL_MINION, move_id - MoveType.SELL_MINION)
+        elif MoveType.PLAY_MINION <= move_id < MoveType.END_TURN:
+            return Move(MoveType.PLAY_MINION, move_id - MoveType.PLAY_MINION)
+        elif move_id == MoveType.END_TURN:
+            return Move(MoveType.END_TURN)
+        else:
+            raise ValueError(f'{move_id} is not a valid move id!')
+
+
+class MoveType(IntEnum):
+    """A class representing the different types of moves in Hearthstone Battlegrounds.
+
+    Instance Attributes:
+        - UPGRADE: Upgrades the tavern.
+        - REFRESH: Refresh the minions available for purchase.
+        - FREEZE: Freeze the minions available for purchase.
+        - BUY: Buy a minion from the tavern. This value corresponds to the action of buying
+               the minion at index 0 of the available pool. The action for buying the minion at
+               index i from the pool is simply offset (by i) from this action.
+        - SELL: Sell a minion from the tavern. This value corresponds to the action of selling
+                the minion at index 0 on the board. The action for buying the minion at index i
+                on the board is simply offset (by i) from this action.
+        - PLAY: Play a minion from the hand. This value corresponds to the action of playing
+                the minion at index 0 in the hand. The action for playing the minion at index i
+                in the hand is simply offset (by i) from this action.
+        - END_TURN: End the current turn.
+    """
+    UPGRADE = 0
+    REFRESH = 1
+    FREEZE = 2
+    BUY_MINION = 3
+    SELL_MINION = BUY_MINION + MAX_TAVERN_RECRUIT_SIZE
+    PLAY_MINION = SELL_MINION + MAX_TAVERN_BOARD_SIZE
+    END_TURN = PLAY_MINION + MAX_HAND_SIZE
 
 
 if __name__ == '__main__':
