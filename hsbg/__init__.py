@@ -491,7 +491,7 @@ class TavernGameBoard:
         True
         >>> board.hand[0] == minion
         True
-        >>> board.recruits[0] == None
+        >>> board.recruits[0] is None
         True
         >>> board.gold == 0
         True
@@ -532,7 +532,7 @@ class TavernGameBoard:
 
         >>> board = TavernGameBoard()
         >>> minion = board.pool.find(name='Murloc Tidehunter')
-        >>> all(x == None for x in board.hand)  # Empty hand
+        >>> all(x is None for x in board.hand)  # Empty hand
         True
         >>> board.add_minion_to_hand(minion)
         True
@@ -581,7 +581,7 @@ class TavernGameBoard:
         True
         >>> board.gold == 1
         True
-        >>> board.board[0] == None
+        >>> board.board[0] is None
         True
         >>> board.sell_minion(1)  # Empty position
         False
@@ -700,15 +700,15 @@ class TavernGameBoard:
         True
         >>> board.remove_minion_from_board(0) == minion_a
         True
-        >>> board.board[0] == None
+        >>> board.board[0] is None
         True
         >>> board.remove_minion_from_board(1) == minion_b
         True
-        >>> board.board[1] == None
+        >>> board.board[1] is None
         True
-        >>> board.remove_minion_from_board(2) == None  # Empty position
+        >>> board.remove_minion_from_board(2) is None  # Empty position
         True
-        >>> board.remove_minion_from_board(10) == None  # Out of range
+        >>> board.remove_minion_from_board(10) is None  # Out of range
         True
         """
         if index < 0 or index >= len(self._board) or self._board[index] is None:
@@ -835,7 +835,7 @@ class TavernGameBoard:
         >>> board.get_index_of_minion_on_board(minion_b)
         1
         >>> minion_c = board.pool.find(name='Alleycat')
-        >>> board.get_index_of_minion_on_board(minion_c) == None
+        >>> board.get_index_of_minion_on_board(minion_c) is None
         True
         """
         try:
