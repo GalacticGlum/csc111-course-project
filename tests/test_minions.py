@@ -575,3 +575,51 @@ def test_golden_molten_rock_effect_3() -> None:
     molten_rock = board.board[0]
     assert molten_rock.current_attack == 4 and molten_rock.current_health == 8
 
+
+def test_party_elemental_effect_1() -> None:
+    """Test hte effect for the Party Elemental minion when an Elemental is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    party_elemental = board.board[0]
+    assert party_elemental.current_attack == 4 and party_elemental.current_health == 3
+
+
+def test_party_elemental_effect_2() -> None:
+    """Test hte effect for the Party Elemental minion when a non-Elemental is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    party_elemental = board.board[0]
+    assert party_elemental.current_attack == 3 and party_elemental.current_health == 2
+
+
+def test_golden_party_elemental_effect_1() -> None:
+    """Test hte effect for the golden Party Elemental minion when an Elemental is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL_GOLDEN)
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    party_elemental = board.board[0]
+    assert party_elemental.current_attack == 8 and party_elemental.current_health == 6
+
+
+def test_golden_party_elemental_effect_2() -> None:
+    """Test hte effect for the golden Party Elemental minion when a non-Elemental is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL_GOLDEN)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    party_elemental = board.board[0]
+    assert party_elemental.current_attack == 6 and party_elemental.current_health == 4
+
