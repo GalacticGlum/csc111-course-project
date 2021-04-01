@@ -227,12 +227,12 @@ def _wrath_weaver_on_any_played(self: Minion, board: TavernGameBoard, played_min
     if MinionRace.DEMON not in played_minion.race:
         return
     if self.is_golden:
-        buff = Buff(2, 2, CardAbility.NONE)
-    else:
         buff = Buff(4, 4, CardAbility.NONE)
+    else:
+        buff = Buff(2, 2, CardAbility.NONE)
 
-    board.attack_hero(1)
     self.add_buff(buff)
+    board.attack_hero(1)
 
 WRATH_WEAVER = Minion(
     'Wrath Weaver', CardClass.NEUTRAL, MinionRace.NONE, 1, 3,
