@@ -381,6 +381,19 @@ def test_rabid_saurolisk_effect_2() -> None:
     assert rabid_saurolisk.current_attack == 3 and rabid_saurolisk.current_health == 2
 
 
+def test_rabid_saurolisk_effect_2() -> None:
+    """Test the effect for the Rabid Saurolisk minion when a minion without Deathrattle is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.RABID_SAUROLISK)
+    board.play_minion(0)
+
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+
+    rabid_saurolisk = board.board[0]
+    assert rabid_saurolisk.current_attack == 3 and rabid_saurolisk.current_health == 2
+
+
 def test_golden_rabid_saurolisk_effect_1() -> None:
     """Test the effect for the golden Rabid Saurolisk minion when a minion with Deathrattle is played."""
     board = TavernGameBoard()
@@ -401,6 +414,19 @@ def test_golden_rabid_saurolisk_effect_2() -> None:
     board.play_minion(0)
 
     board.summon_minion(minions.KINDLY_GRANDMOTHER)
+
+    rabid_saurolisk = board.board[0]
+    assert rabid_saurolisk.current_attack == 6 and rabid_saurolisk.current_health == 4
+
+
+def test_golden_rabid_saurolisk_effect_3() -> None:
+    """Test the effect for the Rabid Saurolisk minion when a minion without Deathrattle is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.RABID_SAUROLISK_GOLDEN)
+    board.play_minion(0)
+
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
 
     rabid_saurolisk = board.board[0]
     assert rabid_saurolisk.current_attack == 6 and rabid_saurolisk.current_health == 4
@@ -476,3 +502,12 @@ def test_golden_steward_of_time_effect() -> None:
     assert minion_a.current_attack == 3 and minion_a.current_health == 3
     assert minion_b.current_attack == 4 and minion_b.current_health == 5
     assert minion_c.current_attack == 3 and minion_c.current_health == 4
+
+
+# def test_molten_rock_effect() -> None:
+#     """Test the effect for the Molten Rock minion."""
+#     board = TavernGameBoard()
+#     board.add_minion_to_hand(minions.MOLTEN_ROCK)
+#     board.play_minion(0)
+
+#     board.add_minion_to_hand(minions.)
