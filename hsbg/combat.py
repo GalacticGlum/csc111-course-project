@@ -106,7 +106,7 @@ class Battle:
                               to include while matching.
             """
             # Matches for "<name>: <float><value_suffix>"
-            pattern = f'(?<={name}:\s)-?\d+.?\d*{value_suffix}'
+            pattern = r'(?<={}:\s)-?\d+.?\d*{}'.format(name, value_suffix)
             match = re.search(pattern, output)
             if match is None:
                 raise ValueError(f'Could not parse field with name \'{name}\' in:\n{output}')
