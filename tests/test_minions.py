@@ -241,10 +241,39 @@ def test_murloc_tidehunter_battlecry() -> None:
     assert board.get_minions_on_board() == [minions.MURLOC_TIDEHUNTER, minions.MURLOC_SCOUT]
 
 
-def test_murloc_tidehunter_battlecry() -> None:
-    """Test the battlecry effect for the Murloc Tidehunter minion."""
+def test_golden_murloc_tidehunter_battlecry() -> None:
+    """Test the battlecry effect for the golden Murloc Tidehunter minion."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_TIDEHUNTER_GOLDEN)
     board.play_minion(0)
     expected = [minions.MURLOC_TIDEHUNTER_GOLDEN, minions.MURLOC_SCOUT_GOLDEN]
     assert board.get_minions_on_board() == expected
+
+
+def test_rockpool_hunter_battlecry() -> None:
+    """Test the battlecry effect for the Rockpool Hunter minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+    murloc_scout = board.board[0]
+    assert murloc_scout.current_attack == 1 and murloc_scout.current_health == 1
+
+    board.add_minion_to_hand(minions.ROCKPOOL_HUNTER)
+    board.play_minion(0)
+
+    assert murloc_scout.current_attack == 2 and murloc_scout.current_health == 2
+
+
+def test_golden_rockpool_hunter_battlecry() -> None:
+    """Test the battlecry effect for the golden Rockpool Hunter minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+    murloc_scout = board.board[0]
+    assert murloc_scout.current_attack == 1 and murloc_scout.current_health == 1
+
+    board.add_minion_to_hand(minions.ROCKPOOL_HUNTER_GOLDEN)
+    board.play_minion(0)
+
+    assert murloc_scout.current_attack == 3 and murloc_scout.current_health == 3
+
