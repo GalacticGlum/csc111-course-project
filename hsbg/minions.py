@@ -981,18 +981,22 @@ def _soul_devourer_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     Effect (regular): Choose a friendly Demon. Remove it to gain its stats and 3 gold.
     Effect (golden):  Choose a friendly Demon. Remove it to gain double its stats and 6 gold.
     """
+    multiplier = 2 if self.is_golden else 1
+    # Give gold
+    board.give_gold(3 * multiplier)
+
     minion = board.get_random_minion_on_board(race=MinionRace.DEMON, ignore=[self])
+    if minion is None:
+        # There is no friendly Demon minion.
+        return
     # Remove minion from board
     board.remove_minion_from_board(board.get_index_of_minion_on_board(minion))
 
-    multiplier = 2 if self.is_golden else 1
     attack_buff = minion.current_attack * multiplier
     health_buff = minion.current_health * multiplier
 
     # Give stats to self
     self.add_buff(Buff(attack_buff, health_buff, CardAbility.NONE))
-    # Give gold
-    board.give_gold(3 * multiplier)
 
 SOUL_DEVOURER = Minion(
     'Soul Devourer', CardClass.NEUTRAL, MinionRace.DEMON, 3, 3,
