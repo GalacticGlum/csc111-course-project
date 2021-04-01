@@ -983,7 +983,7 @@ def _soul_devourer_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """
     minion = board.get_random_minion_on_board(race=MinionRace.DEMON, ignore=[self])
     # Remove minion from board
-    board.remove_minion(minion)
+    board.remove_minion_from_board(board.get_index_of_minion_on_board(minion))
 
     multiplier = 2 if self.is_golden else 1
     attack_buff = minion.current_attack * multiplier
