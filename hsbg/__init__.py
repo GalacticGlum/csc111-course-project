@@ -1118,6 +1118,30 @@ class BattlegroundsGame:
         self._turn_completion = [False] * self._num_players
         self._round_number += 1
 
+    def get_valid_moves(self) -> List[Move]:
+        """Return a list of valid moves for the active player.
+        Raise a ValueError if no player's turn is active.
+        """
+        if not self.is_turn_in_progress:
+            raise ValueError('No player is currently in a turn!')
+        # We can always end the turn!
+        return self.active_board.get_valid_moves() + [Move(Action.END_TURN)]
+
+    def make_move(self, move: Move) -> None:
+        """Make the given move for the active player. This instance of TavernGameBoard will be
+        mutated, and will afterwards represent the game state after move is made.
+
+        If move is not a currently valid move, do nothing.
+        Raise a ValueError if no player's turn is active.
+        """
+        if not self.is_turn_in_progress:
+            raise ValueError('No player is currently in a turn!')
+
+        if move.action == Action.END_TURN:
+            self.end_turn()
+        else:
+            self.active_board.make_move(move)
+
     @property
     def is_done(self) -> bool:
         """Return whether the game is done.
