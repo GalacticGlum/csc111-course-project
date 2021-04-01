@@ -354,3 +354,54 @@ def test_golden_pack_leader_2() -> None:
     board.summon_minion(minions.IMP)
     tabbycat = board.board[1]
     assert tabbycat.current_attack == 1 and tabbycat.current_health == 1
+
+
+def test_rabid_saurolisk_1() -> None:
+    """Test the effect for the Rabid Saurolisk minion when a minion with Deathrattle is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.RABID_SAUROLISK)
+    board.play_minion(0)
+
+    board.add_minion_to_hand(minions.KINDLY_GRANDMOTHER)
+    board.play_minion(0)
+
+    rabid_saurolisk = board.board[0]
+    assert rabid_saurolisk.current_attack == 4 and rabid_saurolisk.current_health == 4
+
+
+def test_rabid_saurolisk_2() -> None:
+    """Test the effect for the Rabid Saurolisk minion when a minion with Deathrattle is summoned."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.RABID_SAUROLISK)
+    board.play_minion(0)
+
+    board.summon_minion(minions.KINDLY_GRANDMOTHER)
+
+    rabid_saurolisk = board.board[0]
+    assert rabid_saurolisk.current_attack == 3 and rabid_saurolisk.current_health == 2
+
+
+def test_golden_rabid_saurolisk_1() -> None:
+    """Test the effect for the golden Rabid Saurolisk minion when a minion with Deathrattle is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.RABID_SAUROLISK_GOLDEN)
+    board.play_minion(0)
+
+    board.add_minion_to_hand(minions.KINDLY_GRANDMOTHER)
+    board.play_minion(0)
+
+    rabid_saurolisk = board.board[0]
+    assert rabid_saurolisk.current_attack == 8 and rabid_saurolisk.current_health == 8
+
+
+def test_golden_rabid_saurolisk_2() -> None:
+    """Test the effect for the Rabid Saurolisk minion when a minion with Deathrattle is summoned."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.RABID_SAUROLISK_GOLDEN)
+    board.play_minion(0)
+
+    board.summon_minion(minions.KINDLY_GRANDMOTHER)
+
+    rabid_saurolisk = board.board[0]
+    assert rabid_saurolisk.current_attack == 6 and rabid_saurolisk.current_health == 4
+
