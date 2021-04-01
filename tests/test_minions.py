@@ -428,3 +428,51 @@ def test_golden_nathrezim_overseer_battlecry() -> None:
 
     imp = board.board[0]
     assert imp.current_attack == 5 and imp.current_health == 5
+
+
+def test_steward_of_time_effect() -> None:
+    """Test the effect for the Steward of Time minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.STEWARD_OF_TIME)
+    board.play_minion(0)
+
+    # Add a few minions to the board
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.DRAGON_SPAWN_LIEUTENANT)
+    board.add_minion_to_hand(minions.MICRO_MACHINE)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+
+    # Sell minion
+    # This gives every minion on board a +1/+1 buff.
+    board.sell_minion(0)
+
+    minion_a, minion_b, minion_c = board.get_minions_on_board()
+    assert minion_a.current_attack == 2 and minion_a.current_health == 2
+    assert minion_b.current_attack == 3 and minion_b.current_health == 4
+    assert minion_c.current_attack == 2 and minion_c.current_health == 3
+
+
+def test_golden_steward_of_time_effect() -> None:
+    """Test the effect for the golden Steward of Time minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.STEWARD_OF_TIME_GOLDEN)
+    board.play_minion(0)
+
+    # Add a few minions to the board
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.DRAGON_SPAWN_LIEUTENANT)
+    board.add_minion_to_hand(minions.MICRO_MACHINE)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+
+    # Sell minion
+    # This gives every minion on board a +2/+2 buff.
+    board.sell_minion(0)
+
+    minion_a, minion_b, minion_c = board.get_minions_on_board()
+    assert minion_a.current_attack == 3 and minion_a.current_health == 3
+    assert minion_b.current_attack == 4 and minion_b.current_health == 5
+    assert minion_c.current_attack == 3 and minion_c.current_health == 4
