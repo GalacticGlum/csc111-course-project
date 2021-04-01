@@ -418,9 +418,8 @@ def _deck_swabbie_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the Deck Swabbie battlecry effect.
     Effect: Reduce the cost of upgrading Bob's Tavern by (1) (or (2) if golden).
     """
-    cost = board.current_tavern_upgrade_cost
     discount = 2 if self.is_golden else 1
-    board.modify_tavern_upgrade_cost(cost - discount, times=1)
+    board.set_tavern_upgrade_discount(discount, times=1)
 
 DECK_SWABBIE = Minion(
     'Deck Swabbie', CardClass.NEUTRAL, MinionRace.PIRATE, 2, 2,
