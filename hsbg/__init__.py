@@ -2,7 +2,6 @@
 from __future__ import annotations
 import random
 from enum import IntEnum
-from dataclasses import dataclass
 from contextlib import contextmanager
 from typing import List, Optional, Dict
 
@@ -277,9 +276,7 @@ class TavernGameBoard:
             # We can't upgrade since we already have the max tier!
             return False
 
-        discount = self._tavern_upgrade_discount if apply_discount else 0
-        cost = max(TAVERN_UPGRADE_COSTS[self._tavern_tier] - discount, 0)
-        if not self._spend_gold(cost):
+        if not self._spend_gold(self.get_tavern_upgrade_cost(apply_discount)):
             # We can't upgrade since we don't have enough gold!
             return False
 
@@ -291,6 +288,11 @@ class TavernGameBoard:
             self._tavern_upgrade_discount_clock.step()
 
         return True
+
+    def get_tavern_upgrade_cost(self, apply_discount: bool = True) -> int:
+        """Return the current cost of upgrading the tavern."""
+        discount = self._tavern_upgrade_discount if apply_discount else 0
+        return max(TAVERN_UPGRADE_COSTS[self._tavern_tier] - discount, 0)
 
     def set_tavern_upgrade_discount(self, amount: int, times: Optional[int] = 1) -> None:
         """Set a discount for the cost of the next tavern upgrades.
@@ -813,6 +815,30 @@ class TavernGameBoard:
         enemy_board._battle_history.append(battle.invert())
         return battle
 
+    def get_valid_moves(self) -> List[Move]:
+        """Return a list of valid moves."""
+        # We can always end the turn or freeze
+        moves = [Move(Action.END_TURN), Move(Action.FREEZE)]
+        if self.gold >= self.get_tavern_upgrade_cost():
+            moves.append(Move(Action.UPGRADE))
+        if self.gold >= self.refresh_cost:
+            moves.append(Move(Action.REFRESH))
+
+        # Add buy minion moves
+        if self.gold >= self._minion_buy_price:
+            for index, minion in enumerate(self.recruits):
+                if minion is not None:
+                    moves.append(Move(Action.BUY_MINION, index))
+        # Add sell minion moves
+        for index, minion in enumerate(self.board):
+            if minion is not None:
+                moves.append(Move(Action.SELL_MINION, index))
+        # Add play minion moves
+        for index, minion in enumerate(self.hand):
+            if minion is not None:
+                moves.append(Move(Action.PLAY_MINION, index))
+        return moves
+
     @property
     def won_previous(self) -> bool:
         """Return whether this player won its most recent battle."""
@@ -1121,6 +1147,12 @@ class Move:
             return Move(Action.END_TURN)
         else:
             raise ValueError(f'{move_id} is not a valid move id!')
+
+    def __str__(self) -> str:
+        return f'Move(action={self.action}, index={self.index})'
+
+    def __repr__(self) -> str:
+        return f'Move(action={repr(self.action)}, index={repr(self.index)})'
 
 
 class Action(IntEnum):
