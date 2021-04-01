@@ -1077,18 +1077,18 @@ class Move:
         - action: The type of this move.
         - index: An optional index for specifying a minion to apply the action on.
     """
-    action: MoveType
+    action: Action
     index: Optional[int] = None
 
-    def __init__(self, action: MoveType, index: Optional[int] = None) -> None:
+    def __init__(self, action: Action, index: Optional[int] = None) -> None:
         """Initialise the Move.
 
         Preconditions:
-            - index is not None or action in {MoveType.UPGRADE, MoveType.REFRESH, MoveType.FREEZE, MoveType.END_TURN}
-            - index is None or action in {MoveType.BUY_MINION, MoveType.SELL_MINION, MoveType.PLAY_MINION}
-            - action != MoveType.BUY_MINION or 0 <= index < MAX_TAVERN_RECRUIT_SIZE
-            - action != MoveType.SELL_MINION or 0 <= index < MAX_TAVERN_BOARD_SIZE
-            - action != MoveType.PLAY_MINION or 0 <= index < MAX_HAND_SIZE
+            - index is not None or action in {Action.UPGRADE, Action.REFRESH, Action.FREEZE, Action.END_TURN}
+            - index is None or action in {Action.BUY_MINION, Action.SELL_MINION, Action.PLAY_MINION}
+            - action != Action.BUY_MINION or 0 <= index < MAX_TAVERN_RECRUIT_SIZE
+            - action != Action.SELL_MINION or 0 <= index < MAX_TAVERN_BOARD_SIZE
+            - action != Action.PLAY_MINION or 0 <= index < MAX_HAND_SIZE
         """
         self.action = action
         self.index = index
@@ -1103,28 +1103,28 @@ class Move:
         """Return the Move represented by the given id.
 
         Preconditions:
-            - MoveType.UPGRADE <= move_id <= MoveType.END_TURN
+            - Action.UPGRADE <= move_id <= Action.END_TURN
         """
-        if move_id == MoveType.UPGRADE:
-            return Move(MoveType.UPGRADE)
-        elif move_id == MoveType.REFRESH:
-            return Move(MoveType.REFRESH)
-        elif move_id == MoveType.FREEZE:
-            return Move(MoveType.FREEZE)
-        elif MoveType.BUY_MINION <= move_id < MoveType.SELL_MINION:
-            return Move(MoveType.BUY_MINION, move_id - MoveType.BUY_MINION)
-        elif MoveType.SELL_MINION <= move_id < MoveType.PLAY_MINION:
-            return Move(MoveType.SELL_MINION, move_id - MoveType.SELL_MINION)
-        elif MoveType.PLAY_MINION <= move_id < MoveType.END_TURN:
-            return Move(MoveType.PLAY_MINION, move_id - MoveType.PLAY_MINION)
-        elif move_id == MoveType.END_TURN:
-            return Move(MoveType.END_TURN)
+        if move_id == Action.UPGRADE:
+            return Move(Action.UPGRADE)
+        elif move_id == Action.REFRESH:
+            return Move(Action.REFRESH)
+        elif move_id == Action.FREEZE:
+            return Move(Action.FREEZE)
+        elif Action.BUY_MINION <= move_id < Action.SELL_MINION:
+            return Move(Action.BUY_MINION, move_id - Action.BUY_MINION)
+        elif Action.SELL_MINION <= move_id < Action.PLAY_MINION:
+            return Move(Action.SELL_MINION, move_id - Action.SELL_MINION)
+        elif Action.PLAY_MINION <= move_id < Action.END_TURN:
+            return Move(Action.PLAY_MINION, move_id - Action.PLAY_MINION)
+        elif move_id == Action.END_TURN:
+            return Move(Action.END_TURN)
         else:
             raise ValueError(f'{move_id} is not a valid move id!')
 
 
-class MoveType(IntEnum):
-    """A class representing the different types of moves in Hearthstone Battlegrounds.
+class Action(IntEnum):
+    """A class representing the different types of actions in Hearthstone Battlegrounds.
 
     Instance Attributes:
         - UPGRADE: Upgrades the tavern.
