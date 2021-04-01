@@ -826,3 +826,41 @@ def test_golden_houndmaster_battlecry_2() -> None:
     minion = board.board[0]
     assert minion.current_attack == 1 and minion.current_health == 1 \
                                       and minion.current_abilities == CardAbility.NONE
+
+
+def test_crystal_weaver_battlecry() -> None:
+    """Test the battlecry effect for the Crystal Weaver minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP)
+    board.add_minion_to_hand(minions.IMP_GANG_BOSS)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.CRYSTAL_WEAVER)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 2 and all_minions[0].current_health == 2
+    assert all_minions[1].current_attack == 3 and all_minions[1].current_health == 5
+    assert all_minions[2].current_attack == 1 and all_minions[2].current_health == 1
+    assert all_minions[3].current_attack == 5 and all_minions[3].current_health == 4
+
+
+def test_golden_crystal_weaver_battlecry() -> None:
+    """Test the battlecry effect for the golden Crystal Weaver minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP)
+    board.add_minion_to_hand(minions.IMP_GANG_BOSS)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.CRYSTAL_WEAVER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 3 and all_minions[0].current_health == 3
+    assert all_minions[1].current_attack == 4 and all_minions[1].current_health == 6
+    assert all_minions[2].current_attack == 1 and all_minions[2].current_health == 1
+    assert all_minions[3].current_attack == 10 and all_minions[3].current_health == 8
