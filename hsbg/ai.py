@@ -1,4 +1,5 @@
 """Framework for making Hearthstone Battlegrounds AI."""
+import random
 from hsbg import BattlegroundsGame, Move
 
 
