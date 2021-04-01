@@ -92,3 +92,28 @@ def test_golden_wrath_weaver_effect_2() -> None:
                                    and wrath_weaver.current_health == 6
 
 
+def test_refreshing_anomaly_battlecry() -> None:
+    """Test the battlecry effect the Refreshing Anomaly minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.REFRESHING_ANOMALY)
+    board.play_minion(0)
+
+    board.next_turn()
+    assert board.refresh_cost == 0
+    board.refresh_recruits()  # This one is free thanks to the Refreshing Anomaly!
+    assert board.refresh_cost == 1
+
+
+def test_golden_refreshing_anomaly_battlecry() -> None:
+    """Test the battlecry effect the golden Refreshing Anomaly minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.REFRESHING_ANOMALY_GOLDEN)
+    board.play_minion(0)
+
+    board.next_turn()
+    assert board.refresh_cost == 0
+    board.refresh_recruits()  # This one is free thanks to the Refreshing Anomaly!
+    assert board.refresh_cost == 0
+    board.refresh_recruits()  # This one is free thanks to the Refreshing Anomaly!
+    assert board.refresh_cost == 1
+
