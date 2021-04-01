@@ -577,7 +577,7 @@ def test_golden_molten_rock_effect_3() -> None:
 
 
 def test_party_elemental_effect_1() -> None:
-    """Test hte effect for the Party Elemental minion when an Elemental is played."""
+    """Test the effect for the Party Elemental minion when an Elemental is played."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.PARTY_ELEMENTAL)
     board.add_minion_to_hand(minions.SELLEMENTAL)
@@ -589,7 +589,7 @@ def test_party_elemental_effect_1() -> None:
 
 
 def test_party_elemental_effect_2() -> None:
-    """Test hte effect for the Party Elemental minion when a non-Elemental is played."""
+    """Test the effect for the Party Elemental minion when a non-Elemental is played."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.PARTY_ELEMENTAL)
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
@@ -601,7 +601,7 @@ def test_party_elemental_effect_2() -> None:
 
 
 def test_golden_party_elemental_effect_1() -> None:
-    """Test hte effect for the golden Party Elemental minion when an Elemental is played."""
+    """Test the effect for the golden Party Elemental minion when an Elemental is played."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.PARTY_ELEMENTAL_GOLDEN)
     board.add_minion_to_hand(minions.SELLEMENTAL)
@@ -613,7 +613,7 @@ def test_golden_party_elemental_effect_1() -> None:
 
 
 def test_golden_party_elemental_effect_2() -> None:
-    """Test hte effect for the golden Party Elemental minion when a non-Elemental is played."""
+    """Test the effect for the golden Party Elemental minion when a non-Elemental is played."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.PARTY_ELEMENTAL_GOLDEN)
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
@@ -623,3 +623,44 @@ def test_golden_party_elemental_effect_2() -> None:
     party_elemental = board.board[0]
     assert party_elemental.current_attack == 6 and party_elemental.current_health == 4
 
+
+def test_metaltooth_leaper_battlecry() -> None:
+    """Test the battlecry effect for the Metaltooth Leaper minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.HARVEST_GOLEM)
+    board.add_minion_to_hand(minions.KABOOM_BOT)
+    board.add_minion_to_hand(minions.DAMAGED_GOLEM)
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)
+    board.add_minion_to_hand(minions.METALTOOTH_LEAPER)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+    board.play_minion(4)
+
+    minion_a, minion_b, minion_c, minion_d = board.get_minions_on_board()[:4]
+    assert minion_a.current_attack == 4 and minion_a.current_health == 3
+    assert minion_b.current_attack == 4 and minion_b.current_health == 2
+    assert minion_c.current_attack == 4 and minion_c.current_health == 1
+    assert minion_d.current_attack == 3 and minion_d.current_health == 2
+
+
+def test_golden_metaltooth_leaper_battlecry() -> None:
+    """Test the battlecry effect for the golden Metaltooth Leaper minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.HARVEST_GOLEM)
+    board.add_minion_to_hand(minions.KABOOM_BOT)
+    board.add_minion_to_hand(minions.DAMAGED_GOLEM)
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)
+    board.add_minion_to_hand(minions.METALTOOTH_LEAPER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+    board.play_minion(4)
+
+    minion_a, minion_b, minion_c, minion_d = board.get_minions_on_board()[:4]
+    assert minion_a.current_attack == 6 and minion_a.current_health == 3
+    assert minion_b.current_attack == 6 and minion_b.current_health == 2
+    assert minion_c.current_attack == 6 and minion_c.current_health == 1
+    assert minion_d.current_attack == 3 and minion_d.current_health == 2
