@@ -664,3 +664,22 @@ def test_golden_metaltooth_leaper_battlecry() -> None:
     assert minion_b.current_attack == 6 and minion_b.current_health == 2
     assert minion_c.current_attack == 6 and minion_c.current_health == 1
     assert minion_d.current_attack == 3 and minion_d.current_health == 2
+
+
+def test_freedealing_gambler_effect() -> None:
+    """Test the effect for the Freedealing Gambler minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.FREEDEALING_GAMBLER)
+    board.play_minion(0)
+    board.sell_minion(0)
+    # The minion sells for 3 gold.
+    assert board.gold == 3
+
+def test_golden_freedealing_gambler_effect() -> None:
+    """Test the effect for the golden Freedealing Gambler minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.FREEDEALING_GAMBLER_GOLDEN)
+    board.play_minion(0)
+    board.sell_minion(0)
+    # The minion sells for 6 gold.
+    assert board.gold == 6
