@@ -331,7 +331,6 @@ def _micro_mummy_on_end_turn(self: Minion, board: TavernGameBoard) -> None:
     else:
         minion.add_buff(Buff(1, 0, CardAbility.NONE))
 
-# NOTE: only reborn card in game!
 MICRO_MUMMY = Minion(
     'Micro Mummy', CardClass.PALADIN, MinionRace.MECH, 1, 2,
     cost=2, rarity=CardRarity.EPIC, abilities=CardAbility.REBORN,
