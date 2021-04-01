@@ -194,10 +194,6 @@ class TavernGameBoard:
         if self._is_frozen:
             self._is_frozen = False
 
-        # Update refresh cost
-        if self._refresh_cost_clock is not None:
-            self._refresh_cost_clock.step()
-
         # Call the new turn events
         self._handle_on_new_turn()
 
@@ -259,30 +255,34 @@ class TavernGameBoard:
 
         # The refresh was successful so subtract the amount from the gold total.
         self._spend_gold(self._refresh_cost)
+
+        # Update refresh cost
+        if self._refresh_cost_clock is not None:
+            self._refresh_cost_clock.step()
+
         return True
 
-    def set_refresh_cost(self, amount: int, turns: Optional[int] = 1) -> None:
+    def set_refresh_cost(self, amount: int, times: Optional[int] = 1) -> None:
         """Set the recruit refresh cost.
 
         Args:
             amount: The new cost of refreshing the recruitment pool.
-            turns: The amount of turns to keep this cost.
+            turns: The amount of times to keep this cost.
                    If None, then the new refresh cost is indefinite.
 
         >>> board = TavernGameBoard()
-        >>> board.set_refresh_cost(100, turns=1)
+        >>> board.set_refresh_cost(10, times=1)
         >>> board.refresh_cost
-        100
-        >>> board.next_turn()
-        >>> board.refresh_cost
-        100
-        >>> board.next_turn()
+        10
+        >>> board.give_gold(10)
+        >>> board.refresh_recruits()
+        True
         >>> board.refresh_cost
         1
         """
         self._refresh_cost = amount
-        if turns is not None:
-            self._refresh_cost_clock = TurnClock(turns + 1, on_complete=self._reset_refresh_cost)
+        if times is not None:
+            self._refresh_cost_clock = TurnClock(times, on_complete=self._reset_refresh_cost)
 
     def _reset_refresh_cost(self) -> None:
         """Reset the refresh cost to the default value. This also clears the refresh cost clock."""
