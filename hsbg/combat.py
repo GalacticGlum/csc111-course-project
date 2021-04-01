@@ -206,8 +206,8 @@ def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT
         padding = ' ' * len('ValueError: ')
         sim_errors = '\n'.join([f'{padding} - {error.group(0)}' for error in errors])
         raise ValueError(
-            f'Invalid battle config.\n'
-            f'{padding}Encountered {len(errors)} errors while parsing battle config.\n{sim_errors}'
+            f'Invalid battle config. '
+            f'Encountered {len(errors)} errors while parsing battle config.\n{sim_errors}'
         )
     else:
         return Battle.parse_simulator_output(stdout)
