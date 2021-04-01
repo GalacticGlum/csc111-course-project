@@ -676,10 +676,9 @@ class TavernGameBoard:
                 return False
 
         if clone:
-            self._board[index] = minion.clone()
-        else:
-            self._board[index] = minion
+            minion = minion.clone()
 
+        self._board[index] = minion
         if call_events:
             minion.on_this_summoned(self)
             self._handle_on_any_summoned(minion)
