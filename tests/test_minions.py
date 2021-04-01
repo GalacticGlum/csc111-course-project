@@ -93,7 +93,7 @@ def test_golden_wrath_weaver_effect_2() -> None:
 
 
 def test_refreshing_anomaly_battlecry() -> None:
-    """Test the battlecry effect the Refreshing Anomaly minion."""
+    """Test the battlecry effect for the Refreshing Anomaly minion."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.REFRESHING_ANOMALY)
     board.play_minion(0)
@@ -105,7 +105,7 @@ def test_refreshing_anomaly_battlecry() -> None:
 
 
 def test_golden_refreshing_anomaly_battlecry() -> None:
-    """Test the battlecry effect the golden Refreshing Anomaly minion."""
+    """Test the battlecry effect for the golden Refreshing Anomaly minion."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.REFRESHING_ANOMALY_GOLDEN)
     board.play_minion(0)
@@ -130,7 +130,7 @@ def test_sellemental_effect() -> None:
 
 
 def test_golden_sellemental_effect() -> None:
-    """Test the effect for the Sellemental minion."""
+    """Test the effect for the golden Sellemental minion."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.SELLEMENTAL_GOLDEN)
     board.play_minion(0)
@@ -139,3 +139,30 @@ def test_golden_sellemental_effect() -> None:
     board.sell_minion(0)
     expected = [minions.WATER_DROPLET, minions.WATER_DROPLET]
     assert list(filter(lambda x: x is not None, board.hand)) == expected
+
+
+def test_micro_machine_effect() -> None:
+    """Test the effect for the Micro Machine minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MICRO_MACHINE)
+    board.play_minion(0)
+
+    micro_machine = board.board[0]
+    assert micro_machine.current_attack == 1
+    for i in range(3):
+        # At the start of each turn, we gain +1 Attack, but our health should not change.
+        board.next_turn()
+        assert micro_machine.current_attack == i + 2 and micro_machine.current_health == 2
+
+def test_golden_micro_machine_effect() -> None:
+    """Test the effect for the golden Micro Machine minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MICRO_MACHINE_GOLDEN)
+    board.play_minion(0)
+
+    micro_machine = board.board[0]
+    assert micro_machine.current_attack == 2
+    for i in range(3):
+        # At the start of each turn, we gain +2 Attack, but our health should not change.
+        board.next_turn()
+        assert micro_machine.current_attack == 2 * i + 4 and micro_machine.current_health == 4
