@@ -119,6 +119,8 @@ class TavernGameBoard:
     #   - _is_frozen: Whether the recruit selection is currently frozen.
     #   - _refresh_cost: The current cost of refreshing the recruitment pool.
     #   - _refresh_cost_clock: Clock to manage when to change the refresh cost.
+    #   - _tavern_upgrade_discount: A discount applied to the next tavern upgrade.
+    #   - _tavern_upgrade_discount_clock: Clock to manage when to change the tavern upgrade cost discount.
     #   - _minion_buy_price: The amount of gold it costs to buy a minion.
     #   - _minion_sell_price: The amount of gold the player gets when they sell a minion.
     _turn_number: int
@@ -135,6 +137,9 @@ class TavernGameBoard:
 
     _refresh_cost: int
     _refresh_cost_clock: Optional[TurnClock]
+
+    _tavern_upgrade_discount: int
+    _tavern_upgrade_discount_clock: Optional[TurnClock]
 
     _minion_buy_price: int
     _minion_sell_price: int
@@ -161,8 +166,8 @@ class TavernGameBoard:
         self._recruits = [None] * MAX_TAVERN_RECRUIT_SIZE
         self._is_frozen = False
 
-        self._refresh_cost = TAVERN_REFRESH_COST
-        self._refresh_cost_clock = None
+        self._reset_refresh_cost()
+        self._reset_tavern_upgrade_discount()
 
         self._minion_buy_price = TAVERN_MINION_BUY_PRICE
         self._minion_sell_price = TAVERN_MINION_SELL_PRICE
@@ -289,7 +294,7 @@ class TavernGameBoard:
         self._refresh_cost = TAVERN_REFRESH_COST
         self._refresh_cost_clock = None
 
-    def upgrade_tavern(self) -> bool:
+    def upgrade_tavern(self, apply_discount: bool = True) -> bool:
         """Upgrade the tavern. Do nothing if the tavern cannot be upgraded anymore,
         or if the player does not have enough gold. Return whether the upgrade was successful.
 
@@ -314,14 +319,49 @@ class TavernGameBoard:
             # We can't upgrade since we already have the max tier!
             return False
 
-        cost = TAVERN_UPGRADE_COSTS[self._tavern_tier]
+        discount = self._tavern_upgrade_discount if apply_discount else 0
+        cost = max(TAVERN_UPGRADE_COSTS[self._tavern_tier] - discount, 0)
         if not self._spend_gold(cost):
             # We can't upgrade since we don't have enough gold!
             return False
 
         self._num_recruits += RECRUIT_NUM_PROGRESSION[self._tavern_tier]
         self._tavern_tier += 1
+
+         # Update discount
+        if self._tavern_upgrade_discount_clock is not None:
+            self._tavern_upgrade_discount_clock.step()
+
         return True
+
+    def set_tavern_upgrade_discount(self, amount: int, times: Optional[int] = 1) -> None:
+        """Set a discount for the cost of the next tavern upgrades.
+
+        Args:
+            amount: The discount applied to the tavern upgrade cost.
+            turns: The amount of times to apply the discount.
+                   If None, then the discount is applied infinitely many times.
+
+        >>> board = TavernGameBoard()
+        >>> board.set_tavern_upgrade_discount(10, times=2)
+        >>> board.upgrade_tavern()  # Free since the first upgrade costs 5 gold.
+        True
+        >>> board.upgrade_tavern()  # Free since the second upgrade costs 7 gold.
+        True
+        >>> board.upgrade_tavern()
+        False
+        """
+        self._tavern_upgrade_discount = amount
+        if times is not None:
+            clock = TurnClock(times, on_complete=self._reset_tavern_upgrade_discount)
+            self._tavern_upgrade_discount_clock = clock
+
+    def _reset_tavern_upgrade_discount(self) -> None:
+        """Reset the tavern upgrade cost discount to the default value.
+        This also clears the tavern upgrade discount clock.
+        """
+        self._tavern_upgrade_discount = 0
+        self._tavern_upgrade_discount_clock = None
 
     def freeze(self) -> None:
         """Freeze the selection of recruit minions.
@@ -380,6 +420,9 @@ class TavernGameBoard:
     def _can_spend_gold(self, amount: int) -> bool:
         """Return whether the given amount of gold can be spent.
 
+        Preconditions:
+            - amount >= 0
+
         >>> board = TavernGameBoard()
         >>> board._can_spend_gold(1)  # No turns have been started, so we have 0 gold!
         False
@@ -394,6 +437,9 @@ class TavernGameBoard:
     def _spend_gold(self, amount: int) -> bool:
         """Return whether the given amount of gold can be spent. If it can be,
         mutate the TavernGameBoard by subtracting that amount from the current gold total.
+
+        Preconditions:
+            - amount >= 0
 
         >>> board = TavernGameBoard()
         >>> board._spend_gold(1)  # No turns have been started, so we have 0 gold!
@@ -418,7 +464,7 @@ class TavernGameBoard:
         """Give the player gold.
 
         Preconditions:
-            - amount > 0
+            - amount >= 0
 
         >>> board = TavernGameBoard()
         >>> board.give_gold(5)
