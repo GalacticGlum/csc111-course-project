@@ -277,3 +277,36 @@ def test_golden_rockpool_hunter_battlecry() -> None:
 
     assert murloc_scout.current_attack == 3 and murloc_scout.current_health == 3
 
+
+def test_deck_swabbie_battlecry() -> None:
+    """Test the battlecry effect for the Deck Swabbie minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.DECK_SWABBIE)
+    board.play_minion(0)
+
+    # Tavern upgrade should now cost 4 gold.
+    board.give_gold(4)
+    board.upgrade_tavern()
+    assert board.tavern_tier == 2 and board.gold == 0
+
+    # Discount only applied once. The next upgrade should be full price (7 gold).
+    board.give_gold(7)
+    board.upgrade_tavern()
+    assert board.tavern_tier == 3 and board.gold == 0
+
+
+def test_golden_deck_swabbie_battlecry() -> None:
+    """Test the battlecry effect for the golden Deck Swabbie minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.DECK_SWABBIE_GOLDEN)
+    board.play_minion(0)
+
+    # Tavern upgrade should now cost 3 gold.
+    board.give_gold(3)
+    board.upgrade_tavern()
+    assert board.tavern_tier == 2 and board.gold == 0
+
+    # Discount only applied once. The next upgrade should be full price (7 gold).
+    board.give_gold(7)
+    board.upgrade_tavern()
+    assert board.tavern_tier == 3 and board.gold == 0
