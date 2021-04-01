@@ -117,3 +117,25 @@ def test_golden_refreshing_anomaly_battlecry() -> None:
     board.refresh_recruits()  # This one is free thanks to the Refreshing Anomaly!
     assert board.refresh_cost == 1
 
+
+def test_sellemental_effect() -> None:
+    """Test the effect for the Sellemental minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.play_minion(0)
+
+    # When the Sellemental is sold, a Water Droplet is add to the hand.
+    board.sell_minion(0)
+    assert list(filter(lambda x: x is not None, board.hand)) == [minions.WATER_DROPLET]
+
+
+def test_golden_sellemental_effect() -> None:
+    """Test the effect for the Sellemental minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.SELLEMENTAL_GOLDEN)
+    board.play_minion(0)
+
+    # When the golden Sellemental is sold, two Water Droplets are add to the hand.
+    board.sell_minion(0)
+    expected = [minions.WATER_DROPLET, minions.WATER_DROPLET]
+    assert list(filter(lambda x: x is not None, board.hand)) == expected
