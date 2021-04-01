@@ -6,6 +6,7 @@ from contextlib import contextmanager
 
 from hsbg.utils import filter_minions
 from hsbg.minions import MinionPool
+from hsbg.combat import Battle, simulate_combat
 
 
 # The maximum number of minions a player can have in their hand.
@@ -102,7 +103,9 @@ class TurnClock:
 
 
 class TavernGameBoard:
-    """A class representing the state of a tavern game board for a single player."""
+    """A class representing the state of a tavern game board for a single player.
+    Note: the game board starts at turn 0!
+    """
     # Private Instance Attributes:
     #   - _turn_number: The current turn (where 1 indicates the first turn).
     #   - _hero_health: The current health of the hero.
@@ -695,7 +698,6 @@ class TavernGameBoard:
             ignore: A list of minions to ignore.
             **kwargs: Keyword arguments corresponding to minion attributes to match.
 
-        >>> random.seed(69)
         >>> board = TavernGameBoard()
         >>> minion_a = board.pool.find(name='Murloc Scout')
         >>> minion_b = board.pool.find(name='Tabbycat', is_golden=True)
@@ -703,6 +705,7 @@ class TavernGameBoard:
         True
         >>> board.play_minion(0) and board.play_minion(1)
         True
+        >>> random.seed(69)  # Use seed to get the same results everytime!
         >>> board.get_random_minions_on_board(2) == [minion_a, minion_b]
         True
         >>> board.get_random_minions_on_board(1) == [minion_a]
@@ -731,6 +734,14 @@ class TavernGameBoard:
             return None
         else:
             return matches[0]
+
+    def battle(self, enemy_board: TavernGameBoard) -> Battle:
+        """Battle with the given enemy board. Return the battle statistics."""
+        battle = simulate_combat(self, enemy_board, n=1)
+        # Update hero health
+        self._hero_health = int(battle.expected_hero_health)
+        enemy_board._hero_health = int(battle.expected_enemy_hero_health)
+        return battle
 
     @property
     def turn_number(self) -> int:
@@ -798,11 +809,13 @@ class BattlegroundsGame:
     #   - _active_player: The player currently completing their turn.
     #   - _turn_completion: A list containing whether each player has completed their turn for this
     #                       round. The i-th element gives the turn completion for player i.
+    #   - _round_number: The current round (where 1 indicates the first round).
     _num_players: int
     _boards: List[TavernGameBoard]
     _pool: MinionPool
     _active_player: Optional[int] = None
     _turn_completion: List[bool]
+    _round_number: int
 
     def __init__(self, num_players: int = 8) -> None:
         """Initialise the BattlegroundsGame with the given number of players.
@@ -823,6 +836,7 @@ class BattlegroundsGame:
         # Turn state
         self._active_player = None
         self._turn_completion = [False] * num_players
+        self._round_number = 1
 
     @contextmanager
     def turn_for_player(self, player: int) -> TavernGameBoard:
@@ -862,20 +876,53 @@ class BattlegroundsGame:
         self._turn_completion[self._active_player] = True
         self._active_player = None
 
-    def get_board(self, player: int) -> TavernGameBoard:
-        """Return the game board for the given player.
+    def next_round(self) -> None:
+        """Matchups pairs of players and starts the combat phase. Resets the game to the next
+        round. Do nothing if the game is done.
 
-        Preconditions:
-            - 0 <= player < self.num_players
+        Raise a ValueError if a player has not yet completed their turn.
         """
-        return self._boards[player]
+        if any(not self.has_completed_turn(i) for i in range(self._num_players)):
+            raise ValueError('A player has not completed their turn!')
+
+        if self.is_done:
+            return
+
+        # Get the boards that are still alive
+        alive_boards = self.alive_boards
+        random.shuffle(alive_boards)
+        # Partition boards into pairs
+        for i in range(0, self._num_players, 2):
+            board_a, board_b = alive_boards[i:i + 2]
+            board_a.battle(board_b)
+
+        # Reset turn completion
+        self._turn_completion = [False] * self._num_players
+        self._round_number += 1
+
+    @property
+    def is_done(self) -> bool:
+        """Return whether the game is done.
+        The game is done when there is a single player remaining.
+        """
+        return len(self.alive_boards) == 1
+
+    @property
+    def boards(self) -> List[TavernGameBoard]:
+        """Return a list of all the game boards."""
+        return self._boards
+
+    @property
+    def alive_boards(self) -> List[TavernGameBoard]:
+        """Return a list of all the game boards that are still alive."""
+        return [board for board in self._boards if not board.is_dead]
 
     @property
     def active_board(self) -> Optional[TavernGameBoard]:
         """Return the game board of the player currently completing their turn,
         or None if no player is completing their turn.
         """
-        return None if self._active_player is None else self.get_board(self._active_player)
+        return None if self._active_player is None else self._boards[self._active_player]
 
     @property
     def is_turn_in_progress(self) -> bool:
@@ -889,6 +936,11 @@ class BattlegroundsGame:
             - 0 <= player < self.num_players
         """
         return self._turn_completion[player]
+
+    @property
+    def round_number(self) -> int:
+        """Return the current round."""
+        return self._round_number
 
 
 if __name__ == '__main__':
