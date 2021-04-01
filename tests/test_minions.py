@@ -209,7 +209,7 @@ def test_golden_micro_mummy_effect() -> None:
         assert tabbycat.current_attack == 2 * (i + 1) + 1  and tabbycat.current_health == 1
 
 
-def test_murloc_tidecaller() -> None:
+def test_murloc_tidecaller_effect() -> None:
     """Test the effect for the Murloc Tidecaller minion."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_TIDECALLER)
@@ -221,7 +221,7 @@ def test_murloc_tidecaller() -> None:
     assert murloc_tidecaller.current_attack == 2
 
 
-def test_golden_murloc_tidecaller() -> None:
+def test_golden_murloc_tidecaller_effect() -> None:
     """Test the effect for the golden Murloc Tidecaller minion."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_TIDECALLER_GOLDEN)
@@ -312,7 +312,7 @@ def test_golden_deck_swabbie_battlecry() -> None:
     assert board.tavern_tier == 3 and board.gold == 0
 
 
-def test_pack_leader_1() -> None:
+def test_pack_leader_effect_1() -> None:
     """Test the effect for the Pack Leader minion when a Beast is summoned."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.PACK_LEADER)
@@ -323,7 +323,7 @@ def test_pack_leader_1() -> None:
     assert tabbycat.current_attack == 3 and tabbycat.current_health == 1
 
 
-def test_pack_leader_2() -> None:
+def test_pack_leader_effect_2() -> None:
     """Test the effect for the Pack Leader minion when a non-Beast is summoned."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.PACK_LEADER)
@@ -334,7 +334,7 @@ def test_pack_leader_2() -> None:
     assert tabbycat.current_attack == 1 and tabbycat.current_health == 1
 
 
-def test_golden_pack_leader_1() -> None:
+def test_golden_pack_leader_effect_1() -> None:
     """Test the effect for the golden Pack Leader minion when a Beast is summoned."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.PACK_LEADER_GOLDEN)
@@ -345,7 +345,7 @@ def test_golden_pack_leader_1() -> None:
     assert tabbycat.current_attack == 5 and tabbycat.current_health == 1
 
 
-def test_golden_pack_leader_2() -> None:
+def test_golden_pack_leader_effect_2() -> None:
     """Test the effect for the golden Pack Leader minion when a non-Beast is summoned."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.PACK_LEADER_GOLDEN)
@@ -356,7 +356,7 @@ def test_golden_pack_leader_2() -> None:
     assert tabbycat.current_attack == 1 and tabbycat.current_health == 1
 
 
-def test_rabid_saurolisk_1() -> None:
+def test_rabid_saurolisk_effect_1() -> None:
     """Test the effect for the Rabid Saurolisk minion when a minion with Deathrattle is played."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.RABID_SAUROLISK)
@@ -369,7 +369,7 @@ def test_rabid_saurolisk_1() -> None:
     assert rabid_saurolisk.current_attack == 4 and rabid_saurolisk.current_health == 4
 
 
-def test_rabid_saurolisk_2() -> None:
+def test_rabid_saurolisk_effect_2() -> None:
     """Test the effect for the Rabid Saurolisk minion when a minion with Deathrattle is summoned."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.RABID_SAUROLISK)
@@ -381,7 +381,7 @@ def test_rabid_saurolisk_2() -> None:
     assert rabid_saurolisk.current_attack == 3 and rabid_saurolisk.current_health == 2
 
 
-def test_golden_rabid_saurolisk_1() -> None:
+def test_golden_rabid_saurolisk_effect_1() -> None:
     """Test the effect for the golden Rabid Saurolisk minion when a minion with Deathrattle is played."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.RABID_SAUROLISK_GOLDEN)
@@ -394,7 +394,7 @@ def test_golden_rabid_saurolisk_1() -> None:
     assert rabid_saurolisk.current_attack == 8 and rabid_saurolisk.current_health == 8
 
 
-def test_golden_rabid_saurolisk_2() -> None:
+def test_golden_rabid_saurolisk_effect_2() -> None:
     """Test the effect for the Rabid Saurolisk minion when a minion with Deathrattle is summoned."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.RABID_SAUROLISK_GOLDEN)
@@ -405,3 +405,26 @@ def test_golden_rabid_saurolisk_2() -> None:
     rabid_saurolisk = board.board[0]
     assert rabid_saurolisk.current_attack == 6 and rabid_saurolisk.current_health == 4
 
+
+def test_nathrezim_overseer_battlecry() -> None:
+    """Test the battlecry effect for the Nathrezim Overseer minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP)
+    board.add_minion_to_hand(minions.NATHREZIM_OVERSEER)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    imp = board.board[0]
+    assert imp.current_attack == 3 and imp.current_health == 3
+
+
+def test_golden_nathrezim_overseer_battlecry() -> None:
+    """Test the battlecry effect for the Nathrezim Overseer minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP)
+    board.add_minion_to_hand(minions.NATHREZIM_OVERSEER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    imp = board.board[0]
+    assert imp.current_attack == 5 and imp.current_health == 5
