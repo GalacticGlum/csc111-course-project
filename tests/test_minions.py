@@ -864,3 +864,119 @@ def test_golden_crystal_weaver_battlecry() -> None:
     assert all_minions[1].current_attack == 4 and all_minions[1].current_health == 6
     assert all_minions[2].current_attack == 1 and all_minions[2].current_health == 1
     assert all_minions[3].current_attack == 10 and all_minions[3].current_health == 8
+
+
+def test_soul_devourer_battlecry_1() -> None:
+    """Test the battlecry effect for the Soul Devourer when there is another friendly Demon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP)
+    board.add_minion_to_hand(minions.SOUL_DEVOURER)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[1]
+    assert board.board[0] is None and minion.current_attack == 4 and minion.current_health == 4
+    assert board.gold == 3
+
+
+def test_soul_devourer_battlecry_2() -> None:
+    """Test the battlecry effect for the Soul Devourer when there is another friendly Demon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP_GANG_BOSS)
+    board.add_minion_to_hand(minions.SOUL_DEVOURER)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[1]
+    assert board.board[0] is None and minion.current_attack == 5 and minion.current_health == 7
+    assert board.gold == 3
+
+
+def test_soul_devourer_battlecry_3() -> None:
+    """Test the battlecry effect for the Soul Devourer when there is another friendly Demon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP_GANG_BOSS)
+    board.add_minion_to_hand(minions.IMP_GANG_BOSS)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.SOUL_DEVOURER)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    random.seed(69)
+    board.play_minion(3)
+
+    minion = board.board[3]
+    assert board.board[0] is None and minion.current_attack == 5 and minion.current_health == 7
+    assert board.board[1] is not None and board.board[2] is not None
+    assert board.gold == 3
+
+
+def test_soul_devourer_battlecry_4() -> None:
+    """Test the battlecry effect for the Soul Devourer when there is no friendly Demon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.SOUL_DEVOURER)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[1]
+    assert board.board[0] is not None and minion.current_attack == 3 and minion.current_health == 3
+    assert board.gold == 3
+
+
+def test_golden_soul_devourer_battlecry_1() -> None:
+    """Test the battlecry effect for the golden Soul Devourer when there is another friendly Demon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP)
+    board.add_minion_to_hand(minions.SOUL_DEVOURER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[1]
+    assert board.board[0] is None and minion.current_attack == 8 and minion.current_health == 8
+    assert board.gold == 6
+
+
+def test_golden_soul_devourer_battlecry_2() -> None:
+    """Test the battlecry effect for the golden Soul Devourer when there is another friendly Demon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP_GANG_BOSS)
+    board.add_minion_to_hand(minions.SOUL_DEVOURER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[1]
+    assert board.board[0] is None and minion.current_attack == 10 and minion.current_health == 14
+    assert board.gold == 6
+
+
+def test_golden_soul_devourer_battlecry_3() -> None:
+    """Test the battlecry effect for the golden Soul Devourer when there is another friendly Demon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.IMP_GANG_BOSS)
+    board.add_minion_to_hand(minions.IMP_GANG_BOSS)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.SOUL_DEVOURER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    random.seed(69)
+    board.play_minion(3)
+
+    minion = board.board[3]
+    assert board.board[0] is None and minion.current_attack == 10 and minion.current_health == 14
+    assert board.board[1] is not None and board.board[2] is not None
+    assert board.gold == 6
+
+
+def test_golden_soul_devourer_battlecry_4() -> None:
+    """Test the battlecry effect for the golden Soul Devourer when there is no friendly Demon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.SOUL_DEVOURER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[1]
+    assert board.board[0] is not None and minion.current_attack == 6 and minion.current_health == 6
+    assert board.gold == 6
