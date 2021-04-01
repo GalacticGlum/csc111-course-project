@@ -652,7 +652,7 @@ def _party_elemental_on_any_played(self: Minion, board: TavernGameBoard, played_
 
     Note: the elemental is chosen RANDOMLY since we do not have targetting implemented.
     """
-    if MinionRace.ELEMENTAL not in played_minion.race:
+    if played_minion is self or MinionRace.ELEMENTAL not in played_minion.race:
         return
 
     times = 2 if self.is_golden else 1
