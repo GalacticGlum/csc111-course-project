@@ -576,7 +576,7 @@ NATHREZIM_OVERSEER_GOLDEN = Minion(
 )
 
 # Dragon Pool
-# TODO: Implement effect: Whenever this attacks, DOUBLR its attack.
+# TODO: Implement effect: Whenever this attacks, DOUBLE its attack.
 #       This requires implementing the effect in the C++ simulator!
 GLYPH_GUARDIAN = Minion(
     'Glyph Guardian', CardClass.MAGE, MinionRace.DRAGON, 2, 4,
