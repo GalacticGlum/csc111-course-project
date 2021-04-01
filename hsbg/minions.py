@@ -657,7 +657,7 @@ def _party_elemental_on_any_played(self: Minion, board: TavernGameBoard, played_
 
     times = 2 if self.is_golden else 1
     for _ in range(times):
-        minion = board.get_random_minion_on_board(race=MinionRace.ELEMENTAL, ignore=[self])
+        minion = board.get_random_minion_on_board(race=MinionRace.ELEMENTAL, ignore=[played_minion])
         if minion is None:
             return
         # Give +1/+1
