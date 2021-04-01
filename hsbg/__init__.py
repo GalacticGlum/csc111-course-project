@@ -106,7 +106,7 @@ class TavernGameBoard:
     _battle_history: List[Battle]
 
     def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40,
-                 tavern_tier: int = 1, max_freeze_times: Optional[int] = None) -> None:
+                 tavern_tier: int = 1, max_freeze_times: Optional[int] = 5) -> None:
         """Initialise the TavernGameBoard.
 
         Args:
