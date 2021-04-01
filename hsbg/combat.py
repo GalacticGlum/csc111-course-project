@@ -74,6 +74,14 @@ class Battle:
     death_probability: float
     enemy_death_probability: float
 
+    def invert(self) -> Battle:
+        """Return a new Battle where the friendly and enemy players are swapped."""
+        return Battle(self.lose_probability, self.tie_probability, self.win_probability,
+                      -self.mean_score, -self.median_score,
+                      self.mean_damage_dealt, self.mean_damage_taken,
+                      self.expected_enemy_hero_health, self.expected_hero_health,
+                      self.enemy_death_probability, self.death_probability)
+
     @staticmethod
     def parse_simulator_output(output: str) -> Battle:
         """Return the Battle representing a string-based representation of the battle result.

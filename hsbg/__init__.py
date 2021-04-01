@@ -123,7 +123,8 @@ class TavernGameBoard:
     #   - _tavern_upgrade_discount_clock: Clock to manage when to change the tavern upgrade cost discount.
     #   - _minion_buy_price: The amount of gold it costs to buy a minion.
     #   - _minion_sell_price: The amount of gold the player gets when they sell a minion.
-    #   - _battle_history: A history of the battles between this board and enemy boards, mapped by turn number.
+    #   - _battle_history: A history of the battles between this board and enemy boards,
+    #                      ordered by time of battle.
     _turn_number: int
     _hero_health: int
     _tavern_tier: int
@@ -145,7 +146,7 @@ class TavernGameBoard:
     _minion_buy_price: int
     _minion_sell_price: int
 
-    _battle_history: Dict[int, Battle]
+    _battle_history: List[Battle]
 
     def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40, tavern_tier: int = 1) \
             -> None:
@@ -175,7 +176,7 @@ class TavernGameBoard:
         self._minion_buy_price = TAVERN_MINION_BUY_PRICE
         self._minion_sell_price = TAVERN_MINION_SELL_PRICE
 
-        self._battle_history = {}
+        self._battle_history = []
 
     def next_turn(self) -> None:
         """Reset the tavern to the start of the next turn.
@@ -854,19 +855,16 @@ class TavernGameBoard:
         # Update hero health
         self._hero_health = int(battle.expected_hero_health)
         enemy_board._hero_health = int(battle.expected_enemy_hero_health)
+
         # Save history
-        self._battle_history[self._turn_number] = battle
+        self._battle_history.append(battle)
+        enemy_board._battle_history.append(battle.invert())
         return battle
 
     @property
     def won_previous(self) -> bool:
-        """Return whether this player won the battle in the previous turn.
-        Return False if the battle for the previous turn could not be found.
-        """
-        if self._turn_number - 1 not in self._battle_history:
-            return False
-        else:
-            return self._battle_history[self.turn_number - 1].win_probability == 1.0
+        """Return whether this player won its most recent battle."""
+        return self._battle_history[-1].win_probability == 1.0
 
     @property
     def turn_number(self) -> int:
