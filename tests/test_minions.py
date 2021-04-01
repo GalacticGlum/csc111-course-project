@@ -1,5 +1,7 @@
 """Test the minion implementations."""
 import random
+
+from hsbg.models import CardAbility
 from hsbg import TavernGameBoard, minions
 
 
@@ -772,3 +774,55 @@ def test_golden_managerie_mug_battlecry_2() -> None:
     all_minions = board.get_minions_on_board()
     assert all_minions[0].current_attack == 5 and all_minions[0].current_health == 4
     assert all_minions[1].current_attack == 3 and all_minions[1].current_health == 3
+
+
+def test_houndmaster_battlecry_1() -> None:
+    """Test the battlecry effect for the Houndmaster minion when there is a friendly Beast."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.TABBYCAT)
+    board.add_minion_to_hand(minions.HOUNDMASTER)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 3 and minion.current_health == 3 \
+                                      and minion.current_abilities == CardAbility.TAUNT
+
+
+def test_houndmaster_battlecry_2() -> None:
+    """Test the battlecry effect for the Houndmaster minion when there is no friendly Beast."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.HOUNDMASTER)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 1 and minion.current_health == 1 \
+                                      and minion.current_abilities == CardAbility.NONE
+
+
+def test_golden_houndmaster_battlecry_1() -> None:
+    """Test the battlecry effect for the golden Houndmaster minion when there is a friendly Beast."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.TABBYCAT)
+    board.add_minion_to_hand(minions.HOUNDMASTER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 5 and minion.current_health == 5 \
+                                      and minion.current_abilities == CardAbility.TAUNT
+
+
+def test_golden_houndmaster_battlecry_2() -> None:
+    """Test the battlecry effect for the golden Houndmaster minion when there is no friendly Beast."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.HOUNDMASTER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 1 and minion.current_health == 1 \
+                                      and minion.current_abilities == CardAbility.NONE
