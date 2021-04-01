@@ -1054,3 +1054,51 @@ def test_golden_hangry_dragon_effect_2() -> None:
 
     minion = friendly_board.board[0]
     assert minion.current_attack == 8 and minion.current_health == 8
+
+
+def test_twilight_emissary_battlecry_1() -> None:
+    """Test the battlecry effect for the Twilight Emissary minion when there is a friendly Dragon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.HANGRY_DRAGON)
+    board.add_minion_to_hand(minions.TWILIGHT_EMISSARY)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 6 and minion.current_health == 6
+
+
+def test_twilight_emissary_battlecry_2() -> None:
+    """Test the battlecry effect for the Twilight Emissary minion when there isn't a friendly Dragon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.TWILIGHT_EMISSARY)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 1 and minion.current_health == 1
+
+
+def test_golden_twilight_emissary_battlecry_1() -> None:
+    """Test the battlecry effect for the golden Twilight Emissary minion when there is a friendly Dragon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.HANGRY_DRAGON)
+    board.add_minion_to_hand(minions.TWILIGHT_EMISSARY_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 8 and minion.current_health == 8
+
+
+def test_golden_twilight_emissary_battlecry_2() -> None:
+    """Test the battlecry effect for the golden Twilight Emissary minion when there isn't a friendly Dragon."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.TWILIGHT_EMISSARY_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 1 and minion.current_health == 1
