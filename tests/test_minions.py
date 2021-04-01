@@ -504,10 +504,74 @@ def test_golden_steward_of_time_effect() -> None:
     assert minion_c.current_attack == 3 and minion_c.current_health == 4
 
 
-# def test_molten_rock_effect() -> None:
-#     """Test the effect for the Molten Rock minion."""
-#     board = TavernGameBoard()
-#     board.add_minion_to_hand(minions.MOLTEN_ROCK)
-#     board.play_minion(0)
+def test_molten_rock_effect_1() -> None:
+    """Test the effect for the Molten Rock minion when an Elemental is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MOLTEN_ROCK)
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.play_minion(0)
+    board.play_minion(1)
 
-#     board.add_minion_to_hand(minions.)
+    molten_rock = board.board[0]
+    assert molten_rock.current_attack == 2 and molten_rock.current_health == 5
+
+
+def test_molten_rock_effect_2() -> None:
+    """Test the effect for the Molten Rock minion when a non-Elemental is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MOLTEN_ROCK)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    molten_rock = board.board[0]
+    assert molten_rock.current_attack == 2 and molten_rock.current_health == 4
+
+
+def test_molten_rock_effect_3() -> None:
+    """Test the effect for the Molten Rock minion when an Elemental is summoned."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MOLTEN_ROCK)
+    board.play_minion(0)
+
+    board.summon_minion(minions.SELLEMENTAL)
+
+    molten_rock = board.board[0]
+    assert molten_rock.current_attack == 2 and molten_rock.current_health == 4
+
+
+def test_golden_molten_rock_effect_1() -> None:
+    """Test the effect for the golden Molten Rock minion when an Elemental is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MOLTEN_ROCK_GOLDEN)
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    molten_rock = board.board[0]
+    assert molten_rock.current_attack == 4 and molten_rock.current_health == 10
+
+
+def test_golden_molten_rock_effect_2() -> None:
+    """Test the effect for the golden Molten Rock minion when a non-Elemental is played."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MOLTEN_ROCK_GOLDEN)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    molten_rock = board.board[0]
+    assert molten_rock.current_attack == 4 and molten_rock.current_health == 8
+
+
+def test_golden_molten_rock_effect_3() -> None:
+    """Test the effect for the golden Molten Rock minion when an Elemental is summoned."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MOLTEN_ROCK_GOLDEN)
+    board.play_minion(0)
+
+    board.summon_minion(minions.SELLEMENTAL)
+
+    molten_rock = board.board[0]
+    assert molten_rock.current_attack == 4 and molten_rock.current_health == 8
+
