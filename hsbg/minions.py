@@ -782,7 +782,7 @@ YO_HO_OGRE_GOLDEN = Minion(
 
 # Neutral Pool
 def _managerie_mug_on_this_played(self: Minion, board: TavernGameBoard) -> None:
-    """Handle the battlecry effect for the Menagerie Mug effect.
+    """Handle the battlecry effect for the Menagerie Mug minion.
     Effect: Give 3 random friendly minions of different minion types +1/+1 (or +2/+2 if golden).
     """
     minions_by_race = {}
@@ -791,7 +791,7 @@ def _managerie_mug_on_this_played(self: Minion, board: TavernGameBoard) -> None:
             minions_by_race[minion.race] = []
         minions_by_race[minion.race].append(minion)
 
-    keys = random.sample(minions_by_race.keys(), k=min(3, len(minions_by_race)))
+    keys = random.sample(list(minions_by_race.keys()), k=min(3, len(minions_by_race)))
     for key in keys:
         minion = random.choice(minions_by_race[key])
         if self.is_golden:
