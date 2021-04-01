@@ -1068,7 +1068,9 @@ class BattlegroundsGame:
             self.start_turn_for_player(player)
             yield self.active_board
         finally:
-            self.end_turn()
+            # If the turn has not yet been ended, end it!
+            if self.is_turn_in_progress:
+                self.end_turn()
 
     def start_turn_for_player(self, player: int) -> None:
         """Start the turn for the given player.
