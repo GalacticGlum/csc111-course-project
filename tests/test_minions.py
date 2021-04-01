@@ -207,3 +207,27 @@ def test_golden_micro_mummy_effect() -> None:
         assert tabbycat.current_attack == 2 * i + 1 and tabbycat.current_health == 1
         board.next_turn()
         assert tabbycat.current_attack == 2 * (i + 1) + 1  and tabbycat.current_health == 1
+
+
+def test_murloc_tidecaller() -> None:
+    """Test the effect for the Murloc Tidecaller minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER)
+    board.play_minion(0)
+
+    # Whenever we summon a Murloc, the tidecaller minion gains +1 attack.
+    board.summon_minion(minions.MURLOC_SCOUT)
+    murloc_tidecaller = board.board[0]
+    assert murloc_tidecaller.current_attack == 2
+
+
+def test_golden_murloc_tidecaller() -> None:
+    """Test the effect for the golden Murloc Tidecaller minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER_GOLDEN)
+    board.play_minion(0)
+
+    # Whenever we summon a Murloc, the tidecaller minion gains +2 attack.
+    board.summon_minion(minions.MURLOC_SCOUT)
+    murloc_tidecaller = board.board[0]
+    assert murloc_tidecaller.current_attack == 4
