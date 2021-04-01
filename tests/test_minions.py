@@ -144,6 +144,7 @@ def test_golden_sellemental_effect() -> None:
 def test_micro_machine_effect() -> None:
     """Test the effect for the Micro Machine minion."""
     board = TavernGameBoard()
+    board.next_turn()
     board.add_minion_to_hand(minions.MICRO_MACHINE)
     board.play_minion(0)
 
@@ -154,9 +155,11 @@ def test_micro_machine_effect() -> None:
         board.next_turn()
         assert micro_machine.current_attack == i + 2 and micro_machine.current_health == 2
 
+
 def test_golden_micro_machine_effect() -> None:
     """Test the effect for the golden Micro Machine minion."""
     board = TavernGameBoard()
+    board.next_turn()
     board.add_minion_to_hand(minions.MICRO_MACHINE_GOLDEN)
     board.play_minion(0)
 
@@ -165,4 +168,42 @@ def test_golden_micro_machine_effect() -> None:
     for i in range(3):
         # At the start of each turn, we gain +2 Attack, but our health should not change.
         board.next_turn()
-        assert micro_machine.current_attack == 2 * i + 4 and micro_machine.current_health == 4
+        assert micro_machine.current_attack == 2 * (i + 2) and micro_machine.current_health == 4
+
+
+def test_micro_mummy_effect() -> None:
+    """Test the effect for the Micro Mummy minion."""
+    board = TavernGameBoard()
+    board.next_turn()
+
+    board.add_minion_to_hand(minions.MICRO_MUMMY)
+    board.add_minion_to_hand(minions.TABBYCAT)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    tabbycat = board.board[1]
+    for i in range(3):
+        # At the end of each turn, give a random friendly minion +1 Attack,
+        # but the health should not change.
+        assert tabbycat.current_attack == i + 1 and tabbycat.current_health == 1
+        board.next_turn()
+        assert tabbycat.current_attack == i + 2 and tabbycat.current_health == 1
+
+
+def test_golden_micro_mummy_effect() -> None:
+    """Test the effect for the golden Micro Mummy minion."""
+    board = TavernGameBoard()
+    board.next_turn()
+
+    board.add_minion_to_hand(minions.MICRO_MUMMY_GOLDEN)
+    board.add_minion_to_hand(minions.TABBYCAT)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    tabbycat = board.board[1]
+    for i in range(3):
+        # At the end of each turn, give a random friendly minion +2 Attack,
+        # but the health should not change.
+        assert tabbycat.current_attack == 2 * i + 1 and tabbycat.current_health == 1
+        board.next_turn()
+        assert tabbycat.current_attack == 2 * (i + 1) + 1  and tabbycat.current_health == 1
