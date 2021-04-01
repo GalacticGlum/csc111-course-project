@@ -34,6 +34,8 @@ MAX_TAVERN_RECRUIT_SIZE = 6
 MAX_TAVERN_GOLD = 10
 # The amount of gold the player gets per turn.
 GOLD_PER_TURN = 1
+# The amount of gold you start with
+STARTING_GOLD = 3
 
 # A list mapping each tavern tier to its upgrade cost.
 # The element at index i indicates the cost of upgrading FROM a tavern with tier i.
@@ -136,14 +138,14 @@ class TavernGameBoard:
         >>> board.next_turn()
         >>> board.turn_number == 1
         True
-        >>> board._spend_gold(1)
+        >>> board._spend_gold(3)
         True
         >>> board.gold == 0
         True
         >>> board.next_turn()
         >>> board.turn_number == 2
         True
-        >>> board.gold == 2
+        >>> board.gold == 4
         True
         """
         if self._turn_number > 0:
@@ -151,7 +153,7 @@ class TavernGameBoard:
             self._handle_on_end_turn()
 
         self._turn_number += 1
-        self._gold = min(self._turn_number * GOLD_PER_TURN, MAX_TAVERN_GOLD)
+        self._gold = min((self._turn_number - 1) * GOLD_PER_TURN + STARTING_GOLD, MAX_TAVERN_GOLD)
         self._refresh_recruits()
         if self._is_frozen:
             self._is_frozen = False
@@ -201,7 +203,7 @@ class TavernGameBoard:
         >>> board.next_turn()
         >>> board.refresh_recruits()
         True
-        >>> board.gold == 0
+        >>> board.gold == 2
         True
         >>> board.next_turn()
         >>> board.freeze()
@@ -257,11 +259,11 @@ class TavernGameBoard:
 
         >>> board = TavernGameBoard()
         >>> board.next_turn()
-        >>> board.upgrade_tavern()  # Not enough gold (we only have 1)!
+        >>> board.upgrade_tavern()  # Not enough gold (we only have 3)!
         False
         >>> board.tavern_tier == 1
         True
-        >>> for _ in range(4):
+        >>> for _ in range(2):
         ...     board.next_turn()
         >>> board.upgrade_tavern()  # We now have 5 gold
         True
@@ -386,7 +388,7 @@ class TavernGameBoard:
         >>> board = TavernGameBoard()
         >>> board._can_spend_gold(1)  # No turns have been started, so we have 0 gold!
         False
-        >>> board.next_turn()  # We have 1 gold
+        >>> board.next_turn()  # We have 3 gold
         >>> board._can_spend_gold(100)
         False
         >>> board._can_spend_gold(1)
@@ -404,12 +406,12 @@ class TavernGameBoard:
         >>> board = TavernGameBoard()
         >>> board._spend_gold(1)  # No turns have been started, so we have 0 gold!
         False
-        >>> board.next_turn()  # We have 1 gold
+        >>> board.next_turn()  # We have 3 gold
         >>> board._spend_gold(100)
         False
-        >>> board.gold == 1
+        >>> board.gold == 3
         True
-        >>> board._spend_gold(1)
+        >>> board._spend_gold(3)
         True
         >>> board.gold == 0
         True
@@ -444,8 +446,7 @@ class TavernGameBoard:
         Do nothing if there is no minion at the given index, or if there is not enough gold.
 
         >>> board = TavernGameBoard()
-        >>> for _ in range(3):  # Go to turn 3 so we have 3 gold.
-        ...     board.next_turn()
+        >>> board.next_turn()
         >>> minion = board.recruits[0]
         >>> board.buy_minion(0)
         True
@@ -533,8 +534,7 @@ class TavernGameBoard:
         board at the given index. Return whether the minion could be sold.
 
         >>> board = TavernGameBoard()
-        >>> for _ in range(3):  # Go to turn 3 so we have 3 gold.
-        ...     board.next_turn()
+        >>> board.next_turn()
         >>> board.buy_minion(0) and board.play_minion(0)  # We have 0 gold after buying
         True
         >>> board.sell_minion(0)
