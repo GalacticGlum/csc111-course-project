@@ -1,4 +1,5 @@
 """Test the minion implementations."""
+import random
 from hsbg import TavernGameBoard, minions
 
 
@@ -683,3 +684,91 @@ def test_golden_freedealing_gambler_effect() -> None:
     board.sell_minion(0)
     # The minion sells for 6 gold.
     assert board.gold == 6
+
+
+def test_managerie_mug_battlecry_1() -> None:
+    """Test the battlecry effect for the Managerie Mug minion when there are at least 3 friendly
+    minions of different types.
+    """
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)  # Elemental
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)  # Murloc
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER)   # Murloc
+    board.add_minion_to_hand(minions.TABBYCAT)  # Beast
+    board.add_minion_to_hand(minions.MENAGERIE_MUG)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    random.seed(69)
+    board.play_minion(4)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 4 and all_minions[0].current_health == 3
+    assert all_minions[2].current_attack == 2 and all_minions[2].current_health == 3
+    assert all_minions[3].current_attack == 2 and all_minions[3].current_health == 2
+
+
+def test_managerie_mug_battlecry_2() -> None:
+    """Test the battlecry effect for the Managerie Mug minion when there are less than 3 friendly
+    minions of different types.
+    """
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)  # Elemental
+    board.add_minion_to_hand(minions.TABBYCAT)  # Beast
+    board.add_minion_to_hand(minions.MENAGERIE_MUG)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+
+    random.seed(69)
+    board.play_minion(4)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 4 and all_minions[0].current_health == 3
+    assert all_minions[1].current_attack == 2 and all_minions[1].current_health == 2
+
+
+def test_golden_managerie_mug_battlecry_1() -> None:
+    """Test the battlecry effect for the golden Managerie Mug minion when there are at
+    least 3 friendly minions of different types.
+    """
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)  # Elemental
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)  # Murloc
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER)   # Murloc
+    board.add_minion_to_hand(minions.TABBYCAT)  # Beast
+    board.add_minion_to_hand(minions.MENAGERIE_MUG_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    random.seed(69)
+    board.play_minion(4)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 5 and all_minions[0].current_health == 4
+    assert all_minions[2].current_attack == 3 and all_minions[2].current_health == 4
+    assert all_minions[3].current_attack == 3 and all_minions[3].current_health == 3
+
+
+def test_golden_managerie_mug_battlecry_2() -> None:
+    """Test the battlecry effect for the golden Managerie Mug minion when there are
+    less than 3 friendly minions of different types.
+    """
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)  # Elemental
+    board.add_minion_to_hand(minions.TABBYCAT)  # Beast
+    board.add_minion_to_hand(minions.MENAGERIE_MUG_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+
+    random.seed(69)
+    board.play_minion(4)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 5 and all_minions[0].current_health == 4
+    assert all_minions[1].current_attack == 3 and all_minions[1].current_health == 3
