@@ -1070,7 +1070,6 @@ class BattlegroundsGame:
         return self._round_number
 
 
-@dataclass
 class Move:
     """A class representing a move in Hearthstone Battlegrounds.
 
@@ -1081,10 +1080,23 @@ class Move:
     action: MoveType
     index: Optional[int] = None
 
+    def __init__(self, action: MoveType, index: Optional[int] = None) -> None:
+        """Initialise the Move.
+
+        Preconditions:
+            - index is not None or action in {MoveType.UPGRADE, MoveType.REFRESH, MoveType.FREEZE, MoveType.END_TURN}
+            - index is None or action in {MoveType.BUY_MINION, MoveType.SELL_MINION, MoveType.PLAY_MINION}
+            - action != MoveType.BUY_MINION or 0 <= index < MAX_TAVERN_RECRUIT_SIZE
+            - action != MoveType.SELL_MINION or 0 <= index < MAX_TAVERN_BOARD_SIZE
+            - action != MoveType.PLAY_MINION or 0 <= index < MAX_HAND_SIZE
+        """
+        self.action = action
+        self.index = index
+
     @property
     def move_id(self) -> int:
         """Return the unique integer id of this move."""
-        return int(self.action) + (0 or self.index)
+        return int(self.action) + (self.index or 0)
 
     @staticmethod
     def from_id(move_id: int) -> Move:
