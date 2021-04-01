@@ -626,7 +626,7 @@ def _molten_rock_on_any_played(self: Minion, board: TavernGameBoard, played_mini
     """Handle the effect for the Molten Rock minion.
     Effect: After you play an Elemental, gain +1 (or +2 if golden) Health.
     """
-    if MinionRace.ELEMENTAL not in played_minion.race:
+    if played_minion is self or MinionRace.ELEMENTAL not in played_minion.race:
         return
     if self.is_golden:
         self.add_buff(Buff(0, 2, CardAbility.NONE))
