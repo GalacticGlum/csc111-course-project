@@ -840,7 +840,9 @@ class BattlegroundsGame:
 
     @contextmanager
     def turn_for_player(self, player: int) -> TavernGameBoard:
-        """Start and end a turn for the given player. Return the TavernGameBoard of the player.
+        """A context manager that automatically starts and ends a turn for the given player.
+        Return the TavernGameBoard of the player.
+
         Raise a ValueError if the turn could not be started.
 
         Preconditions:
