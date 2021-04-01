@@ -169,21 +169,21 @@ class MinionPool:
 # Beast Pool
 
 # Tabbycat summoned by Alleycat
-TABBY_CAT = Minion(
+TABBYCAT = Minion(
     'Tabbycat', CardClass.HUNTER, MinionRace.BEAST, 1, 1,
     purchasable=False
 )
-TABBY_CAT_GOLDEN = Minion(
+TABBYCAT_GOLDEN = Minion(
     'Tabbycat', CardClass.HUNTER, MinionRace.BEAST, 2, 2,
     is_golden=True, purchasable=False
 )
 
-ALLEY_CAT = Minion(
+ALLEYCAT = Minion(
     'Alleycat', CardClass.HUNTER, MinionRace.BEAST, 1, 1,
     abilities=CardAbility.BATTLECRY | CardAbility.SUMMON,
     _on_this_played=lambda self, board: board.summon_minion(board.pool.find(name='Tabbycat', is_golden=False))
 )
-ALLEY_CAT_GOLDEN = Minion(
+ALLEYCAT_GOLDEN = Minion(
     'Alleycat', CardClass.HUNTER, MinionRace.BEAST, 2, 2,
     is_golden=True, abilities=CardAbility.BATTLECRY | CardAbility.SUMMON,
     _on_this_played=lambda self, board: board.summon_minion(board.pool.find(name='Tabbycat', is_golden=True))
