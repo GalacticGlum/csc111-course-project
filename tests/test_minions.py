@@ -231,3 +231,20 @@ def test_golden_murloc_tidecaller() -> None:
     board.summon_minion(minions.MURLOC_SCOUT)
     murloc_tidecaller = board.board[0]
     assert murloc_tidecaller.current_attack == 4
+
+
+def test_murloc_tidehunter_battlecry() -> None:
+    """Test the battlecry effect for the Murloc Tidehunter minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_TIDEHUNTER)
+    board.play_minion(0)
+    assert board.get_minions_on_board() == [minions.MURLOC_TIDEHUNTER, minions.MURLOC_SCOUT]
+
+
+def test_murloc_tidehunter_battlecry() -> None:
+    """Test the battlecry effect for the Murloc Tidehunter minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_TIDEHUNTER_GOLDEN)
+    board.play_minion(0)
+    expected = [minions.MURLOC_TIDEHUNTER_GOLDEN, minions.MURLOC_SCOUT_GOLDEN]
+    assert board.get_minions_on_board() == expected
