@@ -368,13 +368,17 @@ class TavernGameBoard:
         >>> board.freeze()
         True
         """
-        past_limit = self._max_freeze_times is not None and self._times_frozen >= self._max_freeze_times
-        if self._is_frozen or past_limit:
+        if not self._can_freeze():
             return False
 
         self._times_frozen += 1
         self._is_frozen = True
         return True
+
+    def _can_freeze(self) -> bool:
+        """Return whether the recruits can be frozen."""
+        not_past_limit = self._max_freeze_times is None or self._times_frozen < self._max_freeze_times
+        return not self._is_frozen and not_past_limit
 
     def unfreeze(self) -> bool:
         """Unfreeze the selection of recruit minions. Do nothing if the recruits are not frozen.
@@ -857,11 +861,13 @@ class TavernGameBoard:
     def get_valid_moves(self) -> List[Move]:
         """Return a list of valid moves."""
         # We can always end the turn or freeze
-        moves = [Move(Action.END_TURN), Move(Action.FREEZE)]
+        moves = [Move(Action.END_TURN)]
         if self.gold >= self.get_tavern_upgrade_cost():
             moves.append(Move(Action.UPGRADE))
         if self.gold >= self.refresh_cost:
             moves.append(Move(Action.REFRESH))
+        if self._can_freeze():
+            moves.append(Move(Action.FREEZE))
 
         # Add buy minion moves
         if self.gold >= self._minion_buy_price:
