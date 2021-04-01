@@ -860,8 +860,7 @@ class TavernGameBoard:
 
     def get_valid_moves(self) -> List[Move]:
         """Return a list of valid moves."""
-        # We can always end the turn or freeze
-        moves = [Move(Action.END_TURN)]
+        moves = []
         if self.gold >= self.get_tavern_upgrade_cost():
             moves.append(Move(Action.UPGRADE))
         if self.gold >= self.refresh_cost:
@@ -883,6 +882,27 @@ class TavernGameBoard:
             if minion is not None:
                 moves.append(Move(Action.PLAY_MINION, index))
         return moves
+
+    def make_move(self, move: Move) -> None:
+        """Make the given move. This instance of TavernGameBoard will be mutated, and will
+        afterwards represent the game state after move is made.
+
+        If move is not a currently valid move, do nothing.
+        """
+        if move.action == Action.UPGRADE:
+            self.upgrade_tavern()
+        elif move.action == Action.REFRESH:
+            self.refresh_recruits()
+        elif move.action == Action.FREEZE:
+            self.freeze()
+        elif move.action == Action.BUY_MINION:
+            self.buy_minion(move.index)
+        elif move.action == Action.SELL_MINION:
+            self.sell_minion(move.index)
+        elif move.action == Action.PLAY_MINION:
+            self.play_minion(move.index)
+        else:
+            raise ValueError(f'{move} is not a valid move!')
 
     @property
     def won_previous(self) -> bool:
@@ -1194,7 +1214,7 @@ class Move:
             raise ValueError(f'{move_id} is not a valid move id!')
 
     def __str__(self) -> str:
-        return f'Move(action={self.action}, index={self.index})'
+        return f'Move(action={str(self.action)}, index={self.index})'
 
     def __repr__(self) -> str:
         return f'Move(action={repr(self.action)}, index={repr(self.index)})'
