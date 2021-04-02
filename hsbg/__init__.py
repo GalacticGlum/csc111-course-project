@@ -1370,6 +1370,15 @@ class BattlegroundsGame:
         return len(self.alive_boards) == 1
 
     @property
+    def winner(self) -> Optional[int]:
+        """Return the index of the winning player, or None if there is no winner yet."""
+        alive_boards = self.alive_boards
+        if len(alive_boards) == 1:
+            return self._boards.index(alive_boards[0])
+        else:
+            return None
+
+    @property
     def boards(self) -> List[TavernGameBoard]:
         """Return a list of all the game boards."""
         return self._boards
