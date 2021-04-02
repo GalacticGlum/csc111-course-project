@@ -1,6 +1,6 @@
 """Utility functions."""
 from __future__ import annotations
-from typing import Iterable, List, Dict, Optional, Callable, Any
+from typing import Any, Iterable, Tuple, List, Dict, Callable, Optional, Union
 
 
 def filter_minions(minions: Iterable[Minion], clone: bool = False, limit: Optional[int] = None,
@@ -30,8 +30,11 @@ def filter_minions(minions: Iterable[Minion], clone: bool = False, limit: Option
 
 
 def make_frequency_table(values: List[Any], key: Optional[Callable[[Any], Any]] = None) \
-        -> Dict[Any, int]:
+        -> Dict[Any, Union[int, Tuple[Tuple[Any], int]]]:
     """Return a dict mapping the frequency of each distinct element in the given list.
+
+    If a key is provided, then the value of the dict is a 2-tuple containing the frequency and
+    a tuple of the elements of values before the key was applied.
 
     Args:
         values: A list of values.
@@ -41,16 +44,30 @@ def make_frequency_table(values: List[Any], key: Optional[Callable[[Any], Any]] 
     >>> values = [1, 3, 3, 5, 4, 3]
     >>> make_frequency_table(values) == {1: 1, 3: 3, 4: 1, 5: 1}
     True
-    >>> make_frequency_table(values, key=lambda x: 2 * x) == {2: 1, 6: 3, 8: 1, 10: 1}
+    >>> expected = {2: (1, (1,)), 6: (3, (3, 3, 3)), 8: (1, (4,)), 10: (1, (5,))}
+    >>> make_frequency_table(values, key=lambda x: 2 * x) == expected
     True
     """
     table = {}
     for x in values:
         if key is not None:
-            x = key(x)
-        if x not in table:
-            table[x] = 0
-        table[x] += 1
+            y = key(x)
+            if y not in table:
+                table[y] = [0, []]
+
+            table[y][0] += 1
+            table[y][1].append(x)
+        else:
+            if x not in table:
+                table[x] = 0
+            table[x] += 1
+
+    if key is not None:
+        # Convert lists to tuples
+        for x in table.keys():
+            table[x][1] = tuple(table[x][1])
+            table[x] = tuple(table[x])
+
     return table
 
 
