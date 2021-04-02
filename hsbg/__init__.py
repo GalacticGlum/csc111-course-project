@@ -40,12 +40,13 @@ STARTING_GOLD = 3
 # A list mapping each tavern tier to its upgrade cost.
 # The element at index i indicates the cost of upgrading FROM a tavern with tier i.
 TAVERN_UPGRADE_COSTS = [
-    0,  # Padding element
-    5,  # Cost of upgrading from tier 1 (5 gold)
-    7,  # Cost of upgrading from tier 2 (7 gold)
-    8,  # Cost of upgrading from tier 3 (8 gold)
-    9,  # Cost of upgrading from tier 4 (9 gold)
-    10  # Cost of upgrading from tier 5 (10 gold)
+    0,   # Padding element
+    5,   # Cost of upgrading from tier 1 (5 gold)
+    7,   # Cost of upgrading from tier 2 (7 gold)
+    8,   # Cost of upgrading from tier 3 (8 gold)
+    9,   # Cost of upgrading from tier 4 (9 gold)
+    10,  # Cost of upgrading from tier 5 (10 gold)
+    0    # Padding element
 ]
 # The maximum tavern tier
 MAX_TAVERN_TIER = 6
