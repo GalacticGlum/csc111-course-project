@@ -1374,6 +1374,8 @@ def _khadgar_on_any_summoned(self: Minion, board: TavernGameBoard, summoned_mini
     Effect (regular): Your cards that summon minions summon twice as many.
     Effect (golden):  Your cards that summon minions summon three times as many.
     """
+    if summoned_minion is self:
+        return
     times = 3 if self.is_golden else 2
     # Summon times copies of the summoned card.
     for _ in range(times):
