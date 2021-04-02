@@ -1746,12 +1746,17 @@ def _defender_of_argus_on_this_played(self: Minion, board: TavernGameBoard) -> N
     """Handle the battlecry effect for the Defender of Argus minion.
     Effect: Give adjacent minions +1/+1 (or +2/+2 if golden) and Taunt.
     """
-    minions = board.get_minions_adjacent_to(self)
-    for minion in minions:
-        if self.is_golden:
-            minion.add_buff(Buff(2, 2, CardAbility.TAUNT))
-        else:
-            minion.add_buff(Buff(1, 1, CardAbility.TAUNT))
+    if self.is_golden:
+        buff = Buff(2, 2, CardAbility.TAUNT))
+    else:
+        buff = Buff(1, 1, CardAbility.TAUNT))
+
+    index = self.get_index_of_minion_on_board(self)
+    left, right = board.get_adjacent_minions(index)
+    if left is not None:
+        left.add_buff(buff)
+    if right is not None:
+        right.add_buff(buff)
 
 DEFENDER_OF_ARGUS = Minion(
     'Defender of Argus', CardClass.NEUTRAL, MinionRace.NONE, 2, 3,
