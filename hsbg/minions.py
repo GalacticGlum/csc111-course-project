@@ -1378,7 +1378,7 @@ def _khadgar_on_any_summoned(self: Minion, board: TavernGameBoard, summoned_mini
     # Summon times copies of the summoned card.
     for _ in range(times):
         minion = summoned_minion.clone(keep_buffs=True)
-        board.place_minion(minion)
+        board.summon_minion(minion)
 
 # TODO: Implement effect: Your cards that summon minions summon twice as many.
 # NOTE: This requires changing the C++ simulator as well, since this effect applies
@@ -1751,7 +1751,7 @@ def _defender_of_argus_on_this_played(self: Minion, board: TavernGameBoard) -> N
     else:
         buff = Buff(1, 1, CardAbility.TAUNT)
 
-    index = self.get_index_of_minion_on_board(self)
+    index = board.get_index_of_minion_on_board(self)
     left, right = board.get_adjacent_minions(index)
     if left is not None:
         left.add_buff(buff)
