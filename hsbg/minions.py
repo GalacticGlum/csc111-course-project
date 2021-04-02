@@ -1747,7 +1747,7 @@ def _defender_of_argus_on_this_played(self: Minion, board: TavernGameBoard) -> N
     Effect: Give adjacent minions +1/+1 (or +2/+2 if golden) and Taunt.
     """
     if self.is_golden:
-        buff = Buff(2, 2, CardAbility.TAUNT))
+        buff = Buff(2, 2, CardAbility.TAUNT)
     else:
         buff = Buff(1, 1, CardAbility.TAUNT))
 
