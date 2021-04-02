@@ -695,15 +695,51 @@ class TavernGameBoard:
 
         For each minion, if there are currently 3 duplicates in possession, then the 3 minions
         are removed and a golden copy is added to the hand.
+
+        >>> board = TavernGameBoard()
+        >>> minion = board.pool.find(name='Tabbycat')
+        >>> board.summon_minion(minion)
+        True
+        >>> board.summon_minion(minion)
+        True
+        >>> board.add_minion_to_hand(minion)  # We now have 3 Tabbycats! This will make a golden.
+        True
+        >>> board.hand[0] == board.pool.find(name='Tabbycat', is_golden=True)
+        True
+        >>> all(x is None for x in board.board)
+        True
+        >>> minion = board.pool.find(name='Murloc Scout')
+        >>> board.summon_minion(minion)
+        True
+        >>> board.summon_minion(minion)
+        True
+        >>> from hsbg.models import CardAbility, Buff
+        >>> board.board[0].add_buff(Buff(1, 1, CardAbility.TAUNT))
+        >>> board.board[1].add_buff(Buff(0, 3, CardAbility.DIVINE_SHIELD))
+        >>> board.add_minion_to_hand(minion)  # We now have 3 Murloc Scouts! This will make a golden.
+        True
+        >>> golden_minion = board.pool.find(name='Murloc Scout', is_golden=True)
+        >>> golden_minion.add_buff(Buff(1, 1, CardAbility.TAUNT))
+        >>> golden_minion.add_buff(Buff(0, 3, CardAbility.DIVINE_SHIELD))
+        >>> board.hand[1] == golden_minion
+        True
         """
         # Get non-golden minions (we don't care about golden minions!)
-        board_minions = self.get_minions_on_board(is_golden=False)
+        non_golden_minions = self.get_minions(is_golden=False)
         # Get the minion frequencies by name
-        # frequencies_by_name = make_frequency_table(non_golden_minions, key=lambda x: x.name)
-        # for name, frequency in frequencies_by_name.items():
-        #     if frequency != 3:
-        #         continue
-            # Get minion objects
+        frequencies_by_name = make_frequency_table(non_golden_minions, key=lambda x: x.name)
+        for name, (frequency, minions) in frequencies_by_name.items():
+            if frequency != 3:
+                continue
+
+            golden_copy = self.pool.get_golden(name)
+            for minion in minions:
+                # Carry over all buffs from the regular minions
+                # NOTE: We shouldn't be accessing the private _buffs attribute!
+                golden_copy._buffs += minion._buffs
+                # Remoe the regular minion
+                self.remove_minion(minion)
+            self.add_minion_to_hand(golden_copy, clone=False)
 
     def remove_minion_from_board(self, index: int) -> Optional[Minion]:
         """Remove the minion on the board at the given index. Do nothing if there is no minion at
