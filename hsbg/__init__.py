@@ -5,9 +5,9 @@ from enum import IntEnum
 from contextlib import contextmanager
 from typing import List, Optional, Dict
 
-from hsbg.utils import filter_minions
 from hsbg.minions import MinionPool
 from hsbg.combat import Battle, simulate_combat
+from hsbg.utils import filter_minions, make_frequency_table
 
 
 # The maximum number of minions a player can have in their hand.
@@ -570,6 +570,7 @@ class TavernGameBoard:
             minion = minion.clone()
 
         self._hand[index] = minion
+        self._try_make_golden()
         return True
 
     def sell_minion(self, index: int) -> bool:
@@ -686,7 +687,24 @@ class TavernGameBoard:
             minion.on_this_summoned(self)
             self._handle_on_any_summoned(minion)
 
+        self._try_make_golden()
         return True
+
+    def _try_make_golden(self) -> None:
+        """Try making golden copies of minions if possible.
+
+        For each minion, if there are currently 3 duplicates in possession, then the 3 minions
+        are removed and a golden copy is added to the hand.
+        """
+        # Get non-golden minions (we don't care about golden minions!)
+        board_minions = self.get_minions_on_board(is_golden=False)
+        # Get the minion frequencies by name
+        # frequencies_by_name = make_frequency_table(non_golden_minions, key=lambda x: x.name)
+        # for name, frequency in frequencies_by_name.items():
+        #     if frequency != 3:
+        #         continue
+            # Get minion objects
+
 
     def remove_minion_from_board(self, index: int) -> Optional[Minion]:
         """Remove the minion on the board at the given index. Do nothing if there is no minion at
@@ -768,6 +786,72 @@ class TavernGameBoard:
         ignore = ignore or []
         minions = [x for x in self.board if x is not None and x not in ignore]
         return filter_minions(minions, clone=clone, **kwargs)
+
+    def get_minions_in_hand(self, clone: bool = False, ignore: Optional[List[Minion]] = None,
+                            **kwargs) -> List[Minion]:
+        """Find all the minions in the hand matching the given keyword arguments.
+        Each keyword argument should be an attribute of the Minion class.
+
+        Args:
+            clone: Whether to clone the minions.
+            ignore: A list of minions to ignore.
+            **kwargs: Keyword arguments corresponding to minion attributes to match.
+
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Murloc Scout')
+        >>> minion_b = board.pool.find(name='Tabbycat', is_golden=True)
+        >>> board.add_minion_to_hand(minion_a) and board.add_minion_to_hand(minion_b)
+        True
+        >>> board.get_minions_in_hand() == [minion_a, minion_b]
+        True
+        >>> board.get_minions_in_hand(is_golden=True) == [minion_b]
+        True
+        >>> board.get_minions_in_hand(name='Eamon Ma') == []
+        True
+        >>> board.get_minions_in_hand(ignore=[minion_a]) == [minion_b]
+        True
+        >>> board.play_minion(0) and board.play_minion(1)
+        True
+        >>> board.get_minions_in_hand() == []
+        True
+        """
+        ignore = ignore or []
+        minions = [x for x in self.hand if x is not None and x not in ignore]
+        return filter_minions(minions, clone=clone, **kwargs)
+
+    def get_minions_in_possession(self, clone: bool = False, ignore: Optional[List[Minion]] = None,
+                                  **kwargs) -> List[Minion]:
+        """Find all the minions in possession matching the given keyword arguments.
+        Each keyword argument should be an attribute of the Minion class.
+
+        Args:
+            clone: Whether to clone the minions.
+            ignore: A list of minions to ignore.
+            **kwargs: Keyword arguments corresponding to minion attributes to match.
+
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Murloc Scout')
+        >>> minion_b = board.pool.find(name='Tabbycat', is_golden=True)
+        >>> board.add_minion_to_hand(minion_a) and board.add_minion_to_hand(minion_b)
+        True
+        >>> board.get_minions_in_possession() == [minion_a, minion_b]
+        True
+        >>> board.get_minions_in_possession(is_golden=True) == [minion_b]
+        True
+        >>> board.play_minion(0) and board.play_minion(1)
+        True
+        >>> board.get_minions_on_board() == [minion_a, minion_b]
+        True
+        >>> board.get_minions_on_board(is_golden=True) == [minion_b]
+        True
+        >>> board.get_minions_on_board(name='Eamon Ma') == []
+        True
+        >>> board.get_minions_on_board(ignore=[minion_a]) == [minion_b]
+        True
+        """
+        a = self.get_minions_in_hand(clone=clone, ignore=ignore, **kwargs)
+        b = self.get_minions_on_board(clone=clone, ignore=ignore, **kwargs)
+        return a + b
 
     def get_random_minions_on_board(self, n, clone: bool = False,
                                     ignore: Optional[List[Minion]] = None, **kwargs) \
