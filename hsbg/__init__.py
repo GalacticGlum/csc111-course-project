@@ -775,6 +775,42 @@ class TavernGameBoard:
         self._hand[index] = None
         return minion
 
+    def remove_minion(self, minion: Minion) -> bool:
+        """Remove the first occurence of the given minion from the hand or board.
+        Remove the minion from the board if and only if the minion could not be removed
+        from the hand first.
+
+        Return whether the minion was successfully removed.
+
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Murloc Scout')
+        >>> minion_b = board.pool.find(name='Tabbycat', is_golden=True)
+        >>> board.add_minion_to_hand(minion_a) and board.add_minion_to_hand(minion_b)
+        True
+        >>> board.play_minion(0)
+        True
+        >>> board.summon_minion(minion_b)
+        True
+        >>> board.remove_minion(minion_b)
+        True
+        >>> board.hand[1] == None
+        True
+        >>> board.remove_minion(minion_b)
+        True
+        >>> board.board[1] == None
+        True
+        >>> board.remove_minion(minion_a)
+        True
+        >>> board.board[0] == None
+        True
+        """
+        if (index := self.get_index_of_minion_in_hand(minion)) is not None:
+            return self.remove_minion_from_hand(index) is not None
+        elif (index := self.get_index_of_minion_on_board(minion)) is not None:
+            return self.remove_minion_from_board(index) is not None
+        else:
+            return False
+
     def _handle_on_any_played(self, played_minion: Minion) -> None:
         """Call the _on_any_played event on minions in the hand and on the board."""
         minions = self._hand + self._board
@@ -853,8 +889,8 @@ class TavernGameBoard:
         minions = [x for x in self.hand if x is not None and x not in ignore]
         return filter_minions(minions, clone=clone, **kwargs)
 
-    def get_minions_in_possession(self, clone: bool = False, ignore: Optional[List[Minion]] = None,
-                                  **kwargs) -> List[Minion]:
+    def get_minions(self, clone: bool = False, ignore: Optional[List[Minion]] = None,
+                    **kwargs) -> List[Minion]:
         """Find all the minions in possession matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
 
@@ -868,9 +904,9 @@ class TavernGameBoard:
         >>> minion_b = board.pool.find(name='Tabbycat', is_golden=True)
         >>> board.add_minion_to_hand(minion_a) and board.add_minion_to_hand(minion_b)
         True
-        >>> board.get_minions_in_possession() == [minion_a, minion_b]
+        >>> board.get_minions() == [minion_a, minion_b]
         True
-        >>> board.get_minions_in_possession(is_golden=True) == [minion_b]
+        >>> board.get_minions(is_golden=True) == [minion_b]
         True
         >>> board.play_minion(0) and board.play_minion(1)
         True
@@ -961,6 +997,34 @@ class TavernGameBoard:
         """
         try:
             return self.board.index(minion)
+        except ValueError:
+            return None
+
+    def get_index_of_minion_in_hand(self, minion: Minion) -> Optional[int]:
+        """Return the hand index of the given minion. If there are duplicate minions,
+        this returns the index of the leftmost duplicate.
+
+        Return None if the minion could not be found.
+
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Murloc Scout')
+        >>> minion_b = board.pool.find(name='Tabbycat')
+        >>> board.add_minion_to_hand(minion_a)
+        True
+        >>> board.add_minion_to_hand(minion_b)
+        True
+        >>> board.add_minion_to_hand(minion_a)
+        True
+        >>> board.get_index_of_minion_in_hand(minion_a)
+        0
+        >>> board.get_index_of_minion_in_hand(minion_b)
+        1
+        >>> minion_c = board.pool.find(name='Alleycat')
+        >>> board.get_index_of_minion_in_hand(minion_c) is None
+        True
+        """
+        try:
+            return self.hand.index(minion)
         except ValueError:
             return None
 
