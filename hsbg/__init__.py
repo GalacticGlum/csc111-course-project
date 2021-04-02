@@ -24,7 +24,8 @@ RECRUIT_NUM_PROGRESSION = [
     0,  # No new recruit after upgrading from tier 2
     1,  # One new recruit after upgrading from tier 3
     0,  # No onew recruit after upgrading from tier 4
-    1  # One new recruit after upgrading from tier 5
+    1,  # One new recruit after upgrading from tier 5
+    0   # Padding element
 ]
 # The amount of gold a refresh costs.
 TAVERN_REFRESH_COST = 1
