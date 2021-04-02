@@ -45,7 +45,7 @@ def run_games(n: int, players: List[Player]) -> None:
         players_copy = copy.deepcopy(players)
         winner, _ = run_game(players)
         stats[winner] += 1
-        print(f'Game {i} winner: Player {winner + 1}')
+        print(f'Game {i + 1} winner: Player {winner + 1}')
 
     for player in stats:
         print(f'Player {player}: {stats[player]}/{n} ({100.0 * stats[player] / n:.2f}%)')
