@@ -617,6 +617,7 @@ class TavernGameBoard:
                          empty position is used instead.
             call_events: Whether to call events on the played minion.
 
+        >>> random.seed(69)
         >>> board = TavernGameBoard()
         >>> for _ in range(10):  # Go to turn 10 so we have 10 gold.
         ...     board.next_turn()
@@ -1065,6 +1066,45 @@ class TavernGameBoard:
             return self.hand.index(minion)
         except ValueError:
             return None
+
+    def get_adjacent_minions(self, index: int) -> Tuple[Minion, Minion]:
+        """Return the minion to the left and right of the minion at the given board index.
+        If there is no adjacent minion, then return None for that minion instead.
+
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Tabbycat')
+        >>> minion_b = board.pool.find(name='Murloc Scout')
+        >>> minion_c = board.pool.find(name='Imp')
+        >>> board.summon_minion(minion_a)
+        True
+        >>> board.summon_minion(minion_b)
+        True
+        >>> board.summon_minion(minion_c)
+        True
+        >>> board.get_adjacent_minions(0) == (None, minion_b)
+        True
+        >>> board.get_adjacent_minions(1) == (minion_a, minion_c)
+        True
+        >>> board.get_adjacent_minions(2) == (minion_b, None)
+        True
+        >>> board.get_adjacent_minions(5) == (None, None)
+        True
+        >>> board.get_adjacent_minions(50) == (None, None)
+        True
+        """
+        if index < 0 or index >= len(self._board):
+            # The index is out of range.
+            return None, None
+
+        left, right = None, None
+        # Get left minion
+        if index > 0 and self._board[index - 1] is not None:
+            left = self._board[index - 1]
+        # Get right minion
+        if index < len(self._board) - 1:
+            right = self._board[index + 1]
+
+        return left, right
 
     def battle(self, enemy_board: TavernGameBoard) -> Battle:
         """Battle with the given enemy board. Return the battle statistics."""
