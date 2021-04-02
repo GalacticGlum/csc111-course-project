@@ -1368,11 +1368,13 @@ class BattlegroundsGame:
         if self.is_done:
             return
 
+        # NOTE: When there are an odd number of players remaining, this matchup algorithm
+        #       doesn't work! We need to figure out a way to pair up the odd player with a board.
         # Get the boards that are still alive
         alive_boards = self.alive_boards
         random.shuffle(alive_boards)
         # Partition boards into pairs
-        for i in range(0, self._num_players, 2):
+        for i in range(0, len(alive_boards), 2):
             board_a, board_b = alive_boards[i:i + 2]
             board_a.battle(board_b)
 
