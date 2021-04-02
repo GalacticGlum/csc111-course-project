@@ -705,7 +705,6 @@ class TavernGameBoard:
         #         continue
             # Get minion objects
 
-
     def remove_minion_from_board(self, index: int) -> Optional[Minion]:
         """Remove the minion on the board at the given index. Do nothing if there is no minion at
         the given index, or if the index is out of range.
@@ -739,6 +738,41 @@ class TavernGameBoard:
 
         minion = self._board[index]
         self._board[index] = None
+        return minion
+
+    def remove_minion_from_hand(self, index: int) -> Optional[Minion]:
+        """Remove the minion in the board at the given index. Do nothing if there is no minion at
+        the given index, or if the index is out of range.
+
+        Return the minion that was removed, or None if the removal was not successful.
+
+        >>> board = TavernGameBoard()
+        >>> minion_a = board.pool.find(name='Murloc Scout')
+        >>> minion_b = board.pool.find(name='Tabbycat')
+        >>> board.add_minion_to_hand(minion_a)
+        True
+        >>> board.add_minion_to_hand(minion_b)
+        True
+        >>> board.remove_minion_from_hand(0) == minion_a
+        True
+        >>> board.hand[0] is None
+        True
+        >>> board.remove_minion_from_hand(1) == minion_b
+        True
+        >>> board.hand[1] is None
+        True
+        >>> board.remove_minion_from_hand(2) is None  # Empty position
+        True
+        >>> board.remove_minion_from_hand(10) is None  # Out of range
+        True
+        """
+        if index < 0 or index >= len(self._hand) or self._hand[index] is None:
+            # The index is out of range or refers to a non-empty position.
+            # Use the first non-empty position instead.
+            return None
+
+        minion = self._hand[index]
+        self._hand[index] = None
         return minion
 
     def _handle_on_any_played(self, played_minion: Minion) -> None:
