@@ -1749,7 +1749,7 @@ def _defender_of_argus_on_this_played(self: Minion, board: TavernGameBoard) -> N
     if self.is_golden:
         buff = Buff(2, 2, CardAbility.TAUNT)
     else:
-        buff = Buff(1, 1, CardAbility.TAUNT))
+        buff = Buff(1, 1, CardAbility.TAUNT)
 
     index = self.get_index_of_minion_on_board(self)
     left, right = board.get_adjacent_minions(index)
