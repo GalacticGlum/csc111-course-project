@@ -14,13 +14,14 @@ NOTE: This is a collection of all minions in the Battlegrounds pool as of Patch 
 from __future__ import annotations
 import random
 import logging
-from typing import List, Dict, Optional, Union
+from typing import List, Set, Dict, Optional, Union
 
 from hsbg.utils import filter_minions
 from hsbg.models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
 
 
-def get_all_minions(gold_suffix: str = '_golden') -> Dict[str, Minion]:
+def get_all_minions(gold_suffix: str = '_golden', whitelist: Optional[Set[str]] = None) \
+        -> Dict[str, Minion]:
     """Return a dict mapping the name of each minion defined in the hsbg.minions module to
     its Minion object instance.
 
@@ -29,11 +30,13 @@ def get_all_minions(gold_suffix: str = '_golden') -> Dict[str, Minion]:
 
     Args:
         gold_suffix: The suffix to add to keys representing minions that are golden.
+        whitelist: A set containing the names of minions to include.
+                   If None, then all minions are included.
     """
     all_minions = {}
     globals_copy = globals().copy()
     for obj in globals_copy.values():
-        if not isinstance(obj, Minion):
+        if not isinstance(obj, Minion) or (whitelist is not None and obj.name not in whitelist):
             continue
         key = obj.name + (gold_suffix if obj.is_golden else '')
 
