@@ -13,10 +13,17 @@ NOTE: This is a collection of all minions in the Battlegrounds pool as of Patch 
 from __future__ import annotations
 import random
 import logging
+from pathlib import Path
 from typing import List, Set, Dict, Optional, Union
 
 from hsbg.utils import filter_minions
 from hsbg.models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
+
+
+# The path to the list of implemented minions
+MINION_LIST_PATH = Path(__file__).parent.parent / 'minion_list.txt'
+with open(MINION_LIST_PATH) as fp:
+    MINION_LIST = set(fp.read().splitlines())
 
 
 def get_all_minions(gold_suffix: str = '_golden', whitelist: Optional[Set[str]] = None) \
@@ -124,6 +131,11 @@ class MinionPool:
         True
         """
         def _predicate(x: Minion) -> bool:
+            # TODO: Remove this! This is only a temporary fix so that unimplemented minions
+            # are not added to the recruitment pool.
+            if x.name not in MINION_LIST:
+                return False
+
             if max_tier is not None and x.tier > max_tier:
                 return False
             if predicate is not None:
