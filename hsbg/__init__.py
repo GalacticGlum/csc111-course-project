@@ -1114,7 +1114,8 @@ class TavernGameBoard:
 
         return left, right
 
-    def get_bought_minions(self, turn_numbers: Iterable[int], clone: bool = False, **kwargs) \
+    def get_bought_minions(self, turn_numbers: Iterable[int], clone: bool = False,
+                           ignore: Optional[List[Minion]] = None, **kwargs) \
             -> Dict[int, List[Minion]]:
         """Find all the minions bought on the given turns matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
@@ -1125,6 +1126,7 @@ class TavernGameBoard:
         Args:
             turn_numbers: The turns to get minion purchase information for.
             clone: Whether to clone the minions.
+            ignore: A list of minions to ignore.
             **kwargs: Keyword arguments corresponding to minion attributes to match.
 
         >>> board = TavernGameBoard()
@@ -1140,12 +1142,15 @@ class TavernGameBoard:
         True
         """
         result = {}
+        ignore = ignore or []
         for turn_number in turn_numbers:
-            minions = self._bought_minions.get(turn_number, [])
+            minions = [x for x in self._bought_minions.get(turn_number, []) if x not in ignore]
             result[turn_number] = filter_minions(minions, clone=clone, **kwargs)
         return result
 
-    def get_bought_minions_this_turn(self, clone: bool = False, **kwargs) -> List[Minion]:
+    def get_bought_minions_this_turn(self, clone: bool = False,
+                                     ignore: Optional[List[Minion]] = None, **kwargs) \
+            -> List[Minion]:
         """Find all the minions currently bought this turn matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
 
@@ -1153,6 +1158,7 @@ class TavernGameBoard:
 
         Args:
             clone: Whether to clone the minions.
+            ignore: A list of minions to ignore.
             **kwargs: Keyword arguments corresponding to minion attributes to match.
 
         >>> board = TavernGameBoard()
@@ -1163,7 +1169,12 @@ class TavernGameBoard:
         >>> board.get_bought_minions_this_turn() == board.hand[:2]
         True
         """
-        minions = self.get_bought_minions([self._turn_number], clone=clone, **kwargs)
+        minions = self.get_bought_minions(
+            [self._turn_number],
+            clone=clone,
+            ignore=ignore,
+            **kwargs
+        )
         return minions[self._turn_number]
 
     def battle(self, enemy_board: TavernGameBoard) -> Battle:
