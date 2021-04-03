@@ -1575,3 +1575,27 @@ def test_golden_khadgar_effect() -> None:
         minions.MURLOC_SCOUT_GOLDEN
     ]
     assert board.get_minions_on_board() == expected
+
+
+def test_virmen_sensei_battlecry() -> None:
+    """Test the battlecry effect for the Virmen Sensei minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.TABBYCAT)
+    board.add_minion_to_hand(minions.VIRMEN_SENSEI)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 3 and minion.current_health == 3
+
+
+def test_golden_virmen_sensei_battlecry() -> None:
+    """Test the battlecry effect for the golden Virmen Sensei minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.TABBYCAT)
+    board.add_minion_to_hand(minions.VIRMEN_SENSEI_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion = board.board[0]
+    assert minion.current_attack == 5 and minion.current_health == 5
