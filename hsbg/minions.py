@@ -1333,7 +1333,7 @@ def _southsea_strongarm_on_this_played(self: Minion, board: TavernGameBoard) -> 
     if minion is None:
         return
 
-    n = len(board.get_bought_minions_this_turn(race=MinionRace.PIRATE, ignore=[self]))
+    n = len(board.get_minions_bought_this_turn(race=MinionRace.PIRATE, ignore=[self]))
     buff_amount = n * (2 if self.is_golden else 1)
     minion.add_buff(Buff(buff_amount, buff_amount, CardAbility.NONE))
 
