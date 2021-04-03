@@ -1102,3 +1102,42 @@ def test_golden_twilight_emissary_battlecry_2() -> None:
 
     minion = board.board[0]
     assert minion.current_attack == 1 and minion.current_health == 1
+
+
+def test_arcane_assistant_battlecry() -> None:
+    """Test the battlecry effect for the Arcane Assistant minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.add_minion_to_hand(minions.WATER_DROPLET)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.ARCANE_ASSISTANT)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    all_minions = board.board
+    assert all_minions[0].current_attack == 3 and all_minions[0].current_health == 3
+    assert all_minions[1].current_attack == 3 and all_minions[1].current_health == 3
+    assert all_minions[2].current_attack == 1 and all_minions[2].current_health == 1
+    assert all_minions[3].current_attack == 3 and all_minions[3].current_health == 3
+
+
+def test_golden_arcane_assistant_battlecry() -> None:
+    """Test the battlecry effect for the golden Arcane Assistant minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.add_minion_to_hand(minions.WATER_DROPLET)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.ARCANE_ASSISTANT_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    all_minions = board.board
+    assert all_minions[0].current_attack == 4 and all_minions[0].current_health == 4
+    assert all_minions[1].current_attack == 4 and all_minions[1].current_health == 4
+    assert all_minions[2].current_attack == 1 and all_minions[2].current_health == 1
+    assert all_minions[3].current_attack == 6 and all_minions[3].current_health == 6
+
