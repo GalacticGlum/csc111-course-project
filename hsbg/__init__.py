@@ -3,7 +3,7 @@ from __future__ import annotations
 import random
 from enum import IntEnum
 from contextlib import contextmanager
-from typing import List, Optional, Dict
+from typing import Iterable, List, Optional, Dict
 
 from hsbg.minions import MinionPool
 from hsbg.combat import Battle, simulate_combat
@@ -82,6 +82,7 @@ class TavernGameBoard:
     #   - _minion_sell_price: The amount of gold the player gets when they sell a minion.
     #   - _battle_history: A history of the battles between this board and enemy boards,
     #                      ordered by time of battle.
+    #   - _bought_minions: A dict mapping the minions bought at each turn.
     _turn_number: int
     _hero_health: int
     _tavern_tier: int
@@ -106,6 +107,7 @@ class TavernGameBoard:
     _minion_sell_price: int
 
     _battle_history: List[Battle]
+    _bought_minions: Dict[int, List[Minion]]
 
     def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40,
                  tavern_tier: int = 1, max_freeze_times: Optional[int] = 5) -> None:
@@ -140,6 +142,7 @@ class TavernGameBoard:
         self._minion_sell_price = TAVERN_MINION_SELL_PRICE
 
         self._battle_history = []
+        self._bought_minions = {}
 
     def next_turn(self) -> None:
         """Reset the tavern to the start of the next turn.
@@ -522,6 +525,11 @@ class TavernGameBoard:
         self._recruits[index] = None
         if not self.add_minion_to_hand(minion, clone=False):
             return False
+
+        # Add to history
+        if self._turn_number not in self._bought_minions:
+            self._bought_minions[self._turn_number] = []
+        self._bought_minions[self._turn_number].append(minion)
 
         minion.on_this_bought(self)
         return True
@@ -1105,6 +1113,58 @@ class TavernGameBoard:
             right = self._board[index + 1]
 
         return left, right
+
+    def get_bought_minions(self, turn_numbers: Iterable[int], clone: bool = False, **kwargs) \
+            -> Dict[int, List[Minion]]:
+        """Find all the minions bought on the given turns matching the given keyword arguments.
+        Each keyword argument should be an attribute of the Minion class.
+
+        Return a dict mapping each turn in turn_numbers to a list of minions.
+        Note that minions that were sold are STILL included in the output
+
+        Args:
+            turn_numbers: The turns to get minion purchase information for.
+            clone: Whether to clone the minions.
+            **kwargs: Keyword arguments corresponding to minion attributes to match.
+
+        >>> board = TavernGameBoard()
+        >>> board.next_turn()
+        >>> board.give_gold(10)
+        >>> all(board.buy_minion(i) for i in range(3))
+        True
+        >>> board.next_turn()
+        >>> board.give_gold(10)
+        >>> all(board.buy_minion(i) for i in range(3))
+        True
+        >>> board.get_bought_minions([1, 2]) == {1: board.hand[:3], 2: board.hand[3:6]}
+        True
+        """
+        result = {}
+        for turn_number in turn_numbers:
+            minions = self._bought_minions.get(turn_number, [])
+            result[turn_number] = filter_minions(minions, clone=clone, **kwargs)
+        return result
+
+    def get_bought_minions_this_turn(self, clone: bool = False, **kwargs) -> List[Minion]:
+        """Find all the minions currently bought this turn matching the given keyword arguments.
+        Each keyword argument should be an attribute of the Minion class.
+
+        Note that minions that were sold are STILL included in the output
+
+        Args:
+            clone: Whether to clone the minions.
+            **kwargs: Keyword arguments corresponding to minion attributes to match.
+
+        >>> board = TavernGameBoard()
+        >>> board.next_turn()
+        >>> board.give_gold(10)
+        >>> board.buy_minion(0) and board.buy_minion(2)
+        True
+        >>> board.get_bought_minions_this_turn() == board.hand[:2]
+        True
+        """
+        minions = self.get_bought_minions([self._turn_number], clone=clone, **kwargs)
+        return minions[self._turn_number]
 
     def battle(self, enemy_board: TavernGameBoard) -> Battle:
         """Battle with the given enemy board. Return the battle statistics."""
