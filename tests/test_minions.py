@@ -1344,3 +1344,42 @@ def test_golden_felfin_navigator_battlecry() -> None:
     assert all_minions[2].current_attack == 3 and all_minions[2].current_health == 4
     assert all_minions[3].current_attack == 1 and all_minions[3].current_health == 1
     assert all_minions[4].current_attack == 8 and all_minions[4].current_health == 8
+
+
+def test_bloodsail_cannoneer_battlecry() -> None:
+    """Test the Bloodsail Cannoneer minion."""
+    board =  TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.GOLDGRUBBER)
+    board.add_minion_to_hand(minions.RIPSNARL_CAPTAIN)
+    board.add_minion_to_hand(minions.BLOODSAIL_CANNONEER)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    all_minions = board.board
+    assert all_minions[0].current_attack == 1 and all_minions[0].current_health == 1
+    assert all_minions[1].current_attack == 5 and all_minions[1].current_health == 2
+    assert all_minions[2].current_attack == 7 and all_minions[2].current_health == 5
+    assert all_minions[3].current_attack == 4 and all_minions[3].current_health == 3
+
+
+def test_golden_bloodsail_cannoneer_battlecry() -> None:
+    """Test the golden Bloodsail Cannoneer minion."""
+    board =  TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.GOLDGRUBBER)
+    board.add_minion_to_hand(minions.RIPSNARL_CAPTAIN)
+    board.add_minion_to_hand(minions.BLOODSAIL_CANNONEER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    all_minions = board.board
+    assert all_minions[0].current_attack == 1 and all_minions[0].current_health == 1
+    assert all_minions[1].current_attack == 8 and all_minions[1].current_health == 2
+    assert all_minions[2].current_attack == 10 and all_minions[2].current_health == 5
+    assert all_minions[3].current_attack == 8 and all_minions[3].current_health == 6
+
