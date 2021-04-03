@@ -1639,3 +1639,43 @@ def test_golden_cobalt_scalebane_effect() -> None:
     assert board.board[1].current_attack == 7 and board.board[1].current_health == 1
 
 
+def test_majordomo_executus_effect() -> None:
+    """Test the effect for the Majordomo Executus minion."""
+    board = TavernGameBoard()
+    board.next_turn()
+
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.add_minion_to_hand(minions.WATER_DROPLET)
+    board.add_minion_to_hand(minions.MAJORDOMO_EXECUTUS)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+    board.play_minion(4)
+
+    board.next_turn()
+    minion = board.board[0]
+    assert minion.current_attack == 5 and minion.current_health == 5
+
+
+def test_golden_majordomo_executus_effect() -> None:
+    """Test the effect for the golden Majordomo Executus minion."""
+    board = TavernGameBoard()
+    board.next_turn()
+
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.add_minion_to_hand(minions.SELLEMENTAL)
+    board.add_minion_to_hand(minions.WATER_DROPLET)
+    board.add_minion_to_hand(minions.MAJORDOMO_EXECUTUS_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+    board.play_minion(4)
+
+    board.next_turn()
+    minion = board.board[0]
+    assert minion.current_attack == 9 and minion.current_health == 9
