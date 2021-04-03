@@ -1544,3 +1544,34 @@ def test_golden_southsea_strongarm_battlecry_2() -> None:
 
     minion = board.board[0]
     assert minion.current_attack == 8 and minion.current_health == 6
+
+
+def test_khadgar_effect() -> None:
+    """Test the effect for the Khadgar minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.KHADGAR)
+    board.add_minion_to_hand(minions.MURLOC_TIDEHUNTER)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    expected = [
+        minions.KHADGAR, minions.MURLOC_TIDEHUNTER,
+        minions.MURLOC_SCOUT, minions.MURLOC_SCOUT
+    ]
+    assert board.get_minions_on_board() == expected
+
+
+def test_golden_khadgar_effect() -> None:
+    """Test the effect for the Khadgar minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.KHADGAR_GOLDEN)
+    board.add_minion_to_hand(minions.MURLOC_TIDEHUNTER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    expected = [
+        minions.KHADGAR_GOLDEN, minions.MURLOC_TIDEHUNTER_GOLDEN,
+        minions.MURLOC_SCOUT_GOLDEN, minions.MURLOC_SCOUT_GOLDEN,
+        minions.MURLOC_SCOUT_GOLDEN
+    ]
+    assert board.get_minions_on_board() == expected
