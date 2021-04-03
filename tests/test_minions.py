@@ -1679,3 +1679,75 @@ def test_golden_majordomo_executus_effect() -> None:
     board.next_turn()
     minion = board.board[0]
     assert minion.current_attack == 9 and minion.current_health == 9
+
+
+def test_toxfin_battlecry() -> None:
+    """Test the battlecry effect for the Toxfin minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.TOXFIN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    assert CardAbility.POISONOUS in board.board[0].current_abilities
+
+
+def test_golden_toxfin_battlecry() -> None:
+    """Test the battlecry effect for the Toxfin minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.TOXFIN_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    assert CardAbility.POISONOUS in board.board[0].current_abilities
+
+
+def test_goldgrubber_effect() -> None:
+    """Test the effect for the Goldgrubber minion."""
+    board = TavernGameBoard()
+    board.next_turn()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER_GOLDEN)
+    board.add_minion_to_hand(minions.TABBYCAT_GOLDEN)
+    board.add_minion_to_hand(minions.GOLDGRUBBER)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    # We now have a golden Murloc Scout
+    board.play_minion(3)
+    board.play_minion(4)
+    board.play_minion(5)
+    # In total, we have 3 golden minions on the board.
+    minion = board.board[3]
+    assert minion.current_attack == 2 and minion.current_health == 2
+    board.next_turn()
+
+    assert minion.current_attack == 8 and minion.current_health == 8
+
+
+def test_golden_goldgrubber_effect() -> None:
+    """Test the effect for the Goldgrubber minion."""
+    board = TavernGameBoard()
+    board.next_turn()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER_GOLDEN)
+    board.add_minion_to_hand(minions.TABBYCAT_GOLDEN)
+    board.add_minion_to_hand(minions.GOLDGRUBBER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    # We now have a golden Murloc Scout
+    board.play_minion(3)
+    board.play_minion(4)
+    board.play_minion(5)
+    # In total, we have 3 golden minions on the board.
+    minion = board.board[3]
+    assert minion.current_attack == 4 and minion.current_health == 4
+    board.next_turn()
+
+    assert minion.current_attack == 20 and minion.current_health == 20
