@@ -1120,7 +1120,7 @@ class TavernGameBoard:
         Each keyword argument should be an attribute of the Minion class.
 
         Return a dict mapping each turn in turn_numbers to a list of minions.
-        Note that minions that were sold are STILL included in the output
+        Note that minions that were sold are STILL included in the output.
 
         Args:
             turn_numbers: The turns to get minion purchase information for.
@@ -1149,7 +1149,7 @@ class TavernGameBoard:
         """Find all the minions currently bought this turn matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
 
-        Note that minions that were sold are STILL included in the output
+        Note that minions that were sold are STILL included in the output.
 
         Args:
             clone: Whether to clone the minions.
