@@ -1599,3 +1599,43 @@ def test_golden_virmen_sensei_battlecry() -> None:
 
     minion = board.board[0]
     assert minion.current_attack == 5 and minion.current_health == 5
+
+
+def test_cobalt_scalebane_effect() -> None:
+    """Test the effect for the Cobalt Scalebane minion."""
+    board = TavernGameBoard()
+    board.next_turn()
+
+    board.add_minion_to_hand(minions.COBALT_SCALEBANE)
+    board.play_minion(0)
+    board.next_turn()
+
+    assert board.board[0].current_attack == 5 and board.board[0].current_health == 5
+
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+    board.next_turn()
+
+    assert board.board[0].current_attack == 5 and board.board[0].current_health == 5
+    assert board.board[1].current_attack == 4 and board.board[1].current_health == 1
+
+
+def test_golden_cobalt_scalebane_effect() -> None:
+    """Test the effect for the golden Cobalt Scalebane minion."""
+    board = TavernGameBoard()
+    board.next_turn()
+
+    board.add_minion_to_hand(minions.COBALT_SCALEBANE_GOLDEN)
+    board.play_minion(0)
+    board.next_turn()
+
+    assert board.board[0].current_attack == 10 and board.board[0].current_health == 10
+
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+    board.next_turn()
+
+    assert board.board[0].current_attack == 10 and board.board[0].current_health == 10
+    assert board.board[1].current_attack == 7 and board.board[1].current_health == 1
+
+
