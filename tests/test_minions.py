@@ -1432,3 +1432,115 @@ def test_golden_salty_looter_effect() -> None:
     assert minion_a.current_attack == 10 and minion_a.current_health == 10
     assert minion_b.current_attack == 2 and minion_b.current_health == 2
     assert minion_c.current_attack == 1 and minion_c.current_health == 1
+
+
+def test_southsea_strongarm_battlecry_1() -> None:
+    """Test the battlecry effect for the Southsea Strongarm minion."""
+    board = TavernGameBoard()
+    board.give_gold(10)
+    board._recruits = [
+        minions.GOLDGRUBBER.clone(),
+        minions.GOLDGRUBBER.clone(),
+        minions.RIPSNARL_CAPTAIN.clone(),
+        minions.MURLOC_SCOUT.clone(),
+        minions.SOUTHSEA_STRONGARM.clone(),
+        None
+    ]
+
+    board.buy_minion(0)
+    board.buy_minion(1)
+    board.buy_minion(2)
+
+    board.give_gold(10)
+    board.buy_minion(3)
+    board.buy_minion(4)
+
+    board.play_minion(0)
+    board.play_minion(4)
+
+    minion_a, minion_b = board.board[:2]
+    assert minion_a.current_attack == 5 and minion_a.current_health == 5
+    assert minion_b.current_attack == 4 and minion_b.current_health == 3
+
+
+def test_southsea_strongarm_battlecry_2() -> None:
+    """Test the battlecry effect for the Southsea Strongarm minion."""
+    board = TavernGameBoard()
+    board.give_gold(10)
+    board._recruits = [
+        minions.GOLDGRUBBER.clone(),
+        minions.GOLDGRUBBER.clone(),
+        minions.RIPSNARL_CAPTAIN.clone(),
+        minions.MURLOC_SCOUT.clone(),
+        minions.SOUTHSEA_STRONGARM.clone(),
+        None
+    ]
+
+    board.buy_minion(0)
+    board.buy_minion(1)
+    board.buy_minion(2)
+
+    board.give_gold(10)
+    board.buy_minion(3)
+
+    board.buy_minion(4)
+    board.play_minion(4)
+
+    minion = board.board[0]
+    assert minion.current_attack == 4 and minion.current_health == 3
+
+
+def test_golden_southsea_strongarm_battlecry_1() -> None:
+    """Test the battlecry effect for the golden Southsea Strongarm minion."""
+    board = TavernGameBoard()
+    board.give_gold(10)
+    board._recruits = [
+        minions.GOLDGRUBBER.clone(),
+        minions.GOLDGRUBBER.clone(),
+        minions.RIPSNARL_CAPTAIN.clone(),
+        minions.MURLOC_SCOUT.clone(),
+        minions.SOUTHSEA_STRONGARM_GOLDEN.clone(),
+        None
+    ]
+
+    board.buy_minion(0)
+    board.buy_minion(1)
+    board.buy_minion(2)
+
+    board.give_gold(10)
+    board.buy_minion(3)
+    board.buy_minion(4)
+
+    board.play_minion(0)
+    board.play_minion(4)
+
+    minion_a, minion_b = board.board[:2]
+    assert minion_a.current_attack == 8 and minion_a.current_health == 8
+    assert minion_b.current_attack == 8 and minion_b.current_health == 6
+
+
+def test_golden_southsea_strongarm_battlecry_2() -> None:
+    """Test the battlecry effect for the golden Southsea Strongarm minion."""
+    board = TavernGameBoard()
+    board.give_gold(10)
+    board._recruits = [
+        minions.GOLDGRUBBER.clone(),
+        minions.GOLDGRUBBER.clone(),
+        minions.RIPSNARL_CAPTAIN.clone(),
+        minions.MURLOC_SCOUT.clone(),
+        minions.SOUTHSEA_STRONGARM_GOLDEN.clone(),
+        None
+    ]
+
+    board.buy_minion(0)
+    board.buy_minion(1)
+    board.buy_minion(2)
+
+    board.give_gold(10)
+    board.buy_minion(3)
+
+    board.buy_minion(4)
+    board.play_minion(4)
+
+    minion = board.board[0]
+    assert minion.current_attack == 8 and minion.current_health == 6
