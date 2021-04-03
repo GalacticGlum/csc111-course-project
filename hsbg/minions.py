@@ -1305,7 +1305,7 @@ def _salty_looter_on_any_played(self: Minion, board: TavernGameBoard, played_min
     """Handle the effect for the Salty Looter minion when a card is played from the hand.
     Effect: Whenever you play a Pirate, gain +1/+1 (or +2/+2 if golden).
     """
-    if MinionRace.PIRATE not in played_minion.race:
+    if played_minion is self or MinionRace.PIRATE not in played_minion.race:
         return
     if self.is_golden:
         self.add_buff(Buff(2, 2, CardAbility.NONE))
