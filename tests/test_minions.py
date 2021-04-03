@@ -1257,3 +1257,47 @@ def test_golden_screwjank_clunker_battlecry_2() -> None:
     assert minion_a.current_attack == 1 and minion_a.current_health == 1
     assert minion_b.current_attack == 4 and minion_b.current_health == 10
 
+
+def test_coldlight_seer_battlecry() -> None:
+    """Test the battlecry effect for the Coldlight Seer minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.ROCKPOOL_HUNTER)
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER)
+    board.add_minion_to_hand(minions.TABBYCAT)
+    board.add_minion_to_hand(minions.COLDLIGHT_SEER)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+    board.play_minion(4)
+
+    all_minions = board.board
+    assert all_minions[0].current_attack == 2 and all_minions[0].current_health == 4
+    assert all_minions[1].current_attack == 2 and all_minions[1].current_health == 5
+    assert all_minions[2].current_attack == 1 and all_minions[2].current_health == 4
+    assert all_minions[3].current_attack == 1 and all_minions[3].current_health == 1
+    assert all_minions[4].current_attack == 2 and all_minions[4].current_health == 3
+
+
+def test_golden_coldlight_seer_battlecry() -> None:
+    """Test the battlecry effect for the golden Coldlight Seer minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.ROCKPOOL_HUNTER)
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER)
+    board.add_minion_to_hand(minions.TABBYCAT)
+    board.add_minion_to_hand(minions.COLDLIGHT_SEER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+    board.play_minion(4)
+
+    all_minions = board.board
+    assert all_minions[0].current_attack == 2 and all_minions[0].current_health == 6
+    assert all_minions[1].current_attack == 2 and all_minions[1].current_health == 7
+    assert all_minions[2].current_attack == 1 and all_minions[2].current_health == 6
+    assert all_minions[3].current_attack == 1 and all_minions[3].current_health == 1
+    assert all_minions[4].current_attack == 4 and all_minions[4].current_health == 6
+
