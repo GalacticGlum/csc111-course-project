@@ -1204,3 +1204,56 @@ def test_golden_iron_sensei_effect_2() -> None:
     minion_a, minion_b = board.board[:2]
     assert minion_a.current_attack == 1 and minion_a.current_health == 1
     assert minion_b.current_attack == 4 and minion_b.current_health == 4
+
+
+def test_screwjank_clunker_battlecry_1() -> None:
+    """Test the battlecry effect for the Screwjank Clunker minion when there is a friendly Mechc on the board."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.DEFLECT_O_BOT)
+    board.add_minion_to_hand(minions.SCREWJANK_CLUNKER)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion_a, minion_b = board.board[:2]
+    assert minion_a.current_attack == 5 and minion_a.current_health == 4
+    assert minion_b.current_attack == 2 and minion_b.current_health == 5
+
+
+def test_screwjank_clunker_battlecry_2() -> None:
+    """Test the battlecry effect for the Screwjank Clunker minion when there is no friendly Mechc on the board."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.SCREWJANK_CLUNKER)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion_a, minion_b = board.board[:2]
+    assert minion_a.current_attack == 1 and minion_a.current_health == 1
+    assert minion_b.current_attack == 2 and minion_b.current_health == 5
+
+
+def test_golden_screwjank_clunker_battlecry_1() -> None:
+    """Test the battlecry effect for the golden Screwjank Clunker minion when there is a friendly Mechc on the board."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.DEFLECT_O_BOT)
+    board.add_minion_to_hand(minions.SCREWJANK_CLUNKER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion_a, minion_b = board.board[:2]
+    assert minion_a.current_attack == 7 and minion_a.current_health == 6
+    assert minion_b.current_attack == 4 and minion_b.current_health == 10
+
+
+def test_golden_screwjank_clunker_battlecry_2() -> None:
+    """Test the battlecry effect for the golden Screwjank Clunker minion when there is no friendly Mechc on the board."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.SCREWJANK_CLUNKER_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    minion_a, minion_b = board.board[:2]
+    assert minion_a.current_attack == 1 and minion_a.current_health == 1
+    assert minion_b.current_attack == 4 and minion_b.current_health == 10
+
