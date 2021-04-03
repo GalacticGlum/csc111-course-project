@@ -1367,7 +1367,7 @@ def test_bloodsail_cannoneer_battlecry() -> None:
 
 def test_golden_bloodsail_cannoneer_battlecry() -> None:
     """Test the golden Bloodsail Cannoneer minion."""
-    board =  TavernGameBoard()
+    board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.GOLDGRUBBER)
     board.add_minion_to_hand(minions.RIPSNARL_CAPTAIN)
@@ -1383,3 +1383,52 @@ def test_golden_bloodsail_cannoneer_battlecry() -> None:
     assert all_minions[2].current_attack == 10 and all_minions[2].current_health == 5
     assert all_minions[3].current_attack == 8 and all_minions[3].current_health == 6
 
+
+def test_salty_looter_effect() -> None:
+    """Test the effect for the Salty Looter minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.SALTY_LOOTER)
+    board.play_minion(0)
+
+    minion_a = board.board[0]
+    assert minion_a.current_attack == 4 and minion_a.current_health == 4
+
+    board.add_minion_to_hand(minions.GOLDGRUBBER)
+    board.play_minion(0)
+
+    minion_b = board.board[1]
+    assert minion_a.current_attack == 5 and minion_a.current_health == 5
+    assert minion_b.current_attack == 2 and minion_b.current_health == 2
+
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+
+    minion_c = board.board[2]
+    assert minion_a.current_attack == 5 and minion_a.current_health == 5
+    assert minion_b.current_attack == 2 and minion_b.current_health == 2
+    assert minion_c.current_attack == 1 and minion_c.current_health == 1
+
+
+def test_golden_salty_looter_effect() -> None:
+    """Test the effect for the golden Salty Looter minion."""
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.SALTY_LOOTER_GOLDEN)
+    board.play_minion(0)
+
+    minion_a = board.board[0]
+    assert minion_a.current_attack == 8 and minion_a.current_health == 8
+
+    board.add_minion_to_hand(minions.GOLDGRUBBER)
+    board.play_minion(0)
+
+    minion_b = board.board[1]
+    assert minion_a.current_attack == 10 and minion_a.current_health == 10
+    assert minion_b.current_attack == 2 and minion_b.current_health == 2
+
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.play_minion(0)
+
+    minion_c = board.board[2]
+    assert minion_a.current_attack == 10 and minion_a.current_health == 10
+    assert minion_b.current_attack == 2 and minion_b.current_health == 2
+    assert minion_c.current_attack == 1 and minion_c.current_health == 1
