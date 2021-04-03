@@ -1376,7 +1376,7 @@ def _khadgar_on_any_summoned(self: Minion, board: TavernGameBoard, summoned_mini
     """
     if summoned_minion is self:
         return
-    times = 3 if self.is_golden else 2
+    times = 2 if self.is_golden else 1
     # Summon times copies of the summoned card.
     for _ in range(times):
         minion = summoned_minion.clone(keep_buffs=True)
