@@ -904,6 +904,25 @@ class TavernGameBoard:
         minions = [x for x in self.board if x is not None and x not in ignore]
         return filter_minions(minions, clone=clone, **kwargs)
 
+    def get_leftmost_minion_on_board(self, clone: bool = False) -> Optional[Minion]:
+        """Return the left-most minion on the board, or None if no minions are on the board.
+
+        Args:
+            clone: Whether to the clone minion.
+
+        >>> board = TavernGameBoard()
+        >>> board.get_leftmost_minion_on_board() is None
+        True
+        >>> board.summon_minion(board.pool.find(name='Murloc Scout'))
+        True
+        >>> board.get_leftmost_minion_on_board().name == 'Murloc Scout'
+        True
+        """
+        for minion in self._board:
+            if minion is not None:
+                return minion.clone() if clone else minion
+        return None
+
     def get_minions_in_hand(self, clone: bool = False, ignore: Optional[List[Minion]] = None,
                             **kwargs) -> List[Minion]:
         """Find all the minions in the hand matching the given keyword arguments.
