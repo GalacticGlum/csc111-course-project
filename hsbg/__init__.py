@@ -840,15 +840,15 @@ class TavernGameBoard:
         True
         >>> board.remove_minion(minion_b)
         True
-        >>> board.hand[1] == None
+        >>> board.hand[1] is None
         True
         >>> board.remove_minion(minion_b)
         True
-        >>> board.board[1] == None
+        >>> board.board[1] is None
         True
         >>> board.remove_minion(minion_a)
         True
-        >>> board.board[0] == None
+        >>> board.board[0] is None
         True
         """
         if (index := self.get_index_of_minion_in_hand(minion)) is not None:
