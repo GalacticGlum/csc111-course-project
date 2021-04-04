@@ -20,21 +20,12 @@ else:
 
 
 # A list of abilities supported by the C++ simulator
-_SIMULATOR_ABILITIES = [
+SIMULATOR_ABILITIES = [
     CardAbility.TAUNT,
     CardAbility.DIVINE_SHIELD,
     CardAbility.POISONOUS,
     CardAbility.WINDFURY
 ]
-
-# A dict mapping CardAbility objects
-CARD_ABILITY_TO_STR = {
-    CardAbility.TAUNT: 'taunt',
-    CardAbility.DIVINE_SHIELD: 'divine shield',
-    CardAbility.POISONOUS: 'poisonous',
-    CardAbility.WINDFURY: 'windfury',
-    CardAbility.REBORN: 'reborn'
-}
 
 
 @dataclass
@@ -222,7 +213,7 @@ def battle_to_str(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard)
 
 
 def game_board_to_str(board: TavernGameBoard) -> str:
-    """Return the given TavernGameBoard in a string-based format.
+    """Return the string representation of this TavernGameBoard.
 
     >>> from hsbg import TavernGameBoard
     >>> board = TavernGameBoard()
@@ -275,7 +266,7 @@ def game_board_to_str(board: TavernGameBoard) -> str:
             continue
 
         buffs = [
-            CARD_ABILITY_TO_STR[ability] for ability in _SIMULATOR_ABILITIES
+            ability.as_format_str().lower() for ability in SIMULATOR_ABILITIES
             if ability in minion.current_abilities
         ]
 

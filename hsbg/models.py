@@ -52,6 +52,20 @@ class CardAbility(Flag):
     OVERKILL = auto()
     DISCOVER = auto()
 
+    def as_format_str(self) -> str:
+        """Return this CardAbility as a properly formatted string.
+
+        >>> CardAbility.NONE.as_format_str()
+        'None'
+        >>> CardAbility.START_OF_COMBAT.as_format_str()
+        'Start Of Combat'
+        >>> CardAbility.MEGA_WINDFURY.as_format_str()
+        'Mega Windfury'
+        """
+        name = self.name.replace('_', ' ')
+        parts = name.split()
+        return ' '.join(x[0].upper() + x[1:].lower() for x in parts)
+
 
 class MinionRace(Flag):
     """The race of the minion."""
@@ -79,7 +93,7 @@ class Buff:
     """
     attack: int
     health: int
-    abilities: MinionAbility
+    abilities: CardAbility
 
 
 @dataclass
@@ -120,7 +134,7 @@ class Minion:
     tier: int = 1
 
     is_golden: bool = False
-    abilities: MinionAbility = CardAbility.NONE
+    abilities: CardAbility = CardAbility.NONE
 
     purchasable: bool = True
     _buffs: List[Buff] = field(default_factory=list)
@@ -146,7 +160,7 @@ class Minion:
         return self.attack + sum(buff.attack for buff in self._buffs)
 
     @property
-    def current_abilities(self) -> MinionAbility:
+    def current_abilities(self) -> CardAbility:
         """Return the current abilities of this minion (including buffs)."""
         current_abilities = self.abilities
         for buff in self._buffs:
@@ -156,14 +170,14 @@ class Minion:
     def add_buff(self, buff: Buff) -> None:
         """Apply the given buff to this minion whose source is the given minion.
 
-        >>> minion = Minion('Lonely Boy', MinionRace.DEMON, 0, 0)  # A lonely minion.
-        >>> buff = Buff(health=1, attack=2, abilities=MinionAbility.TAUNT |\
-                                                      MinionAbility.DIVINE_SHIELD)
+        >>> minion = Minion('Lonely Boy', CardClass.NEUTRAL, MinionRace.DEMON, 0, 0)  # A lonely minion.
+        >>> buff = Buff(health=1, attack=2, abilities=CardAbility.TAUNT |\
+                                                      CardAbility.DIVINE_SHIELD)
         >>> minion.add_buff(buff)
         >>> minion.current_health == 1 and minion.current_attack == 2
         True
-        >>> MinionAbility.TAUNT in minion.current_abilities and \
-            MinionAbility.DIVINE_SHIELD in minion.current_abilities
+        >>> CardAbility.TAUNT in minion.current_abilities and \
+            CardAbility.DIVINE_SHIELD in minion.current_abilities
         True
         """
         self._buffs.append(buff)
@@ -172,17 +186,17 @@ class Minion:
         """Remove the given buff.
         Do nothing if the given buff is not applied to this minion.
 
-        >>> minion = Minion('Lonely Boy', MinionRace.DEMON, 0, 0)  # A lonely minion.
-        >>> buff = Buff(health=1, attack=2, abilities=MinionAbility.TAUNT |\
-                                                      MinionAbility.DIVINE_SHIELD)
+        >>> minion = Minion('Lonely Boy', CardClass.NEUTRAL, MinionRace.DEMON, 0, 0)  # A lonely minion.
+        >>> buff = Buff(health=1, attack=2, abilities=CardAbility.TAUNT |\
+                                                      CardAbility.DIVINE_SHIELD)
         >>> minion.add_buff(buff)
         >>> minion.remove_buff(buff)
         >>> minion.current_health == 0 and minion.current_attack == 0
         True
-        >>> minion.current_abilities == MinionAbility.NONE
+        >>> minion.current_abilities == CardAbility.NONE
         True
         """
-        if buff not in self._temp_buffs:
+        if buff not in self._buffs:
             return
         self._buffs.remove(buff)
 
@@ -192,7 +206,7 @@ class Minion:
         Args:
             keep_buffs: Whether to keep the buffs applied to this minion.
 
-        >>> minion = Minion('Lonely Boy', MinionRace.DEMON, 0, 0)  # A lonely minion.
+        >>> minion = Minion('Lonely Boy', CardClass.NEUTRAL, MinionRace.DEMON, 0, 0)  # A lonely minion.
         >>> copy_minion = minion.clone()
         >>> minion is copy_minion
         False
