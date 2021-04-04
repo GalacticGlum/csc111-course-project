@@ -13,6 +13,7 @@ in the Python recruitment phase simulator, and the C++ combat phase simulator.
 from __future__ import annotations
 import random
 import logging
+import argparse
 from pathlib import Path
 from typing import List, Set, Dict, Optional, Union
 
@@ -53,6 +54,16 @@ def get_all_minions(gold_suffix: str = '_golden', whitelist: Optional[Set[str]] 
         all_minions[key] = obj
     return all_minions
 
+
+def _scan_minion_list() -> None:
+    """Produces a summary of which minions are included in the minion list."""
+    minions = get_all_minions()
+    visited = set()
+    for minion in minions.values():
+        if minion.name in visited or minion.name in MINION_LIST:
+            continue
+        visited.add(minion.name)
+        print(minion.name)
 
 # A dict mapping each tier to the number of copies of each minion with that tier.
 TIER_NUM_COPIES = {
@@ -1815,3 +1826,13 @@ QIRAJI_HARBINGER_GOLDEN = Minion(
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+    parser = argparse.ArgumentParser(description='Command-line tool to view all minions.')
+    parser.add_argument('task', help='The task to execute', choices={'scan', 'verify'})
+    args = parser.parse_args()
+    if args.task == 'scan':
+        _scan_minion_list()
+    elif args.task == 'verify':
+        raise NotImplementedError()
+    else:
+        raise ValueError(f'\'{args.task}\' is an invalid task!')
