@@ -64,6 +64,8 @@ def _scan_minion_list() -> None:
             continue
         visited.add(minion.name)
         print(minion.name)
+    if len(visited) == 0:
+        print('All minions are in the minion list!')
 
 # A dict mapping each tier to the number of copies of each minion with that tier.
 TIER_NUM_COPIES = {
