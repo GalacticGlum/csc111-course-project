@@ -1,18 +1,12 @@
-import hsbg
-import hsbg.combat
+import time
+import pprint
+from hsbg.ai import RandomPlayer, run_game, run_games
 
-game = hsbg.BattlegroundsGame(num_players=2)
+winner, move_sequence = run_game([RandomPlayer(), RandomPlayer()])
+print(f'Player {winner + 1} won the game!')
+# pprint.pprint(move_sequence)
 
-while not game.is_done:
-    with game.turn_for_player(0) as board:
-        if board.turn_number == 1:
-            board.add_minion_to_hand(hsbg.minions.MURLOC_SCOUT)
-            board.play_minion(0)
-
-    with game.turn_for_player(1) as board:
-        if board.turn_number == 1:
-            board.add_minion_to_hand(hsbg.minions.ALLEY_CAT)
-            board.play_minion(0)
-
-    print(f'Round #{game.round_number}: {game.boards[0].hero_health} hp vs {game.boards[1].hero_health} hp')
-    game.next_round()
+# start_time=time.time()
+# n = 100
+# run_games(n, [RandomPlayer(), RandomPlayer()], n_jobs=100)
+# print('Took {:.2f} seconds to run {} games'.format(time.time() - start_time, n))
