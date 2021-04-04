@@ -722,10 +722,8 @@ def test_managerie_mug_battlecry_2() -> None:
     board.add_minion_to_hand(minions.MENAGERIE_MUG)
     board.play_minion(0)
     board.play_minion(1)
-    board.play_minion(2)
-
     random.seed(69)
-    board.play_minion(4)
+    board.play_minion(2)
 
     all_minions = board.get_minions_on_board()
     assert all_minions[0].current_attack == 4 and all_minions[0].current_health == 3
@@ -1785,3 +1783,90 @@ def test_golden_defender_of_argus_battlecry() -> None:
                                         and CardAbility.TAUNT in minion_a.current_abilities
     assert minion_b.current_attack == 4 and minion_b.current_health == 4 \
                                         and CardAbility.TAUNT in minion_b.current_abilities
+
+
+def test_managerie_jug_battlecry_1() -> None:
+    """Test the battlecry effect for the Managerie Jug minion when there are at least 3 friendly
+    minions of different types.
+    """
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)  # Elemental
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)  # Murloc
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER)   # Murloc
+    board.add_minion_to_hand(minions.TABBYCAT)  # Beast
+    board.add_minion_to_hand(minions.MENAGERIE_JUG)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    random.seed(69)
+    board.play_minion(4)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 5 and all_minions[0].current_health == 4
+    assert all_minions[2].current_attack == 3 and all_minions[2].current_health == 4
+    assert all_minions[3].current_attack == 3 and all_minions[3].current_health == 3
+
+
+def test_managerie_jug_battlecry_2() -> None:
+    """Test the battlecry effect for the Managerie Jug minion when there are less than 3 friendly
+    minions of different types.
+    """
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)  # Elemental
+    board.add_minion_to_hand(minions.TABBYCAT)  # Beast
+    board.add_minion_to_hand(minions.MENAGERIE_JUG)
+    board.play_minion(0)
+    board.play_minion(1)
+    random.seed(69)
+    board.play_minion(2)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 5 and all_minions[0].current_health == 4
+    assert all_minions[1].current_attack == 3 and all_minions[1].current_health == 3
+
+
+def test_golden_managerie_jug_battlecry_1() -> None:
+    """Test the battlecry effect for the golden Managerie Jug minion when there are at
+    least 3 friendly minions of different types.
+    """
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)  # Elemental
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)  # Murloc
+    board.add_minion_to_hand(minions.MURLOC_TIDECALLER)   # Murloc
+    board.add_minion_to_hand(minions.TABBYCAT)  # Beast
+    board.add_minion_to_hand(minions.MENAGERIE_JUG_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+    board.play_minion(3)
+
+    random.seed(69)
+    board.play_minion(4)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 7 and all_minions[0].current_health == 6
+    assert all_minions[2].current_attack == 5 and all_minions[2].current_health == 6
+    assert all_minions[3].current_attack == 5 and all_minions[3].current_health == 5
+
+
+def test_golden_managerie_jug_battlecry_2() -> None:
+    """Test the battlecry effect for the golden Managerie Jug minion when there are
+    less than 3 friendly minions of different types.
+    """
+    board = TavernGameBoard()
+    board.add_minion_to_hand(minions.PARTY_ELEMENTAL)  # Elemental
+    board.add_minion_to_hand(minions.TABBYCAT)  # Beast
+    board.add_minion_to_hand(minions.MENAGERIE_JUG_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1)
+    board.play_minion(2)
+
+    random.seed(69)
+    board.play_minion(4)
+
+    all_minions = board.get_minions_on_board()
+    assert all_minions[0].current_attack == 7 and all_minions[0].current_health == 6
+    assert all_minions[1].current_attack == 5 and all_minions[1].current_health == 5
+
