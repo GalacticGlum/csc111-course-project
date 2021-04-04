@@ -2,6 +2,7 @@
 These are just a collection of different battles that always have the same result
 (no matter the random move taken).
 """
+from hsbg.models import Buff, CardAbility
 from hsbg import TavernGameBoard, minions
 
 
@@ -23,6 +24,12 @@ def test_battle_1() -> None:
     friendly_board.play_minion(0)
     friendly_board.play_minion(1)
 
+    # Test state of the friendly board after playing all minions
+    assert friendly_board.get_minions_on_board() == [
+        minions.TABBYCAT,
+        minions.SCAVENGING_HYENA
+    ]
+
     enemy_board = TavernGameBoard()
     enemy_board.add_minion_to_hand(minions.TABBYCAT)
     enemy_board.add_minion_to_hand(minions.TABBYCAT)
@@ -30,6 +37,9 @@ def test_battle_1() -> None:
     enemy_board.play_minion(0)
     enemy_board.play_minion(1)
     enemy_board.play_minion(2)
+
+    # Test state of the enemy board after playing all minions
+    assert enemy_board.get_minions_on_board() == [minions.TABBYCAT_GOLDEN]
 
     battle = friendly_board.battle(enemy_board)
     assert battle.win_probability == 1 and battle.tie_probability == 0 \
@@ -47,14 +57,13 @@ def test_battle_2() -> None:
         board
         * Pack Leader
         * Alleycat
-        * Tabbycat
         * Kindly Grandmother
         * Scavenging Hyena
         vs
         * Murloc Tidecaller
         * Murloc Tidehunter
         * Murloc Scout
-        * Rockpool Hunter
+        * Old Murk-Eye
     The friendly player should win.
     """
     friendly_board = TavernGameBoard()
@@ -67,15 +76,37 @@ def test_battle_2() -> None:
     friendly_board.play_minion(2)
     friendly_board.play_minion(3)
 
+    # Test state of the friendly board after playing all minions
+    tabbycat = minions.TABBYCAT.clone()
+    tabbycat.add_buff(Buff(2, 0, CardAbility.NONE))
+    assert friendly_board.get_minions_on_board() == [
+        minions.PACK_LEADER,
+        minions.ALLEYCAT,
+        tabbycat,
+        minions.KINDLY_GRANDMOTHER,
+        minions.SCAVENGING_HYENA
+    ]
+
     enemy_board = TavernGameBoard()
     enemy_board.add_minion_to_hand(minions.MURLOC_TIDECALLER)
     enemy_board.add_minion_to_hand(minions.MURLOC_TIDEHUNTER)
     enemy_board.add_minion_to_hand(minions.MURLOC_SCOUT)
-    enemy_board.add_minion_to_hand(minions.ROCKPOOL_HUNTER)
-    friendly_board.play_minion(0)
-    friendly_board.play_minion(1)
-    friendly_board.play_minion(2)
-    friendly_board.play_minion(3)
+    enemy_board.add_minion_to_hand(minions.OLD_MURK_EYE)
+    enemy_board.play_minion(0)
+    enemy_board.play_minion(1)
+    enemy_board.play_minion(2)
+    enemy_board.play_minion(3)
+
+    # Test state of the enemy board after playing all minions
+    murloc_tidecaller = minions.MURLOC_TIDECALLER.clone()
+    murloc_tidecaller.add_buff(Buff(1, 0, CardAbility.NONE))
+    assert enemy_board.get_minions_on_board() == [
+        murloc_tidecaller,
+        minions.MURLOC_TIDEHUNTER,
+        minions.MURLOC_SCOUT,
+        minions.MURLOC_SCOUT,
+        minions.OLD_MURK_EYE
+    ]
 
     battle = friendly_board.battle(enemy_board)
     assert battle.win_probability == 1 and battle.tie_probability == 0 \
