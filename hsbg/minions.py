@@ -224,7 +224,6 @@ SCAVENGING_HYENA_GOLDEN = Minion(
 )
 
 # Demon Pool
-# TODO: Deathrattle (Give this minion's attack to a random friendly minion)
 FIENDISH_SERVANT = Minion(
     'Fiendish Servant', CardClass.WARLOCK, MinionRace.DEMON, 2, 2,
     abilities=CardAbility.DEATH_RATTLE
@@ -1734,12 +1733,12 @@ RIPSNARL_CAPTAIN_GOLDEN = Minion(
 # Neutral Pool
 # TODO: Implement effect: After a friendly minion loses Divine Shield, gain +2 Attack.
 BOLVAR_FIREBLOOD = Minion(
-    'Bolvar. Fireblood', CardClass.PALADIN, MinionRace.NONE, 1, 7,
+    'Bolvar, Fireblood', CardClass.PALADIN, MinionRace.NONE, 1, 7,
     cost=5, tier=4, rarity=CardRarity.LEGENDARY, abilities=CardAbility.DIVINE_SHIELD
 )
 # TODO: Implement effect: After a friendly minion loses Divine Shield, gain +4 Attack.
 BOLVAR_FIREBLOOD_GOLDEN = Minion(
-    'Bolvar. Fireblood', CardClass.PALADIN, MinionRace.NONE, 2, 14,
+    'Bolvar, Fireblood', CardClass.PALADIN, MinionRace.NONE, 2, 14,
     cost=5, tier=4, rarity=CardRarity.LEGENDARY, is_golden=True,
     abilities=CardAbility.DIVINE_SHIELD
 )
