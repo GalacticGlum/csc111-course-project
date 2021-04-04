@@ -1781,7 +1781,7 @@ def _managerie_jug_on_this_played(self: Minion, board: TavernGameBoard) -> None:
             minions_by_race[minion.race] = []
         minions_by_race[minion.race].append(minion)
 
-    keys = random.sample(minions_by_race.keys(), k=min(3, len(minions_by_race)))
+    keys = random.sample(list(minions_by_race.keys()), k=min(3, len(minions_by_race)))
     for key in keys:
         minion = random.choice(minions_by_race[key])
         if self.is_golden:
