@@ -1751,3 +1751,37 @@ def test_golden_goldgrubber_effect() -> None:
     board.next_turn()
 
     assert minion.current_attack == 20 and minion.current_health == 20
+
+
+def test_defender_of_argus_battlecry() -> None:
+    """Test the battlecry effect for the Defender of Argus minion."""
+    board =  TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.GOLDGRUBBER)
+    board.add_minion_to_hand(minions.DEFENDER_OF_ARGUS)
+    board.play_minion(0)
+    board.play_minion(1, 2)
+    board.play_minion(2, 1)
+
+    minion_a, minion_b = board.board[0], board.board[2]
+    assert minion_a.current_attack == 2 and minion_a.current_health == 2 \
+                                        and CardAbility.TAUNT in minion_a.current_abilities
+    assert minion_b.current_attack == 3 and minion_b.current_health == 3 \
+                                        and CardAbility.TAUNT in minion_b.current_abilities
+
+
+def test_golden_defender_of_argus_battlecry() -> None:
+    """Test the battlecry effect for the golden Defender of Argus minion."""
+    board =  TavernGameBoard()
+    board.add_minion_to_hand(minions.MURLOC_SCOUT)
+    board.add_minion_to_hand(minions.GOLDGRUBBER)
+    board.add_minion_to_hand(minions.DEFENDER_OF_ARGUS_GOLDEN)
+    board.play_minion(0)
+    board.play_minion(1, 2)
+    board.play_minion(2, 1)
+
+    minion_a, minion_b = board.board[0], board.board[2]
+    assert minion_a.current_attack == 3 and minion_a.current_health == 3 \
+                                        and CardAbility.TAUNT in minion_a.current_abilities
+    assert minion_b.current_attack == 4 and minion_b.current_health == 4 \
+                                        and CardAbility.TAUNT in minion_b.current_abilities
