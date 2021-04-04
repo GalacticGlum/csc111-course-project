@@ -70,6 +70,7 @@ def make_frequency_table(values: List[Any], key: Optional[Callable[[Any], Any]] 
 
     return table
 
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
