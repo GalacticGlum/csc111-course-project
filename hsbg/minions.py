@@ -11,6 +11,7 @@ Refer to the minion_list.txt file for a full list of all minions with implementa
 in the Python recruitment phase simulator, and the C++ combat phase simulator.
 """
 from __future__ import annotations
+import json
 import random
 import logging
 import argparse
@@ -66,6 +67,39 @@ def _scan_minion_list() -> None:
         print(minion.name)
     if len(visited) == 0:
         print('All minions are in the minion list!')
+
+
+def _verify_minion_list(card_json_data: Path) -> None:
+    """Verify the list of implemented minions to the HearthstoneJSON API data.
+
+    Args:
+        card_json_data: Path to a json file containing card data in the
+                        format given by the HearthstoneJSON data API.
+    """
+    with open(card_json_data, encoding='utf-8') as fp:
+        card_data = json.load(fp)
+        minions = get_all_minions()
+        for minion in minions.values():
+            try:
+                entry = next(
+                    x for x in card_data if x['name'] == minion.name and \
+                     (minion.is_golden and 'battlegroundsNormalDbfId' in x or \
+                      not minion.is_golden and 'battlegroundsPremiumDbfId' in x)
+                )
+            except StopIteration:
+                print(f'Could not find {minion.name} in \'{card_json_data}\'')
+                continue
+
+            checks = [
+                minion.attack == entry['attack'],
+                minion.health == entry['health'],
+                minion.cost == entry['cost']
+            ]
+            is_valid = all(checks)
+
+            if not is_valid:
+                minion_type = 'golden' if minion.is_golden else 'regular'
+                print(f'Error verifying {minion.name} ({minion_type}) ({checks})')
 
 # A dict mapping each tier to the number of copies of each minion with that tier.
 TIER_NUM_COPIES = {
@@ -227,7 +261,7 @@ SCAVENGING_HYENA_GOLDEN = Minion(
 
 # Demon Pool
 FIENDISH_SERVANT = Minion(
-    'Fiendish Servant', CardClass.WARLOCK, MinionRace.DEMON, 2, 2,
+    'Fiendish Servant', CardClass.WARLOCK, MinionRace.DEMON, 2, 1,
     abilities=CardAbility.DEATH_RATTLE
 )
 FIENDISH_SERVANT_GOLDEN = Minion(
@@ -286,7 +320,7 @@ RED_WHELP = Minion(
     abilities=CardAbility.START_OF_COMBAT
 )
 RED_WHELP_GOLDEN = Minion(
-    'Red Whelp', CardClass.NEUTRAL, MinionRace.DRAGON, 1, 2,
+    'Red Whelp', CardClass.NEUTRAL, MinionRace.DRAGON, 2, 4,
     is_golden=True, abilities=CardAbility.START_OF_COMBAT
 )
 
@@ -327,7 +361,7 @@ SELLEMENTAL = Minion(
     _on_this_sold=_sellemental_on_this_sold
 )
 SELLEMENTAL_GOLDEN = Minion(
-    'Sellemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 2, 2,
+    'Sellemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 4, 4,
     cost=3, abilities=CardAbility.GENERATE, is_golden=True,
     _on_this_sold=_sellemental_on_this_sold
 )
@@ -403,7 +437,7 @@ MURLOC_SCOUT_GOLDEN = Minion(
 
 MURLOC_TIDEHUNTER = Minion(
     'Murloc Tidehunter', CardClass.NEUTRAL, MinionRace.MURLOC, 2, 1,
-    abilities=CardAbility.BATTLECRY | CardAbility.SUMMON,
+    cost=2, abilities=CardAbility.BATTLECRY | CardAbility.SUMMON,
     _on_this_played=lambda self, board: board.summon_minion(board.pool.find(name='Murloc Scout', is_golden=False))
 )
 MURLOC_TIDEHUNTER_GOLDEN = Minion(
@@ -1666,13 +1700,13 @@ SECURITY_ROVER_GOLDEN = Minion(
 # for details into how the discover mechanic is implemented (i.e. what pool of cards
 # it selects from).
 PRIMALFIN_LOOKOUT = Minion(
-    'Primalfin Lookout', CardClass.NEUTRAL, MinionRace.MURLOC, 3, 3,
+    'Primalfin Lookout', CardClass.NEUTRAL, MinionRace.MURLOC, 3, 2,
     cost=3, tier=4, abilities=CardAbility.BATTLECRY | CardAbility.DISCOVER,
     # _on_this_played=???
 )
 # TODO: Implement battlecry (If you control another Murloc, DISCOVER two Murlocs).
 PRIMALFIN_LOOKOUT_GOLDEN = Minion(
-    'Primalfin Lookout', CardClass.NEUTRAL, MinionRace.MURLOC, 6, 6,
+    'Primalfin Lookout', CardClass.NEUTRAL, MinionRace.MURLOC, 6, 4,
     cost=3, tier=4, is_golden=True, abilities=CardAbility.BATTLECRY | CardAbility.DISCOVER,
     # _on_this_played=???
 )
@@ -1830,10 +1864,17 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Command-line tool to view all minions.')
     parser.add_argument('task', help='The task to execute', choices={'scan', 'verify'})
+    parser.add_argument('--card-data', dest='card_data_path', type=Path, default=None,
+                        help='HearthstoneJSON card data.')
     args = parser.parse_args()
     if args.task == 'scan':
         _scan_minion_list()
     elif args.task == 'verify':
-        raise NotImplementedError()
+        if args.card_data_path is None:
+            raise ValueError(
+                'The card_data_path argument (--card-data) is required '
+                'for the \'verify\' task.'
+            )
+        _verify_minion_list(args.card_data_path)
     else:
         raise ValueError(f'\'{args.task}\' is an invalid task!')
