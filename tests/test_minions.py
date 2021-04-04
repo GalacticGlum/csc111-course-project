@@ -1,4 +1,5 @@
 """Test the minion implementations."""
+import pytest
 import random
 
 from hsbg.models import CardAbility, Buff
@@ -1916,3 +1917,6 @@ def test_golden_managerie_jug_battlecry_2() -> None:
     assert all_minions[0].current_attack == 7 and all_minions[0].current_health == 6
     assert all_minions[1].current_attack == 5 and all_minions[1].current_health == 5
 
+
+if __name__ == '__main__':
+    pytest.main([__file__, '-v'])

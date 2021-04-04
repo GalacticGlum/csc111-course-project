@@ -2,6 +2,7 @@
 These are just a collection of different battles that always have the same result
 (no matter the random move taken).
 """
+import pytest
 from hsbg.models import Buff, CardAbility
 from hsbg import TavernGameBoard, minions
 
@@ -167,3 +168,7 @@ def test_battle_3() -> None:
     assert battle.win_probability == 1 and battle.tie_probability == 0 \
                                        and battle.lose_probability == 0
     assert not friendly_board.won_previous and enemy_board.won_previous
+
+
+if __name__ == '__main__':
+    pytest.main([__file__, '-v'])
