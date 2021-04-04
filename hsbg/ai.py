@@ -2,6 +2,8 @@
 import copy
 import random
 from typing import Tuple, List
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from hsbg import BattlegroundsGame, Action, Move
 
 
@@ -33,19 +35,30 @@ class RandomPlayer(Player):
         return random.choice(possible_moves)
 
 
-def run_games(n: int, players: List[Player]) -> None:
+def run_games(n: int, players: List[Player], n_jobs: int = 1) -> None:
     """Run n games using the given Players.
+
+    Args:
+        n: The number of games to run.
+        players: A list of players to run the games with.
+        n_jobs: The number of games to run in parallel.
 
     Preconditions:
         - n >= 1
         - len(players) > 0 and len(players) % 2 == 0
+        - n_jobs >= 1
     """
     stats = {i: 0 for i in range(len(players))}
-    for i in range(0, n):
-        players_copy = copy.deepcopy(players)
-        winner, _ = run_game(players)
-        stats[winner] += 1
-        print(f'Game {i + 1} winner: Player {winner + 1}')
+    with ThreadPoolExecutor(max_workers=n_jobs) as pool:
+        futures = [
+            pool.submit(lambda i,x: (i, run_game(x)), game_index, copy.deepcopy(players))
+            for game_index in range(n)
+        ]
+
+        for future in as_completed(futures):
+            game_index, (winner, _) = future.result()
+            stats[winner] += 1
+            print(f'Game {game_index + 1} winner: Player {winner + 1}')
 
     for player in stats:
         print(f'Player {player}: {stats[player]}/{n} ({100.0 * stats[player] / n:.2f}%)')
