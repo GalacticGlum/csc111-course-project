@@ -212,11 +212,28 @@ class MinionPool:
         return self._all_minions[golden_copy_name].clone()
 
     def insert(self, values: Union[Minion, List[Minion]]) -> None:
-        """Insert the given minions into the pool."""
+        """Insert the given minions into the pool.
+
+        >>> pool = MinionPool()
+        >>> previous_pool_size = pool.size
+        >>> minion = pool.find(name='Murloc Scout')
+        >>> golden_minion = pool.find(name='Murloc Scout', is_golden=True)
+        >>> pool.insert(minion)
+        >>> pool.size == previous_pool_size + 1
+        True
+        >>> pool.insert(golden_minion)
+        >>> pool.size == previous_pool_size + 4
+        True
+        """
         if isinstance(values, Minion):
             values = [values]
         for minion in values:
-            self._pool.append(minion.clone())
+            if minion.is_golden:
+                # Add 3 regular versions of the minion
+                regular_minion = self._all_minions[minion.name]
+                self._pool.extend(regular_minion.clone() for _ in range(3))
+            else:
+                self._pool.append(minion.clone())
 
     @property
     def size(self) -> int:
@@ -1863,7 +1880,7 @@ if __name__ == '__main__':
     doctest.testmod()
 
     parser = argparse.ArgumentParser(description='Command-line tool to view all minions.')
-    parser.add_argument('task', help='The task to execute', choices={'scan', 'verify'})
+    parser.add_argument('task', help='The task to execute', choices={'scan', 'verify'}, nargs='?')
     parser.add_argument('--card-data', dest='card_data_path', type=Path, default=None,
                         help='HearthstoneJSON card data.')
     args = parser.parse_args()
@@ -1876,5 +1893,5 @@ if __name__ == '__main__':
                 'for the \'verify\' task.'
             )
         _verify_minion_list(args.card_data_path)
-    else:
+    elif args.task != None:
         raise ValueError(f'\'{args.task}\' is an invalid task!')
