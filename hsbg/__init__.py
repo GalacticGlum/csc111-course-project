@@ -756,7 +756,7 @@ class TavernGameBoard:
                 # Carry over all buffs from the regular minions
                 # NOTE: We shouldn't be accessing the private _buffs attribute!
                 golden_copy._buffs += minion._buffs
-                # Remoe the regular minion
+                # Remove the regular minion
                 self.remove_minion(minion)
             self.add_minion_to_hand(golden_copy, clone=False)
 
