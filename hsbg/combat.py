@@ -24,7 +24,8 @@ SIMULATOR_ABILITIES = [
     CardAbility.TAUNT,
     CardAbility.DIVINE_SHIELD,
     CardAbility.POISONOUS,
-    CardAbility.WINDFURY
+    CardAbility.WINDFURY,
+    CardAbility.REBORN
 ]
 
 
