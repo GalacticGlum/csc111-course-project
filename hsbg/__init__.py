@@ -1341,6 +1341,8 @@ class TavernGameBoard:
     @property
     def won_previous(self) -> bool:
         """Return whether this player won its most recent battle."""
+        if len(self._battle_history) == 0:
+            return False
         return self._battle_history[-1].win_probability == 1.0
 
     @property
