@@ -13,13 +13,12 @@ from hsbg.models import CardAbility
 
 
 # The default path of the C++ hsbg simulator binary file relative to the root directory.
-INSTANCE_PATH = Path(__file__).parent.parent / 'instance'
-INSTANCE_PATH.mkdir(exist_ok=True, parents=True)
 try:
-    if (INSTANCE_PATH / 'hsbg').is_file():
-        _DEFAULT_HSBG_SIM_PATH = INSTANCE_PATH / 'hsbg'
+    instance_path = Path(__file__).parent.parent / 'instance'
+    if (instance_path / 'hsbg').is_file():
+        _DEFAULT_HSBG_SIM_PATH = instance_path / 'hsbg'
     else:
-        _DEFAULT_HSBG_SIM_PATH = list(INSTANCE_PATH.glob('hsbg.*'))[0]
+        _DEFAULT_HSBG_SIM_PATH = list(instance_path.glob('hsbg.*'))[0]
 except:
     raise ValueError('Could not find the C++ hsbg simulator binary file in the instance folder!')
 
@@ -189,12 +188,14 @@ def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT
         bin_path: The path to the binary file of the C++ simulator.
     """
     # Create temp file.
-    with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False,
-                                     dir=str(INSTANCE_PATH.absolute())) as temp_file:
+    with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False) as temp_file:
         temp_file.write(battle_config)
 
-    command = f'{bin_path} {temp_file.name}'
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        [str(bin_path), str(temp_file.name)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
     stdout, _ = map(lambda x: x.decode(), process.communicate())
     # Remove the temp file
     Path(temp_file.name).unlink()
