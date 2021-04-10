@@ -3,7 +3,8 @@
 git clone "https://github.com/galacticglum/hearthstone-battlegrounds-simulator/" ./_temp_hsbg
 cd ./_temp_hsbg
 make
-filename="$(ls hsbg.* | sort -V | tail -n1)"
+filename="$(find ./ -type f \( -iname "hsbg.*" -o -iname "hsbg" \))"
+mkdir -p ../instance
 cp "$filename" ../instance/"$filename"
 cd ..
 rm -rf ./_temp_hsbg

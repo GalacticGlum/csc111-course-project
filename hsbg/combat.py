@@ -14,7 +14,11 @@ from hsbg.models import CardAbility
 
 # The default path of the C++ hsbg simulator binary file relative to the root directory.
 try:
-    _DEFAULT_HSBG_SIM_PATH = list((Path(__file__).parent.parent / 'instance').glob('hsbg.*'))[0]
+    instance_path = Path(__file__).parent.parent / 'instance'
+    if (instance_path / 'hsbg').is_file():
+        _DEFAULT_HSBG_SIM_PATH = instance_path / 'hsbg'
+    else:
+        _DEFAULT_HSBG_SIM_PATH = list(instance_path.glob('hsbg.*'))[0]
 except:
     raise ValueError('Could not find the C++ hsbg simulator binary file in the instance folder!')
 
