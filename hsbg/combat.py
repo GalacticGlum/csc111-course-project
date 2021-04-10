@@ -13,12 +13,13 @@ from hsbg.models import CardAbility
 
 
 # The default path of the C++ hsbg simulator binary file relative to the root directory.
+INSTANCE_PATH = Path(__file__).parent.parent / 'instance'
+INSTANCE_PATH.mkdir(exist_ok=True, parents=True)
 try:
-    instance_path = Path(__file__).parent.parent / 'instance'
-    if (instance_path / 'hsbg').is_file():
-        _DEFAULT_HSBG_SIM_PATH = instance_path / 'hsbg'
+    if (INSTANCE_PATH / 'hsbg').is_file():
+        _DEFAULT_HSBG_SIM_PATH = INSTANCE_PATH / 'hsbg'
     else:
-        _DEFAULT_HSBG_SIM_PATH = list(instance_path.glob('hsbg.*'))[0]
+        _DEFAULT_HSBG_SIM_PATH = list(INSTANCE_PATH.glob('hsbg.*'))[0]
 except:
     raise ValueError('Could not find the C++ hsbg simulator binary file in the instance folder!')
 
@@ -188,7 +189,8 @@ def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT
         bin_path: The path to the binary file of the C++ simulator.
     """
     # Create temp file.
-    with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False) as temp_file:
+    with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False,
+                                     dir=str(INSTANCE_PATH.absolute())) as temp_file:
         temp_file.write(battle_config)
 
     command = f'{bin_path} {temp_file.name}'
