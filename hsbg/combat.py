@@ -2,7 +2,6 @@
 from __future__ import annotations
 import re
 import platform
-import tempfile
 import subprocess
 from dataclasses import dataclass
 
@@ -187,18 +186,12 @@ def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT
         battle_config: A series of commands that define the friendly and enemy board states.
         bin_path: The path to the binary file of the C++ simulator.
     """
-    # Create temp file.
-    with tempfile.NamedTemporaryFile(mode='w+', encoding='utf-8', delete=False) as temp_file:
-        temp_file.write(battle_config)
-
     process = subprocess.Popen(
-        [str(bin_path), str(temp_file.name)],
+        [str(bin_path), '-l'] + battle_config.splitlines(),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
     stdout, _ = map(lambda x: x.decode(), process.communicate())
-    # Remove the temp file
-    Path(temp_file.name).unlink()
     # Check for errors
     errors = list(re.finditer(r'(?<=Error:\s).*', stdout))
     if len(errors) > 0:
