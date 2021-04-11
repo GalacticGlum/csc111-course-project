@@ -5,8 +5,8 @@ import platform
 import subprocess
 from dataclasses import dataclass
 
-from typing import Union
 from pathlib import Path
+from typing import Union, List
 
 from hsbg.models import CardAbility
 
@@ -171,23 +171,23 @@ def simulate_combat(friendly_board: TavernGameBoard, enemy_board: TavernGameBoar
         enemy_board: The state of the enemy player's board.
         n: The number of times to simulate the battle.
     """
-    battle_config = battle_to_str(friendly_board, enemy_board)
+    battle_config_commands = battle_to_commands(friendly_board, enemy_board)
     # Add run command
-    battle_config += f'\nrun {n}'
-    return run_hsbg_simulator(battle_config)
+    battle_config_commands += [f'run {n}']
+    return run_hsbg_simulator(battle_config_commands)
 
 
-def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT_HSBG_SIM_PATH) \
-        -> Battle:
+def run_hsbg_simulator(battle_config_commands: List[str],
+                       bin_path: Union[Path, str] = _DEFAULT_HSBG_SIM_PATH) -> Battle:
     """Invoke the C++ Hearthstone Battlegrounds simulator on the given battle configuration.
     Note: this function creates a temporary file to store the battle configuration.
 
     Args:
-        battle_config: A series of commands that define the friendly and enemy board states.
+        battle_config_commands: A series of commands that define the friendly and enemy board states.
         bin_path: The path to the binary file of the C++ simulator.
     """
     process = subprocess.Popen(
-        [str(bin_path), '-l'] + battle_config.splitlines(),
+        [str(bin_path), '-l'] + battle_config_commands,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
@@ -205,12 +205,38 @@ def run_hsbg_simulator(battle_config: str, bin_path: Union[Path, str] = _DEFAULT
         return Battle.parse_simulator_output(stdout)
 
 
-def battle_to_str(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> str:
+def battle_to_commands(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> List[str]:
     """Return the series of simulator commands that define the given battle."""
-    return 'Board\n{}\nVS\n{}'.format(
-        game_board_to_str(friendly_board),
-        game_board_to_str(enemy_board)
+    return (
+        ['Board'] + \
+        game_board_to_commands(friendly_board) + \
+        ['VS'] + \
+        game_board_to_commands(enemy_board)
     )
+
+
+def game_board_to_commands(board: TavernGameBoard) -> List[str]:
+    """Return the series of simulator commands that define the given board."""
+    lines = [
+        f'level {board.tavern_tier}',
+        f'health {board.hero_health}',
+    ]
+
+    for minion in board.board:
+        if minion is None:
+            continue
+
+        buffs = [
+            ability.as_format_str().lower() for ability in SIMULATOR_ABILITIES
+            if ability in minion.current_abilities
+        ]
+
+        name = ('golden ' if minion.is_golden else '') + minion.name
+        name_and_buffs = ', '.join([name] + buffs)
+        line = f'* {minion.current_attack}/{minion.current_health} {name_and_buffs}'
+        lines.append(line)
+
+    return lines
 
 
 def game_board_to_str(board: TavernGameBoard) -> str:
@@ -257,26 +283,7 @@ def game_board_to_str(board: TavernGameBoard) -> str:
     * 2/7 Rockpool Hunter
     * 5/6 golden Coldlight Seer, taunt, divine shield
     """
-    lines = [
-        f'level {board.tavern_tier}',
-        f'health {board.hero_health}',
-    ]
-
-    for minion in board.board:
-        if minion is None:
-            continue
-
-        buffs = [
-            ability.as_format_str().lower() for ability in SIMULATOR_ABILITIES
-            if ability in minion.current_abilities
-        ]
-
-        name = ('golden ' if minion.is_golden else '') + minion.name
-        name_and_buffs = ', '.join([name] + buffs)
-        line = f'* {minion.current_attack}/{minion.current_health} {name_and_buffs}'
-        lines.append(line)
-
-    return '\n'.join(lines)
+    return '\n'.join(game_board_to_commands(board))
 
 
 if __name__ == '__main__':
