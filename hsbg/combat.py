@@ -1,26 +1,14 @@
 """A simulator of the combat phase in Hearthstone Battlegrounds."""
 from __future__ import annotations
 import re
-import platform
-import subprocess
 from dataclasses import dataclass
 
 from pathlib import Path
 from typing import Union, List
 
+from hsbg_sim import run_simulator, BattleResult
+
 from hsbg.models import CardAbility
-
-
-# The default path of the C++ hsbg simulator binary file relative to the root directory.
-try:
-    instance_path = Path(__file__).parent.parent / 'instance'
-    if (instance_path / 'hsbg').is_file():
-        _DEFAULT_HSBG_SIM_PATH = instance_path / 'hsbg'
-    else:
-        _DEFAULT_HSBG_SIM_PATH = list(instance_path.glob('hsbg.*'))[0]
-except:
-    raise ValueError('Could not find the C++ hsbg simulator binary file in the instance folder!')
-
 
 # A list of abilities supported by the C++ simulator
 SIMULATOR_ABILITIES = [
@@ -76,6 +64,24 @@ class Battle:
                       self.mean_damage_dealt, self.mean_damage_taken,
                       self.expected_enemy_hero_health, self.expected_hero_health,
                       self.enemy_death_probability, self.death_probability)
+
+    @staticmethod
+    def from_battle_result(battle_result: BattleResult) -> Battle:
+        """Return the Battle representing the given BattleResult object."""
+        # A simple wrapper over the BattleResult object from the hsbg_sim module.
+        return Battle(
+            battle_result.win_probability,
+            battle_result.tie_probability,
+            battle_result.lose_probability,
+            battle_result.mean_score,
+            battle_result.median_score,
+            battle_result.mean_damage_taken,
+            battle_result.mean_damage_dealt,
+            battle_result.expected_hero_health,
+            battle_result.expected_enemy_hero_health,
+            battle_result.death_probability,
+            battle_result.enemy_death_probability
+        )
 
     @staticmethod
     def parse_simulator_output(output: str) -> Battle:
@@ -172,37 +178,8 @@ def simulate_combat(friendly_board: TavernGameBoard, enemy_board: TavernGameBoar
         n: The number of times to simulate the battle.
     """
     battle_config_commands = battle_to_commands(friendly_board, enemy_board)
-    # Add run command
-    battle_config_commands += [f'run {n}']
-    return run_hsbg_simulator(battle_config_commands)
-
-
-def run_hsbg_simulator(battle_config_commands: List[str],
-                       bin_path: Union[Path, str] = _DEFAULT_HSBG_SIM_PATH) -> Battle:
-    """Invoke the C++ Hearthstone Battlegrounds simulator on the given battle configuration.
-    Note: this function creates a temporary file to store the battle configuration.
-
-    Args:
-        battle_config_commands: A series of commands that define the friendly and enemy board states.
-        bin_path: The path to the binary file of the C++ simulator.
-    """
-    process = subprocess.Popen(
-        [str(bin_path), '-l'] + battle_config_commands,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    stdout = process.communicate()[0].decode()
-    # Check for errors
-    errors = list(re.finditer(r'(?<=Error:\s).*', stdout))
-    if len(errors) > 0:
-        padding = ' ' * len('ValueError: ')
-        sim_errors = '\n'.join([f'{padding} - {error.group(0)}' for error in errors])
-        raise ValueError(
-            f'Invalid battle config. '
-            f'Encountered {len(errors)} errors while parsing battle config.\n{sim_errors}'
-        )
-    else:
-        return Battle.parse_simulator_output(stdout)
+    battle_result = run_simulator(battle_config_commands, n)
+    return Battle.from_battle_result(battle_result)
 
 
 def battle_to_commands(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> List[str]:

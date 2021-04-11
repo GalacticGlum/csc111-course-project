@@ -11,3 +11,6 @@ hurry.filesize
 
 # Data scraping
 bs4
+
+# Hearthstone Simulator API
+git+https://github.com/galacticglum/hearthstone-battlegrounds-simulator.git#egg=hsbg_sim
