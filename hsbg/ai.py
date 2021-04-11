@@ -2,7 +2,7 @@
 import copy
 import random
 from typing import Tuple, List
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from hsbg import BattlegroundsGame, Action, Move
 
@@ -35,13 +35,15 @@ class RandomPlayer(Player):
         return random.choice(possible_moves)
 
 
-def run_games(n: int, players: List[Player], n_jobs: int = 1) -> None:
+def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: bool = False) \
+        -> None:
     """Run n games using the given Players.
 
     Args:
         n: The number of games to run.
         players: A list of players to run the games with.
         n_jobs: The number of games to run in parallel.
+        use_threadpool: Whether to use the thread pool or process pool executor.
 
     Preconditions:
         - n >= 1
@@ -49,14 +51,12 @@ def run_games(n: int, players: List[Player], n_jobs: int = 1) -> None:
         - n_jobs >= 1
     """
     stats = {i: 0 for i in range(len(players))}
-    with ThreadPoolExecutor(max_workers=n_jobs) as pool:
-        futures = [
-            pool.submit(lambda i,x: (i, run_game(x)), game_index, copy.deepcopy(players))
-            for game_index in range(n)
-        ]
 
-        for future in as_completed(futures):
-            game_index, (winner, _) = future.result()
+    Executor = ThreadPoolExecutor if use_thread_pool else ProcessPoolExecutor
+    with Executor(max_workers=n_jobs) as pool:
+        futures = [pool.submit(run_game, copy.deepcopy(players)) for _ in range(n)]
+        for game_index, future in enumerate(as_completed(futures)):
+            winner, _ = future.result()
             stats[winner] += 1
             print(f'Game {game_index + 1} winner: Player {winner + 1}')
 
@@ -64,7 +64,7 @@ def run_games(n: int, players: List[Player], n_jobs: int = 1) -> None:
         print(f'Player {player}: {stats[player]}/{n} ({100.0 * stats[player] / n:.2f}%)')
 
 
-def run_game(players: List[Player]) -> tuple[int, List[Tuple[int, Move]]]:
+def run_game(players: List[Player]) -> Tuple[int, List[Tuple[int, Move]]]:
     """Run a Battlegrounds game between the given players.
 
     Return the index of the winning player and a list of moves made in the game,
