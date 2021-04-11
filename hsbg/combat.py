@@ -191,7 +191,7 @@ def run_hsbg_simulator(battle_config_commands: List[str],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
-    stdout, _ = map(lambda x: x.decode(), process.communicate())
+    stdout = process.communicate()[0].decode()
     # Check for errors
     errors = list(re.finditer(r'(?<=Error:\s).*', stdout))
     if len(errors) > 0:
