@@ -45,6 +45,9 @@ def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: b
         n_jobs: The number of games to run in parallel.
         use_threadpool: Whether to use the thread pool or process pool executor.
 
+                        Note that when using a process pool executor, this function
+                        must be guarded by ``if __name__ == '__main__':``.
+
     Preconditions:
         - n >= 1
         - len(players) > 0 and len(players) % 2 == 0
