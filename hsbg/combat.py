@@ -6,7 +6,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Union, List
 
-from hsbg_sim import run_simulator, BattleResult
+from hsbg_sim import (
+    run_simulator,
+    Board as SimulatorBoard,
+    Minion as SimulatorMinion,
+    BattleResult as SimulatorBattleResult
+)
 
 from hsbg.models import CardAbility
 
@@ -66,9 +71,9 @@ class Battle:
                       self.enemy_death_probability, self.death_probability)
 
     @staticmethod
-    def from_battle_result(battle_result: BattleResult) -> Battle:
+    def from_battle_result(battle_result: SimulatorBattleResult) -> Battle:
         """Return the Battle representing the given BattleResult object."""
-        # A simple wrapper over the BattleResult object from the hsbg_sim module.
+        # A simple wrapper over the SimulatorBattleResult object from the hsbg_sim module.
         return Battle(
             battle_result.win_probability,
             battle_result.tie_probability,
@@ -177,9 +182,34 @@ def simulate_combat(friendly_board: TavernGameBoard, enemy_board: TavernGameBoar
         enemy_board: The state of the enemy player's board.
         n: The number of times to simulate the battle.
     """
-    battle_config_commands = battle_to_commands(friendly_board, enemy_board)
-    battle_result = run_simulator(battle_config_commands, n)
+    battle_result = run_simulator(
+        to_simulator_board(friendly_board),  # The friendly board
+        to_simulator_board(enemy_board),  # The enemy board
+        n  # Number of times to simulate
+    )
     return Battle.from_battle_result(battle_result)
+
+
+def to_simulator_board(board: TavernGameBoard) -> SimulatorBoard:
+    """Return the given TavernGameBoard as a SimulatorBoard."""
+    minions = []
+    for minion in board.get_minions_on_board():
+        minions.append(SimulatorMinion(
+            name=minion.name,
+            attack=minion.current_attack,
+            health=minion.current_health,
+            is_golden=minion.is_golden,
+            taunt=CardAbility.TAUNT in minion.current_abilities,
+            divine_shield=CardAbility.DIVINE_SHIELD in minion.current_abilities,
+            poisonous=CardAbility.POISONOUS in minion.current_abilities,
+            windfury=CardAbility.WINDFURY in minion.current_abilities,
+            reborn=CardAbility.REBORN in minion.current_abilities
+        ))
+    return SimulatorBoard(
+        tavern_tier=board.tavern_tier,
+        hero_health=board.hero_health,
+        minions=minions
+    )
 
 
 def battle_to_commands(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> List[str]:
