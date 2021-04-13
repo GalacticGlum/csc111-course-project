@@ -23,19 +23,45 @@ class Corpus:
 
 class MonitorCallback(CallbackAny2Vec):
     """A callback for monitoring the progress of the card2vec model."""
-    def __init__(self, summary_writer: Optional[tf.summary.SummaryWriter] = None):
+    # Private Instance Attributes:
+    #   - _epoch: The current epoch.
+    #   - _loss_previous_steps: The loss at the previous step.
+    #   - _summary_writer: The TensorBoard summar writer.
+    #   - _log_frequency: The frequency at which to log stats, in epochs.
+    #   - _save_frequency: The frequency at which to save the model.
+    #   - _output_path: The directory to save model checkpoints.
+    _epoch: int
+    _loss_previous_step: float
+    _summary_writer: Optional[tf.summary.SummaryWriter]
+    _log_frequency: int
+    _save_frequency: int
+    _output_path: Optional[Path]
+
+    def __init__(self, output_path: Optional[Path] = None,
+                 log_frequency: int = 1,
+                 save_frequency: int = 100,
+                 summary_writer: Optional[tf.summary.SummaryWriter] = None) \
+            -> None:
         self._epoch = 0
         self._loss_previous_step = 0
         self._summary_writer = summary_writer
+        self._log_frequency = log_frequency
+        self._save_frequency = save_frequency
+        self._output_path = output_path
 
     def on_epoch_end(self, model: Word2Vec):
         loss = model.get_latest_training_loss()
         delta_loss = loss - self._loss_previous_step
         print(f'Epoch {self._epoch} - Loss: {delta_loss}')
 
-        if self._summary_writer is not None:
+        log = self._epoch % self._log_frequency == 0
+        if self._summary_writer is not None and log:
             with self._summary_writer.as_default():
                 tf.summary.scalar('loss', delta_loss, step=self._epoch)
+
+        save = self._epoch > 0 and self._epoch % self._save_frequency == 0
+        if self._output_path is not None and save:
+            model.save(str(self._output_path / f'checkpoint-{self._epoch}.model'))
 
         self._epoch += 1
         self._loss_previous_step = loss
@@ -67,7 +93,7 @@ def main(args: argparse.Namespace) -> None:
         epochs=args.epochs,
         batch_words=args.batch_size,
         compute_loss=True,
-        callbacks=[MonitorCallback(summary_writer)]
+        callbacks=[MonitorCallback(output_path, args.log_freq, args.save_freq, summary_writer)]
     )
 
     elapsed_time = time.time() - start_time
@@ -111,6 +137,11 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--seed', type=int, default=None,
                         help='Sets the seed of the random engine. '
                               'If unspecified, a random seed is chosen.')
+    parser.add_argument('--log-freq', type=int, default=1,
+                        help='The frequency at which to log stats, in epochs. Defaults to 1.')
+    parser.add_argument('--save-freq', type=int, default=100,
+                        help='The frequency at which to save the model, '
+                             'in epochs. Defaults to 100.')
     parser.add_argument('--num-workers', type=int, default=8,
                         help='The number of workers to use. Defaults to 8.')
     main(parser.parse_args())
