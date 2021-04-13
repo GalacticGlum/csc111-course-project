@@ -30,6 +30,14 @@ def capitalise_name(name: str) -> str:
     return name[0].upper() + name[1:].lower()
 
 
+def normalize_name(name: str) -> str:
+    """Normalise the name of a card."""
+    name = name.replace(' ', '_')
+    name = name.replace('\'', '_')
+    name = name.replace('-', '_')
+    return name
+
+
 def main(args: argparse.Namespace) -> None:
     """Main entrypoint for the script."""
     card_data = []
@@ -53,7 +61,7 @@ def main(args: argparse.Namespace) -> None:
             if is_golden:
                 name = f'{args.gold_prefix} {name}'
 
-            name_map[name] = name.replace(' ', '_')
+            name_map[name] = normalize_name(name)
             name = name_map[name]
 
             # Manage duplicates
@@ -81,7 +89,7 @@ def main(args: argparse.Namespace) -> None:
             if (cost := card.get('cost', None)) is not None:
                 parts += [f'{name} Cost_{num2words(cost)}']
 
-            description = '\n'.join(parts)
+            description = '. '.join(parts)
             fp.write(description + '\n')
 
     name_map_filename = args.output_filepath.with_suffix('').name + '_name_map.json'
