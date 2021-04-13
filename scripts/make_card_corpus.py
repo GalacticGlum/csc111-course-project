@@ -19,6 +19,12 @@ def clean_card_description(text: str) -> str:
     text = re.sub(r'<.*?>', '', text)
     if text.endswith('.'):
         text = text[:-1]
+    # Replace numbers with word representation
+    text = re.sub(r'(\d+)', lambda x: num2words(int(x.group(0))), text)
+    # Replace slashes with space
+    text = text.replace('/', ' ')
+    text = text.replace('+', ' plus ')
+    # Convert to ascii
     text = text.encode('ascii', 'replace').decode('ascii').replace('?', ' ')
     return text
 
@@ -30,11 +36,10 @@ def capitalise_name(name: str) -> str:
     return name[0].upper() + name[1:].lower()
 
 
-def normalize_name(name: str) -> str:
+def normalise_name(name: str) -> str:
     """Normalise the name of a card."""
-    name = name.replace(' ', '_')
-    name = name.replace('\'', '_')
-    name = name.replace('-', '_')
+    # Replace non-alphanumeric characters with underscore
+    name = re.sub(r'[^0-9a-zA-Z]+', '_', name)
     return name
 
 
@@ -61,7 +66,7 @@ def main(args: argparse.Namespace) -> None:
             if is_golden:
                 name = f'{args.gold_prefix} {name}'
 
-            name_map[name] = normalize_name(name)
+            name_map[name] = normalise_name(name)
             name = name_map[name]
 
             # Manage duplicates
@@ -71,7 +76,7 @@ def main(args: argparse.Namespace) -> None:
                 continue
             visited.add(name)
 
-            # Normalize text
+            # Normalise text
             parts = [f'{name}, "{clean_card_description(text)}"']
             # Optional attributes
             if (race := card.get('race', None)) is not None:
