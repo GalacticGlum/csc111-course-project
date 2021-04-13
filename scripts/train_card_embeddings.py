@@ -6,9 +6,8 @@ from typing import Iterator, List, Optional
 
 import tensorflow as tf
 from gensim.models import  Word2Vec
-from gensim.utils import simple_preprocess
 from gensim.models.callbacks import CallbackAny2Vec
-from gensim.test.utils import common_texts
+from gensim.utils import simple_preprocess, RULE_KEEP
 
 
 class Corpus:
@@ -18,7 +17,8 @@ class Corpus:
 
     def __iter__(self) -> Iterator[List[str]]:
         for line in open(self.filepath):
-            yield simple_preprocess(line)
+            words = simple_preprocess(line, min_len=0, max_len=float('inf'))
+            yield words
 
 
 class MonitorCallback(CallbackAny2Vec):
@@ -93,7 +93,10 @@ def main(args: argparse.Namespace) -> None:
         epochs=args.epochs,
         batch_words=args.batch_size,
         compute_loss=True,
-        callbacks=[MonitorCallback(output_path, args.log_freq, args.save_freq, summary_writer)]
+        callbacks=[MonitorCallback(output_path, args.log_freq, args.save_freq, summary_writer)],
+        trim_rule=lambda x, y, z: RULE_KEEP,  # Keep all words, and don't perform trimming!
+        max_vocab_size=None,
+        max_final_vocab=None
     )
 
     elapsed_time = time.time() - start_time
