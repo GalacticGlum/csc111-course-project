@@ -37,6 +37,7 @@ def main(args: argparse.Namespace) -> None:
         with open(path, encoding='utf-8') as fp:
             card_data.extend(json.load(fp))
 
+    name_map = {}
     with open(args.output_filepath, 'w+', encoding='utf-8') as fp,\
         tqdm(card_data) as progress_bar:
         visited = set()
@@ -50,7 +51,10 @@ def main(args: argparse.Namespace) -> None:
             # Add golden prefix
             is_golden = card.get('is_golden', False)
             if is_golden:
-                name = f'Golden {name}'
+                name = f'{args.gold_prefix} {name}'
+
+            name_map[name] = name.replace(' ', '_')
+            name = name_map[name]
 
             # Manage duplicates
             if args.ignore_duplicates and name in visited:
@@ -63,22 +67,26 @@ def main(args: argparse.Namespace) -> None:
             parts = [f'{name}, "{clean_card_description(text)}"']
             # Optional attributes
             if (race := card.get('race', None)) is not None:
-                parts += [f'Race: {capitalise_name(race)}']
+                parts += [f'{name} is Race_{capitalise_name(race)}']
             if (card_class := card.get('cardClass', None)) is not None:
-                parts += [f'Class: {capitalise_name(card_class)}']
+                parts += [f'{name} is Class_{capitalise_name(card_class)}']
             if (rarity := card.get('rarity', None)) is not None:
-                parts += [f'Rarity: {capitalise_name(rarity)}']
+                parts += [f'{name} is Rarity_{capitalise_name(rarity)}']
             if (tier := card.get('tier', None)) is not None:
-                parts += [f'Tier {num2words(tier)}']
+                parts += [f'{name} is Tier_{num2words(tier)}']
             if (attack := card.get('attack', None)) is not None:
-                parts += [f'Attack: {num2words(attack)}']
+                parts += [f'{name} Attack_{num2words(attack)}']
             if (health := card.get('health', None)) is not None:
-                parts += [f'Health: {num2words(health)}']
+                parts += [f'{name} Health_{num2words(health)}']
             if (cost := card.get('cost', None)) is not None:
-                parts += [f'Cost: {num2words(cost)}']
+                parts += [f'{name} Cost_{num2words(cost)}']
 
-            description = '. '.join(parts)
+            description = '\n'.join(parts)
             fp.write(description + '\n')
+
+    name_map_filename = args.output_filepath.with_suffix('').name + '_name_map.json'
+    with open(args.output_filepath.parent / name_map_filename, 'w+') as fp:
+        json.dump(name_map, fp, indent=4)
 
 
 if __name__ == '__main__':
@@ -86,6 +94,8 @@ if __name__ == '__main__':
     parser.add_argument('card_data_filepaths', nargs='+', type=Path,
                         help='A list of input card data json files.')
     parser.add_argument('output_filepath', type=Path, help='The output filepath.')
+    parser.add_argument('--gold-prefix', type=str, default='Golden',
+                        help='Prefix to add to the names of golden cards.')
     parser.add_argument('-d', '--ignore-duplicates', dest='ignore_duplicates',
                         action='store_false', help='Whether to ignore duplicate cards.')
     parser.add_argument('-w', '--warn-duplicates', dest='warn_duplicates',
