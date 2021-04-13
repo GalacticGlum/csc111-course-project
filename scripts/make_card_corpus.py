@@ -66,7 +66,8 @@ def main(args: argparse.Namespace) -> None:
             if is_golden:
                 name = f'{args.gold_prefix} {name}'
 
-            name_map[name] = normalise_name(name)
+            # name_map[name] = normalise_name(name)
+            name_map[name] = name
             name = name_map[name]
 
             # Manage duplicates
@@ -77,22 +78,23 @@ def main(args: argparse.Namespace) -> None:
             visited.add(name)
 
             # Normalise text
-            parts = [f'{name}, "{clean_card_description(text)}"']
+            card_type = card.get('type', '')
+            parts = [f'{name} is a {card_type} card. {clean_card_description(text)}']
             # Optional attributes
             if (race := card.get('race', None)) is not None:
-                parts += [f'{name} is Race_{capitalise_name(race)}']
+                parts += [f'{name} is a {capitalise_name(race)}']
             if (card_class := card.get('cardClass', None)) is not None:
-                parts += [f'{name} is Class_{capitalise_name(card_class)}']
+                parts += [f'{name} is a {capitalise_name(card_class)}']
             if (rarity := card.get('rarity', None)) is not None:
-                parts += [f'{name} is Rarity_{capitalise_name(rarity)}']
+                parts += [f'{name} is {capitalise_name(rarity)}']
             if (tier := card.get('tier', None)) is not None:
-                parts += [f'{name} is Tier_{num2words(tier)}']
+                parts += [f'{name} is tier {num2words(tier)}']
             if (attack := card.get('attack', None)) is not None:
-                parts += [f'{name} Attack_{num2words(attack)}']
+                parts += [f'{name} has {num2words(attack)} attack']
             if (health := card.get('health', None)) is not None:
-                parts += [f'{name} Health_{num2words(health)}']
+                parts += [f'{name} {num2words(health)} health']
             if (cost := card.get('cost', None)) is not None:
-                parts += [f'{name} Cost_{num2words(cost)}']
+                parts += [f'{name} costs {num2words(cost)} mana']
 
             description = '. '.join(parts)
             fp.write(description + '\n')
