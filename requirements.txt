@@ -17,5 +17,15 @@ num2words
 setuptools
 wheel
 
+# Word embeddings
+gensim
+sklearn
+python-Levenshtein
+numpy>=1.20.0
+# Deep learning
+tensorflow<2.5.0
+# Visualisation
+matplotlib
+
 # Hearthstone Simulator API
 git+https://github.com/galacticglum/hearthstone-battlegrounds-simulator.git#egg=hsbg_sim
