@@ -20,8 +20,6 @@ def main(args: argparse.Namespace) -> None:
     metadata_filepath = args.output_filepath.parent / metadata_filename
     with open(args.output_filepath, 'w+') as output_fp,\
         open(metadata_filepath, 'w+') as metadata_fp:
-        # Add header column
-        metadata_fp.write('word\n')
         # Write data
         for word in model.wv.index_to_key:
             if words is not None and word not in words:
