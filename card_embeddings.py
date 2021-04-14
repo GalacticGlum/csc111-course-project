@@ -331,6 +331,21 @@ class CardEmbeddings:
 
         return most_similar
 
+    def save_as_tsv(self, filepath: Union[str, Path]) -> None:
+        """Save these card embeddings as a tsv file at the given filepath."""
+        # Ensure filepath is a Path-like object
+        filepath = Path(filepath)
+        # Build metdata filepath
+        extension = filepath.suffix
+        metadata_filename = filepath.with_suffix('').name + '_metadata' + extension
+        metadata_filepath = filepath.parent / metadata_filename
+        with open(filepath, 'w+') as output_fp, open(metadata_filepath, 'w+') as metadata_fp:
+            # Write data
+            for index in range(len(self._weights)):
+                line = '\t'.join(str(x) for x in self._weights[index])
+                output_fp.write(line + '\n')
+                metadata_fp.write(self._card_names[index] + '\n')
+
     @property
     def embedding_size(self) -> int:
         """Return the dimensionality of the embedding vectors."""
