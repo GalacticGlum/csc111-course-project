@@ -250,7 +250,8 @@ class CardEmbeddings:
             parts.append(self._word_embeddings.get_vector('health') * card.health)
         # Add cost feature vector
         if card.cost is not None:
-            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize('Mana cost'), sum) * card.cost)
+            mana_cost_vector = _aggregrate_embeddings(self._tokenizer.tokenize('Mana cost'), sum)
+            parts.append(mana_cost_vector * card.cost)
 
         # Get average of vectors
         v = sum(parts) / len(parts)
