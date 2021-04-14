@@ -27,12 +27,11 @@ def _clean_card_text(text: str) -> str:
     text = text.replace('[x]', '')
     # Remove html tags
     text = re.sub(r'<.*?>', '', text)
+    # Replace "+X/+Y" with "X attack and Y health"
+    replace_func = lambda x: '{} attack and {} health'.format(x.group(1), x.group(2))
+    text = re.sub(r'\+(\d*)\/\+(\d*)', replace_func, text)
     # Replace numbers with word representation
     text = re.sub(r'(\d+)', lambda x: num2words(int(x.group(0))), text)
-    # Replace slashes with space
-    text = text.replace('/', ' ')
-    # Replace + with plus
-    text = text.replace('+', ' plus ')
     return text
 
 
