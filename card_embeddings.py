@@ -2,6 +2,7 @@
 from __future__ import annotations
 import re
 import time
+import math
 import json
 from pathlib import Path
 from dataclasses import dataclass
@@ -209,55 +210,47 @@ class CardEmbeddings:
 
     def _vectorize_card(self, card: Card) -> np.ndarray:
         """Vectorize a card with the given attributes. Return the corresponding card embedding."""
-        def _get_embedding_sum(words: List[str]) -> np.ndarray:
-            """Return the sum of the embedding vectors for the given list of words.
+        def _aggregrate_embeddings(words: List[str], func: callable) -> np.ndarray:
+            """Return the aggregate of the embedding vectors for the given list of words.
             If a word doesn't have an embedding word, then the zero vector is used instead.
             """
             # Filter out stopwords
             words = [x for x in words if x not in self._stop_words]
-            return sum(self._word_embeddings.get_vector(x) for x in words if x in self._word_embeddings)
+            return func(self._word_embeddings.get_vector(x) for x in words if x in self._word_embeddings)
 
-        parts = [_get_embedding_sum(self._tokenizer.tokenize(card.name))]
+        parts = [_aggregrate_embeddings(self._tokenizer.tokenize(card.name), sum)]
         if card.text is not None:
-            parts.append(_get_embedding_sum(self._tokenizer.tokenize(
+            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize(
                 _clean_card_text(card.text)
-            )))
+            ), sum))
 
         # Add race feature vector
         if card.race is not None:
-            parts.append(_get_embedding_sum(self._tokenizer.tokenize(
+            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize(
                 f'Type {card.race}'
-            )))
+            ), sum))
         # Add class feature vector
         if card.card_class is not None:
-            parts.append(_get_embedding_sum(self._tokenizer.tokenize(
+            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize(
                 f'Class {card.card_class}'
-            )))
+            ), sum))
         # Add rarity feature vector
         if card.rarity is not None:
-            parts.append(_get_embedding_sum(self._tokenizer.tokenize(
+            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize(
                 f'Rarity {card.rarity}'
-            )))
+            ), sum))
         # Add tavern tier feature vector
         if card.tier is not None:
-            parts.append(_get_embedding_sum(self._tokenizer.tokenize(
-                f'Tier {num2words(card.tier)}'
-            )))
+            parts.append(self._word_embeddings.get_vector('tier') * card.tier)
         # Add attack feature vector
         if card.attack is not None:
-            parts.append(_get_embedding_sum(self._tokenizer.tokenize(
-                f'Attack {num2words(card.attack)}'
-            )))
+            parts.append(self._word_embeddings.get_vector('attack') * card.attack)
         # Add health feature vector
         if card.health is not None:
-            parts.append(_get_embedding_sum(self._tokenizer.tokenize(
-                f'Health {num2words(card.health)}'
-            )))
+            parts.append(self._word_embeddings.get_vector('health') * card.health)
         # Add cost feature vector
         if card.cost is not None:
-            parts.append(_get_embedding_sum(self._tokenizer.tokenize(
-                f'Mana cost {num2words(card.cost)}'
-            )))
+            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize('Mana cost'), sum) * card.cost)
 
         # Get average of vectors
         v = sum(parts) / len(parts)
