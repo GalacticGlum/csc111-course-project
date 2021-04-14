@@ -5,13 +5,14 @@ import time
 import json
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Tuple, List, Dict, Union, Optional
+from typing import Tuple, Set, List, Dict, Union, Optional
 
 import numpy as np
 import gensim.downloader
 from num2words import num2words
+from nltk.corpus import stopwords
 from nltk.tokenize import TweetTokenizer
-from sklearn import decomposition, neighbors
+from sklearn import manifold, neighbors
 from gensim.models import Word2Vec, KeyedVectors
 
 from logger import logger
@@ -92,17 +93,15 @@ class CardEmbeddings:
     #   - _vocabulary: A dict mapping each card name to its index.
     #   - _nearest_neighbours: A nearest neighbours model for finding most similar embeddings.
     #   - _word_embeddings: Learned word embeddigns from a word2vec model.
-    #   - _embedding_size: The dimensionality of each embedding. If this does not match the
-    #                      dimensionality of the given word2vec, then t-SNE is used to reduce
-    #                      the dimensionality of the vectors to the desired size.
     #   - _card_data: A dict mapping each card name to its json object.
     #   - _tokenizer: Tokenizer for tokenizing strings.
+    #   - _stop_words: A set of commonly used English words.
     _vocabulary: Dict[str, int]
     _nearest_neighbours: Optional[neighbors.NearestNeighbors]
     _word_embeddings: Optional[KeyedVectors]
-    _embedding_size: Optional[int]
     _card_data: Dict[str, dict]
     _tokenizer: TweetTokenizer
+    _stop_words: Set[str]
 
     def __init__(self, card_data_filepath: Optional[Path] = None,
                  use_nearest_neighbours: bool = True,
@@ -134,20 +133,26 @@ class CardEmbeddings:
             else:
                 # word2vec_model is a path to a model checkpoint
                 self._word_embeddings = Word2Vec.load(str(word2vec_model)).wv
-        except:
-            logger.warn('Could not load word2vec embeddings!')
+
+            if embedding_size is not None:
+                # Embed word vectors into lower-dimensional space
+                tsne = manifold.TSNE(n_components=embedding_size)
+                self._word_embeddings = tsne.fit_transform(self._word_embeddings)
+        except Exception as error:
+            logger.exception(error)
+            logger.warning('Could not load word2vec embeddings!')
             self._word_embeddings = None
 
         self._weights = np.empty((0,))
         self._card_names = []
         self._vocabulary = {}
         self._nearest_neighbours = None
-        self._embedding_size = embedding_size
         self._card_data = {}
         self._tokenizer = TweetTokenizer(preserve_case=False)
+        self._stop_words = set(stopwords.words('english'))
 
         if card_data_filepath:
-            self._load_card_data(card_data_filepath, use_nearest_neighbours=use_nearest_neighbours)
+            self._load_card_data(card_data_filepath)
 
         if use_nearest_neighbours:
             self._build_nearest_neighbours()
@@ -202,16 +207,14 @@ class CardEmbeddings:
         else:
             raise ValueError(f'no embedding vector for the card with name \'{card_name}\'')
 
-    def __getitem__(self, card_name: str) -> np.ndarray:
-        """Return the embedding vector for the card with the given name."""
-        return self.get_vector(card_name)
-
     def _vectorize_card(self, card: Card) -> np.ndarray:
         """Vectorize a card with the given attributes. Return the corresponding card embedding."""
         def _get_embedding_sum(words: List[str]) -> np.ndarray:
             """Return the sum of the embedding vectors for the given list of words.
             If a word doesn't have an embedding word, then the zero vector is used instead.
             """
+            # Filter out stopwords
+            words = [x for x in words if x not in self._stop_words]
             return sum(self._word_embeddings.get_vector(x) for x in words if x in self._word_embeddings)
 
         parts = [_get_embedding_sum(self._tokenizer.tokenize(card.name))]
@@ -326,6 +329,15 @@ class CardEmbeddings:
         ) for index in indices[0] if index != card_index]
 
         return most_similar
+
+    @property
+    def embedding_size(self) -> int:
+        """Return the dimensionality of the embedding vectors."""
+        return self._weights.shape[-1]
+
+    def __getitem__(self, card_name: str) -> np.ndarray:
+        """Return the embedding vector for the card with the given name."""
+        return self.get_vector(card_name)
 
 
 def cosine_similarity(u: np.ndarray, v: np.ndarray) -> float:
