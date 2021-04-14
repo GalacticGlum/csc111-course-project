@@ -217,52 +217,75 @@ class CardEmbeddings:
 
     def _vectorize_card(self, card: Card) -> np.ndarray:
         """Vectorize a card with the given attributes. Return the corresponding card embedding."""
-        def _aggregrate_embeddings(words: List[str], func: callable) -> np.ndarray:
-            """Return the aggregate of the embedding vectors for the given list of words.
-            If a word doesn't have an embedding word, then the zero vector is used instead.
-            """
-            # Filter out stopwords
-            words = [x for x in words if x not in self._stop_words]
-            return func(self._word_embeddings.get_vector(x) for x in words if x in self._word_embeddings)
-
-        parts = [_aggregrate_embeddings(self._tokenizer.tokenize(card.name), sum)]
+        parts = []
         if card.text is not None:
-            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize(
-                _clean_card_text(card.text)
-            ), sum))
+            text_tokens = self._tokenizer.tokenize(_clean_card_text(card.text))
+            text_vector = self._aggregrate_embeddings(text_tokens, sum)
 
+        # Add golden feature vector
+        golden_text = 'golden' if card.is_golden else 'not golden'
+        parts.append(self._make_named_feature_vector(golden_text, ''))
         # Add race feature vector
         if card.race is not None:
-            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize(
-                f'Type {card.race}'
-            ), sum))
+            parts.append(self._make_named_feature_vector('type', card.race))
         # Add class feature vector
         if card.card_class is not None:
-            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize(
-                f'Class {card.card_class}'
-            ), sum))
+            parts.append(self._make_named_feature_vector('class', card.card_class))
         # Add rarity feature vector
         if card.rarity is not None:
-            parts.append(_aggregrate_embeddings(self._tokenizer.tokenize(
-                f'Rarity {card.rarity}'
-            ), sum))
+            parts.append(self._make_named_feature_vector('rarity', card.rarity))
         # Add tavern tier feature vector
         if card.tier is not None:
-            parts.append(self._word_embeddings.get_vector('tier') * card.tier)
+            tier_vector = self._word_embeddings.get_vector('tier', norm=True)
+            parts.append(tier_vector * card.tier)
         # Add attack feature vector
         if card.attack is not None:
-            parts.append(self._word_embeddings.get_vector('attack') * card.attack)
+            attack_vector = self._word_embeddings.get_vector('attack', norm=True)
+            parts.append(attack_vector * card.attack)
         # Add health feature vector
         if card.health is not None:
-            parts.append(self._word_embeddings.get_vector('health') * card.health)
-        # Add cost feature vector
+            health_vector = self._word_embeddings.get_vector('health', norm=True)
+            parts.append(health_vector * card.health)
+        # Add mana cost feature vector
         if card.cost is not None:
-            mana_cost_vector = _aggregrate_embeddings(self._tokenizer.tokenize('Mana cost'), sum)
+            mana_cost_vector = self._aggregrate_embeddings(
+                self._tokenizer.tokenize('Mana cost'),
+                sum, norm=True
+            )
             parts.append(mana_cost_vector * card.cost)
 
         # Get average of vectors
         v = sum(parts) / len(parts)
         return v
+
+    def _aggregrate_embeddings(self, tokens: List[str], func: callable, norm: bool = True) \
+            -> np.ndarray:
+        """Return the aggregate of the embedding vectors for the given list of words.
+        If a word doesn't have an embedding word, then the zero vector is used instead.
+
+        Args:
+            tokens: A list of tokens.
+            func: The aggregation function to use. This takes in a list of vectors
+                    (np.ndarray objects) and returns a single vector, of the same dimensionality
+                    as a np.ndarray object.
+            norm: Whether to use unit-norm word embeddings, or raw word embedding vectors.
+        """
+        return func(
+            self._word_embeddings.get_vector(x, norm=norm)
+            for x in tokens if x in self._word_embeddings
+        )
+
+    def _make_named_feature_vector(self, attribute: str, value: str, norm: bool = True) \
+            -> np.ndarray:
+        """Return the named feature vector for the given attribute.
+
+        Args:
+            attribute: The name of the attribute. Used as a context in the feature vector.
+            value: The value of the attribute.
+            norm: Whether to use unit-norm word embeddings, or raw word embedding vectors.
+        """
+        tokens = self._tokenizer.tokenize(f'{attribute} {value}')
+        return self._aggregrate_embeddings(tokens, sum, norm=norm)
 
     # def vectorize_minion(self, minion: Minion) -> np.ndarray:
     #     """Vectorize the given minion. Return the corresponding card embedding."""
