@@ -13,7 +13,7 @@ import gensim.downloader
 from num2words import num2words
 from nltk.corpus import stopwords
 from nltk.tokenize import TweetTokenizer
-from sklearn import manifold, neighbors
+from sklearn import decomposition, neighbors
 from gensim.models import Word2Vec, KeyedVectors
 
 from logger import logger
@@ -137,8 +137,15 @@ class CardEmbeddings:
 
             if embedding_size is not None:
                 # Embed word vectors into lower-dimensional space
-                tsne = manifold.TSNE(n_components=embedding_size)
-                self._word_embeddings = tsne.fit_transform(self._word_embeddings)
+                pca = decomposition.PCA(n_components=embedding_size)
+                fit_embeddings = pca.fit_transform(self._word_embeddings.vectors)
+                word_embeddings = KeyedVectors(embedding_size)
+                keys, vectors = [], []
+                for index, key in enumerate(self._word_embeddings.index_to_key):
+                    keys.append(key)
+                    vectors.append(fit_embeddings[index])
+                word_embeddings.add_vectors(keys, vectors)
+                self._word_embeddings = word_embeddings
         except Exception as error:
             logger.exception(error)
             logger.warning('Could not load word2vec embeddings!')
