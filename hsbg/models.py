@@ -1,6 +1,5 @@
 """Model dataclasses for representing objects of the game."""
 from __future__ import annotations
-
 import copy
 from enum import Enum, Flag, auto
 from dataclasses import dataclass, field
@@ -23,6 +22,14 @@ class CardClass(Enum):
     DEATH_KNIGHT = 'death_knight'
     NEUTRAL = 'neutral'
 
+    @classmethod
+    def from_name(cls, name: str) -> Optional[CardClass]:
+        """Return the CardClass with the given name. This is case sensitive."""
+        try:
+            return cls[name]
+        except KeyError:
+            return None
+
 
 class CardRarity(Enum):
     """The rarity of a card."""
@@ -31,6 +38,14 @@ class CardRarity(Enum):
     RARE = 'rare'
     EPIC = 'epic'
     LEGENDARY = 'legendary'
+
+    @classmethod
+    def from_name(cls, name: str) -> Optional[CardRarity]:
+        """Return the CardRarity with the given name. This is case sensitive."""
+        try:
+            return cls[name]
+        except KeyError:
+            return None
 
 
 class CardAbility(Flag):
@@ -80,6 +95,14 @@ class MinionRace(Flag):
     NEUTRAL = auto()
     AMALGAM = BEAST | DEMON | DRAGON | MECH | MURLOC
     ALL = ~0
+
+    @classmethod
+    def from_name(cls, name: str) -> Optional[MinionRace]:
+        """Return the MinionRace with the given name. This is case sensitive."""
+        try:
+            return cls[name]
+        except KeyError:
+            return None
 
 
 @dataclass

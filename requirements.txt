@@ -18,12 +18,15 @@ setuptools
 wheel
 
 # Word embeddings
+nltk
 gensim
 sklearn
 python-Levenshtein
 numpy>=1.20.0
+
 # Deep learning
 tensorflow<2.5.0
+
 # Visualisation
 matplotlib
 
