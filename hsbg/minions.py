@@ -84,7 +84,8 @@ def _verify_minion_list(card_json_data: Path) -> None:
                 entry = next(
                     x for x in card_data if x['name'] == minion.name and \
                      (minion.is_golden and 'battlegroundsNormalDbfId' in x or \
-                      not minion.is_golden and 'battlegroundsPremiumDbfId' in x)
+                      not minion.is_golden and 'battlegroundsPremiumDbfId' in x or
+                      'is_golden' in x and x['is_golden'] == minion.is_golden)
                 )
             except StopIteration:
                 print(f'Could not find {minion.name} in \'{card_json_data}\'')
@@ -96,10 +97,13 @@ def _verify_minion_list(card_json_data: Path) -> None:
                 minion.cost == entry['cost']
             ]
             is_valid = all(checks)
+            checks_str = 'match check: attack={}, health={}, cost={}'.format(*[
+                'PASSED' if x else 'FAILED' for x in checks
+            ])
 
             if not is_valid:
                 minion_type = 'golden' if minion.is_golden else 'regular'
-                print(f'Error verifying {minion.name} ({minion_type}) ({checks})')
+                print(f'Error verifying {minion.name} ({minion_type}) ({checks_str})')
 
 # A dict mapping each tier to the number of copies of each minion with that tier.
 TIER_NUM_COPIES = {
@@ -575,12 +579,12 @@ def _pack_leader_on_any_summoned(self: Minion, board: TavernGameBoard,
 
 
 PACK_LEADER = Minion(
-    'Pack Leader', CardClass.NEUTRAL, MinionRace.BEAST, 2, 3,
+    'Pack Leader', CardClass.NEUTRAL, MinionRace.BEAST, 3, 3,
     cost=2, tier=2, rarity=CardRarity.RARE,
     _on_any_summoned=_pack_leader_on_any_summoned
 )
 PACK_LEADER_GOLDEN = Minion(
-    'Pack Leader', CardClass.NEUTRAL, MinionRace.BEAST, 4, 6,
+    'Pack Leader', CardClass.NEUTRAL, MinionRace.BEAST, 6, 6,
     cost=2, tier=2, rarity=CardRarity.RARE, is_golden=True,
     _on_any_summoned=_pack_leader_on_any_summoned
 )
@@ -1918,12 +1922,12 @@ QIRAJI_HARBINGER_GOLDEN = Minion(
 # Beast Pool
 # Ironhide Runt summoned by Ironhide Direhorn
 IRONHIDE_RUNT = Minion(
-    'Ironhide Direhorn', CardClass.DRUID, MinionRace.BEAST, 5, 5,
+    'Ironhide Runt', CardClass.DRUID, MinionRace.BEAST, 5, 5,
     cost=5, tier=1, purchasable=False
 )
 
 IRONHIDE_RUNT_GOLDEN = Minion(
-    'Ironhide Direhorn', CardClass.DRUID, MinionRace.BEAST, 10, 10,
+    'Ironhide Runt', CardClass.DRUID, MinionRace.BEAST, 10, 10,
     cost=5, tier=1, is_golden=True, purchasable=False
 )
 
@@ -2003,24 +2007,24 @@ MAL_GANIS_GOLDEN = Minion(
 
 # Voidwalker summoned by voidlord
 VOIDWALKER = Minion(
-    'Voidwalker', CardClass.WARLOCK, MinionRace.Demon, 1, 3,
+    'Voidwalker', CardClass.WARLOCK, MinionRace.DEMON, 1, 3,
     cost=1, tier=1, abilities=CardAbility.TAUNT, purchasable=False
 )
 
 VOIDWALKER_GOLDEN = Minion(
-    'Voidwalker', CardClass.WARLOCK, MinionRace.Demon, 2, 6, is_golden=True,
+    'Voidwalker', CardClass.WARLOCK, MinionRace.DEMON, 2, 6, is_golden=True,
     cost=1, tier=1, abilities=CardAbility.TAUNT, purchasable=False
 )
 
 # TODO: Deathrattle: summon three 1/3 (2/6 if golden) demons with taunt
 VOIDLORD = Minion(
-    'Voidlord', CardClass.WARLOCK, MinionRace.Demon, 3, 9,
+    'Voidlord', CardClass.WARLOCK, MinionRace.DEMON, 3, 9,
     cost=9, tier=5, rarity=CardRarity.EPIC,
     abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE | CardAbility.SUMMON
 )
 
 VOIDLORD_GOLDEN = Minion(
-    'Voidlord', CardClass.WARLOCK, MinionRace.Demon, 6, 18,
+    'Voidlord', CardClass.WARLOCK, MinionRace.DEMON, 6, 18,
     cost=9, tier=5, rarity=CardRarity.EPIC, is_golden=True,
     abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE | CardAbility.SUMMON
 )
@@ -2082,7 +2086,7 @@ def _nomi_on_any_played(self: Minion, board: TavernGameBoard, played_minion: Min
 NOMI_KITCHEN_NIGHTMARE = Minion(
     "Nomi, Kitchen Nightmare", CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 4,
     cost=7, tier=5, rarity=CardRarity.LEGENDARY,
-    _on_this_played=_nomi_on_this_played
+    _on_any_played=_nomi_on_any_played
 )
 
 NOMI_KITCHEN_NIGHTMARE_GOLDEN = Minion(
@@ -2266,13 +2270,13 @@ def _lightfang_enforcer_on_end_turn(self: Minion, board: TavernGameBoard) -> Non
 # TODO: look over the function
 LIGHTFANG_ENFORCER = Minion(
     'Lightfang Enforcer', CardClass.NEUTRAL, MinionRace.NEUTRAL, 2, 2,
-    cost=4, tier=5,
+    cost=6, tier=5,
     _on_end_turn=_lightfang_enforcer_on_end_turn
 )
 
 LIGHTFANG_ENFORCER_GOLDEN = Minion(
     'Lightfang Enforcer', CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 4,
-    cost=4, tier=5, is_golden=True,
+    cost=6, tier=5, is_golden=True,
     _on_end_turn=_lightfang_enforcer_on_end_turn
 )
 
@@ -2369,12 +2373,12 @@ MAEXXNA_GOLD = Minion(
 # Demon Pool
 # TODO: Implement whenever this minion takes damage, summon 1(2) random Demon and give taunt
 IMP_MAMA = Minion(
-    'Imp Mama', CardClass.NEUTRAL, MinionRace.Demon, 6, 10,
+    'Imp Mama', CardClass.NEUTRAL, MinionRace.DEMON, 6, 10,
     cost=8, tier=6, abilities=CardAbility.SUMMON
 )
 
 IMP_MAMA_GOLDEN = Minion(
-    'Imp Mama', CardClass.NEUTRAL, MinionRace.Demon, 12, 20,
+    'Imp Mama', CardClass.NEUTRAL, MinionRace.DEMON, 12, 20,
     cost=8, tier=6, is_golden=True, abilities=CardAbility.SUMMON
 )
 
