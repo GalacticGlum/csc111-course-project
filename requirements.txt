@@ -28,13 +28,14 @@ nltk
 gensim
 sklearn
 python-Levenshtein
-numpy>=1.20.0
+#numpy>=1.20.0
 
 # Deep learning
-tensorflow<2.5.0
+tensorflow
 
 # Visualisation
 matplotlib
+pygame
 
 # Hearthstone Simulator API
 git+https://github.com/galacticglum/hearthstone-battlegrounds-simulator.git#egg=hsbg_sim

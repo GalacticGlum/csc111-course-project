@@ -1633,6 +1633,16 @@ class BattlegroundsGame:
         """Return the current round."""
         return self._round_number
 
+    @property
+    def num_alive_players(self) -> int:
+        """Return the number of players currently in the game."""
+        return len(self.alive_boards)
+
+    @property
+    def num_total_players(self) -> int:
+        """Return the number of total players in the game."""
+        return self._num_players
+
 
 class Move:
     """A class representing a move in Hearthstone Battlegrounds.
