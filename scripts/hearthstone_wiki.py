@@ -11,6 +11,7 @@ import click
 import pypandoc
 import contractions
 from tqdm import tqdm
+from num2words import num2words
 
 from hsbg.utils import parallel_map
 
@@ -153,6 +154,11 @@ def make_corpus_from_pages(directory: Path, output_filepath: Path,
             text = contractions.fix(text)
             # Replace hyphenated words
             text = re.sub(HYPENATED_WORDS_PATTERN, r'\1_\3', text)
+            # Replace "+X/+Y" with "X attack and Y health"
+            replace_func = lambda x: '{} attack and {} health'.format(x.group(1), x.group(2))
+            text = re.sub(r'\+(\d*)\/\+(\d*)', replace_func, text)
+            # Replace numbers with word representation
+            text = re.sub(r'\+?(\d+)', lambda x: num2words(int(x.group(0))), text)
             # Output text to corpus file
             fp.write(text + '\n')
 
