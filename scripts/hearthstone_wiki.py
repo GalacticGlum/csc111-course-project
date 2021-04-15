@@ -21,6 +21,7 @@ API_URL = 'https://hearthstone.fandom.com/api.php?action={action}&format=json'
 # A regex pattern to find hypenated words.
 HYPENATED_WORDS_PATTERN = re.compile(r'(\w+)(-)(\w+)')
 
+
 def request_from_api(params: dict) -> dict:
     """Perform an api request and return the json response."""
     url = API_URL.format(**params)
