@@ -129,7 +129,7 @@ if __name__ == '__main__':
         # Fill the background
         screen.fill(BACKGROUND_COLOUR)
 
-        visualise_game_board(board)
+        visualise_game_board(screen, board)
 
         # Flip screen buffers
         pygame.display.flip()
