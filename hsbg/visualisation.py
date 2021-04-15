@@ -5,6 +5,7 @@ from typing import Tuple, List, Optional
 
 from hsbg.models import Minion
 from hsbg import TavernGameBoard, BattlegroundsGame
+from hsbg.combat import SIMULATOR_ABILITIES
 
 
 def visualise_game(surface: pygame.Surface, board: BattlegroundsGame) -> None:
@@ -82,8 +83,39 @@ def visualise_game_board(surface: pygame.Surface, board: TavernGameBoard) -> Non
     raise NotImplementedError
 
 
-def draw_minion(surface: pygame.Surface, minion: Minion, size: Tuple[int, int], position: Tuple[int, int]) \
-        -> None:
+def initialize_screen(screen_size: tuple[int, int], allowed: list) -> pygame.Surface:
+    """Initialize pygame and the display window.
+
+    allowed is a list of pygame event types that should be listened for while pygame is running.
+    """
+    pygame.display.init()
+    pygame.font.init()
+    screen = pygame.display.set_mode(screen_size)
+    screen.fill((255, 255, 255))
+    pygame.display.flip()
+
+    pygame.event.clear()
+    pygame.event.set_blocked(None)
+    pygame.event.set_allowed([pygame.QUIT] + allowed)
+
+    return screen
+
+
+def draw_text(screen: pygame.Surface, text: str, pos: tuple[int, int]) -> None:
+    """Draw the given text to the pygame screen at the given position.
+
+    pos represents the *upper-left corner* of the text.
+    """
+    font_size = min(20 * screen.get_height() // 1080, 20 * screen.get_width() // 1980)
+    font = pygame.font.SysFont('inconsolata', font_size)
+    text_surface = font.render(text, True, (0, 0, 0))
+    width, height = text_surface.get_size()
+    screen.blit(text_surface,
+                pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
+
+
+def draw_minion(surface: pygame.Surface, minion: Minion, size: Tuple[int, int],
+                position: Tuple[int, int]) -> None:
     """Draw a minion on the screen at the given position with the given size.
 
     Args:
@@ -92,10 +124,55 @@ def draw_minion(surface: pygame.Surface, minion: Minion, size: Tuple[int, int], 
         size: The size of the card representing the minion given as a width-height int tuple.
         position: The centre position of the minion given as an x-y int tuple.
     """
-    raise NotImplementedError
+    card_w, card_l = size
+    x, y = position
+    font_padding = 22 // 4
+    # padding within the card
+    side = card_w // (25 // 3)
+    color = (218, 165, 32) if minion.is_golden else (0, 0, 0)
+
+    # CARD ITSELF
+    pygame.draw.rect(surface, color, (x, y, card_w, card_l), 2)
+
+    # TIER LEVEL
+    pygame.draw.rect(surface, color, (x, y, card_w // 5, card_l // 6), 2)
+    draw_text(surface, str(minion.tier),
+              (x + card_w // 10 - font_padding, y + card_l // 12 - font_padding))
+
+    # MONSTER TYPE
+    pygame.draw.rect(surface, color,
+                     (x + side, y + 2 * card_l // 3 - side, card_w - side * 2, side), 2)
+    draw_text(surface, str(minion.card_class.name),
+              (x + side + (card_w - side * 2) // 4, y + 2 * card_l // 3 - side + side // 4))
+
+    # ATTACK
+    pygame.draw.rect(surface, color, (x, y + card_l - card_l // 6, card_w // 5, card_l // 6), 2)
+    draw_text(surface, str(minion.attack),
+              (x + card_w // 10 - font_padding, y + card_l - card_l // 12 - font_padding))
+
+    # HEALTH
+    pygame.draw.rect(surface, color, (x + card_w - card_w // 5, y + card_l - card_l // 6,
+                                      card_w // 5, card_l // 6), 2)
+    draw_text(surface, str(minion.health),
+              (x + card_w - card_w // 10 - font_padding, y + card_l - card_l // 12 - font_padding))
+
+    # NAME
+    # TODO: Fix the name and all the text including colour and shit
+    pygame.draw.rect(surface, color, (x + side // 2, y + card_l // 2 - card_l // 6,
+                                      card_w - side, card_l // 6), 2)
+    draw_text(surface, str(minion.name), (x + side // 2 + 4,
+                                          y + card_l // 2 - card_l // 6 + 10))
+
+    # ABILITIES (ONLY THE ONES THE SIMULATOR CAN HANDLE)
+    pygame.draw.rect(surface, color, (x + card_w - card_w // 2, y, card_w // 2, card_l // 6), 2)
+    abilities_to_draw = [x.name[0] for x in SIMULATOR_ABILITIES if x in minion.current_abilities]
+    draw_text(surface, str(','.join(abilities_to_draw)),
+              (x + card_w - card_w // 2 + 5, y + card_l // 12 - font_padding))
 
 
 if __name__ == '__main__':
+    from hsbg import minions
+    # from hsbg.models import Buff
     # Draw the following game state:
     # Board
     #   * Pack Leader
@@ -105,15 +182,14 @@ if __name__ == '__main__':
     #   * Scavenging Hyena
     board = TavernGameBoard()
     board.next_turn()
-    board.add_minion_to_hand(minions.PACK_LEADER)
     board.add_minion_to_hand(minions.ALLEYCAT)
     board.add_minion_to_hand(minions.KINDLY_GRANDMOTHER)
     board.add_minion_to_hand(minions.SCAVENGING_HYENA)
     board.play_minion(0)
     board.play_minion(1)
 
-    BACKGROUND_COLOUR = (0, 0, 0)
-    SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+    BACKGROUND_COLOUR = (255, 255, 255)
+    SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
 
     pygame.init()
     screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
@@ -129,7 +205,10 @@ if __name__ == '__main__':
         # Fill the background
         screen.fill(BACKGROUND_COLOUR)
 
-        visualise_game_board(screen, board)
+        # visualise_game_board(screen, board)
+        card_width = SCREEN_WIDTH // 10
+        card_length = card_width * 6 // 5
+        draw_minion(screen, board.board[0], (card_width, card_length), (800, 800))
 
         # Flip screen buffers
         pygame.display.flip()
