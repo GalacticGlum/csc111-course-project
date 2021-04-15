@@ -1943,7 +1943,7 @@ IRONHIDE_DIREHORN_GOLDEN = Minion(
 )
 
 
-def _mama_bear_on_any_summoned(self: Minion, summoned_minion: Minion) -> None:
+def _mama_bear_on_any_summoned(self: Minion, board: TavernGameBoard, summoned_minion: Minion) -> None:
     """Handle the Mama Bear effect
     Effect: Whenever you summon a Beast, give it +4/+4 (or +8/+8 if golden)."""
     if MinionRace.BEAST not in summoned_minion.race:
