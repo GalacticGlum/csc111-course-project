@@ -35,4 +35,4 @@ matplotlib
 pygame
 
 # Hearthstone Simulator API
-git+https://github.com/galacticglum/hearthstone-battlegrounds-simulator.git#egg=hsbg_sim
+hsbg_sim
