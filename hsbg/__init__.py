@@ -1,5 +1,6 @@
 """A simulator for Hearthstone Battlegrounds."""
 from __future__ import annotations
+import copy
 import random
 from enum import IntEnum
 from contextlib import contextmanager
@@ -1581,6 +1582,20 @@ class BattlegroundsGame:
             self.end_turn()
         else:
             self.active_board.make_move(move)
+
+    def copy_and_make_move(self, move: Move) -> BattlegroundsGame:
+        """Make the given move for the active player in a copy of this BattlegroundsGame, and
+        return that copy.
+
+        If move is not a currently valid move, do nothing.
+        Raise a ValueError if no player's turn is active.
+        """
+        if not self.is_turn_in_progress:
+            raise ValueError('No player is currently in a turn!')
+
+        game_copy = copy.copy(self)
+        game_copy.make_move(move)
+        return game_copy
 
     @property
     def is_done(self) -> bool:
