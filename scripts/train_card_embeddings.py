@@ -1,4 +1,4 @@
-"""Train a card embedding model on a corpus."""
+"""Train or fine-tune a card embedding model on a corpus."""
 import argparse
 import time
 from pathlib import Path
@@ -10,13 +10,13 @@ from gensim.models.callbacks import CallbackAny2Vec
 from gensim.utils import simple_preprocess, RULE_KEEP
 
 
-class Corpus:
+class SentenceIterator:
     """An iterator that yields sentences (lists of str)."""
     def __init__(self, filepath: Path) -> None:
         self.filepath = filepath
 
     def __iter__(self) -> Iterator[List[str]]:
-        for line in open(self.filepath):
+        for line in open(self.filepath, encoding='utf-8'):
             words = simple_preprocess(line, min_len=0, max_len=float('inf'))
             yield words
 
@@ -49,7 +49,8 @@ class MonitorCallback(CallbackAny2Vec):
         self._save_frequency = save_frequency
         self._output_path = output_path
 
-    def on_epoch_end(self, model: Word2Vec):
+    def on_epoch_end(self, model: Word2Vec) -> None:
+        """Called when an epoch ends."""
         loss = model.get_latest_training_loss()
         delta_loss = loss - self._loss_previous_step
         print(f'Epoch {self._epoch} - Loss: {delta_loss}')
@@ -76,10 +77,16 @@ def main(args: argparse.Namespace) -> None:
     output_path.mkdir(exist_ok=True, parents=True)
     summary_writer = tf.summary.create_file_writer(str(output_path))
 
+    if args.line_by_line:
+        dataset = SentenceIterator(args.corpus_filepath)
+    else:
+        corpus_text = args.corpus_filepath.read_text(encoding='utf-8')
+        dataset = simple_preprocess(corpus_text, min_len=0, max_len=float('inf'))
+
     print('Started training model...')
     start_time = time.time()
     model = Word2Vec(
-        sentences=Corpus(args.corpus_filepath),
+        sentences=dataset,
         vector_size=args.hidden_size,
         workers=args.num_workers,
         min_count=0,  # Don't ignore any words by frequency
@@ -125,6 +132,9 @@ if __name__ == '__main__':
     parser.add_argument('--lambda', dest='ns_lambda_power', type=float, default=0.75,
                         help='Used to skew the probability distribution when sampling words.')
     # Training configuration
+    parser.add_argument('--no-line-by-line', dest='line_by_line', action='store_false',
+                        help='Whether to load the corpus line by line, or all at once. '
+                             'Note that loading it all at once (potentially) requires a lot of RAM.')
     parser.add_argument('--run-name', type=str, default=None,
                         help='The name of the run. If unspecified, defaults to the name of the '
                         'first file in the given corpus.')
@@ -133,7 +143,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--epochs', type=int, default=300,
                         help='The number of times to iterate over the dataset '
                               'while training. Defaults to 1.')
-    parser.add_argument('--initial-lr', type=float, default=0.1,
+    parser.add_argument('--initial-lr', type=float, default=0.025,
                         help='The initial learning rate.')
     parser.add_argument('--target-lr', type=float, default=1e-4,
                         help='The target learning rate.')

@@ -92,12 +92,14 @@ class CardEmbeddings:
     #                  to the name of the card with encoded index i. This is in lowercase.
     #   - _vocabulary: A dict mapping each card name to its index.
     #   - _nearest_neighbours: A nearest neighbours model for finding most similar embeddings.
-    #   - _word_embeddings: Learned word embeddigns from a word2vec model.
+    #   - _word2vec: Full-dimensionality word embeddings from a word2vec model.
+    #   - _word_embeddings: Active (potentially reduced) word embeddings from a word2vec model.
     #   - _card_data: A dict mapping each card name to its json object.
     #   - _tokenizer: Tokenizer for tokenizing strings.
     #   - _stop_words: A set of commonly used English words.
     _vocabulary: Dict[str, int]
     _nearest_neighbours: Optional[neighbors.NearestNeighbors]
+    _word2vec: Optional[KeyedVectors]
     _word_embeddings: Optional[KeyedVectors]
     _card_data: Dict[str, dict]
     _tokenizer: TweetTokenizer
@@ -125,30 +127,19 @@ class CardEmbeddings:
         """
         # Load card data and construct embeddings
         model_keys = list(gensim.downloader.info()['models'].keys())
-        try:
-            # Load model vectors as a KeyedVectors object
-            if isinstance(word2vec_model, str) and word2vec_model in model_keys:
-                # word2vec_model is the name of a pre-trained model
-                self._word_embeddings = gensim.downloader.load(word2vec_model)
-            else:
-                # word2vec_model is a path to a model checkpoint
-                self._word_embeddings = Word2Vec.load(str(word2vec_model)).wv
+        # Load model vectors as a KeyedVectors object
+        if isinstance(word2vec_model, str) and word2vec_model in model_keys:
+            # word2vec_model is the name of a pre-trained model
+            self._word2vec = gensim.downloader.load(word2vec_model)
+        else:
+            # word2vec_model is a path to a model checkpoint
+            self._word2vec = Word2Vec.load(str(word2vec_model)).wv
 
-            if embedding_size is not None:
-                # Embed word vectors into lower-dimensional space
-                pca = decomposition.PCA(n_components=embedding_size)
-                fit_embeddings = pca.fit_transform(self._word_embeddings.vectors)
-                word_embeddings = KeyedVectors(embedding_size)
-                keys, vectors = [], []
-                for index, key in enumerate(self._word_embeddings.index_to_key):
-                    keys.append(key)
-                    vectors.append(fit_embeddings[index])
-                word_embeddings.add_vectors(keys, vectors)
-                self._word_embeddings = word_embeddings
-        except Exception as error:
-            logger.exception(error)
-            logger.warning('Could not load word2vec embeddings!')
-            self._word_embeddings = None
+        self._init_special_embeddings()
+        if embedding_size is not None:
+            self._reduce_dimensionality(embedding_size)
+        else:
+            self._word_embeddings = self._word2vec
 
         self._weights = np.empty((0,))
         self._card_names = []
@@ -204,6 +195,35 @@ class CardEmbeddings:
         elapsed = time.time() - start_time
         logger.info(f'Finished building nearest neighbours ({elapsed:.2f} seconds)!')
 
+    def _reduce_dimensionality(self, target_dimensionality: int) -> None:
+        """Reduce the dimensionality of the word embeddings.
+
+        Preconditions:
+            - target_dimensionality < self._word2vec.vector_size
+        """
+        # Embed word vectors into lower-dimensional space
+        pca = decomposition.PCA(n_components=target_dimensionality)
+        fit_embeddings = pca.fit_transform(self._word2vec.vectors)
+        word_embeddings = KeyedVectors(target_dimensionality)
+        keys, vectors = [], []
+        for index, key in enumerate(self._word2vec.index_to_key):
+            keys.append(key)
+            vectors.append(fit_embeddings[index])
+        word_embeddings.add_vectors(keys, vectors)
+        self._word_embeddings = word_embeddings
+
+    def _init_special_embeddings(self) -> None:
+        """Initialise embeddings for special Hearthstone words such as "Deathrattle" and "Murloc."
+        """
+        if 'deathrattle' not in self._word2vec:
+            # Use the average of the vectors for "death" and "rattle" as a proxy
+            v = (self._word2vec.get_vector('death') + self._word2vec.get_vector('rattle')) / 2
+            self._word2vec.add_vector('deathrattle', v)
+        if 'murloc' not in self._word2vec:
+            # Use the vector for "fish" as a proxy
+            v = self._word2vec.get_vector('fish')
+            self._word2vec.add_vector('murloc', v)
+
     def get_vector(self, card_name: str) -> np.ndarray:
         """Return the embedding vector for the card with the given name.
         Raise a ValueError if there is no embedding vector for the card with the given name.
@@ -216,46 +236,35 @@ class CardEmbeddings:
 
     def _vectorize_card(self, card: Card) -> np.ndarray:
         """Vectorize a card with the given attributes. Return the corresponding card embedding."""
-        parts = []
+        # 70-30
+        features = []
         if card.text is not None:
             text_tokens = self._tokenizer.tokenize(_clean_card_text(card.text))
-            text_vector = self._aggregrate_embeddings(text_tokens, sum)
+            text_vector = self._aggregrate_embeddings(text_tokens, sum) / len(text_tokens)
 
-        # Add golden feature vector
-        golden_text = 'golden' if card.is_golden else 'not golden'
-        parts.append(self._make_named_feature_vector(golden_text, ''))
         # Add race feature vector
         if card.race is not None:
-            parts.append(self._make_named_feature_vector('type', card.race))
-        # Add class feature vector
-        if card.card_class is not None:
-            parts.append(self._make_named_feature_vector('class', card.card_class))
-        # Add rarity feature vector
-        if card.rarity is not None:
-            parts.append(self._make_named_feature_vector('rarity', card.rarity))
+            features.append(self._word_embeddings.get_vector(card.race.lower(), norm=True))
         # Add tavern tier feature vector
         if card.tier is not None:
-            tier_vector = self._word_embeddings.get_vector('tier', norm=True)
-            parts.append(tier_vector * card.tier)
+            tier_tokens = self._tokenizer.tokenize(f'tier {num2words(card.tier)}')
+            # tier_vector = self._word_embeddings.get_vector('tier', norm=True)
+            # features.append(tier_vector * card.tier)
+            features.append(self._aggregrate_embeddings(tier_tokens, math.prod))
         # Add attack feature vector
         if card.attack is not None:
-            attack_vector = self._word_embeddings.get_vector('attack', norm=True)
-            parts.append(attack_vector * card.attack)
+            attack_tokens = self._tokenizer.tokenize(f'attack {num2words(card.attack)}')
+            # attack_vector = self._word_embeddings.get_vector('attack', norm=True)
+            # features.append(attack_vector * card.attack)
+            features.append(self._aggregrate_embeddings(attack_tokens, math.prod))
         # Add health feature vector
         if card.health is not None:
-            health_vector = self._word_embeddings.get_vector('health', norm=True)
-            parts.append(health_vector * card.health)
-        # Add mana cost feature vector
-        if card.cost is not None:
-            mana_cost_vector = self._aggregrate_embeddings(
-                self._tokenizer.tokenize('Mana cost'),
-                sum, norm=True
-            )
-            parts.append(mana_cost_vector * card.cost)
+            health_tokens = self._tokenizer.tokenize(f'health {num2words(card.health)}')
+            # health_vector = self._word_embeddings.get_vector('health', norm=True)
+            # features.append(health_vector * card.health)
+            features.append(self._aggregrate_embeddings(health_tokens, math.prod))
 
-        # Get average of vectors
-        v = sum(parts) / len(parts)
-        return v
+        return sum(features)
 
     def _aggregrate_embeddings(self, tokens: List[str], func: callable, norm: bool = True) \
             -> np.ndarray:
@@ -269,6 +278,10 @@ class CardEmbeddings:
                     as a np.ndarray object.
             norm: Whether to use unit-norm word embeddings, or raw word embedding vectors.
         """
+        for x in tokens:
+            if x not in self._word_embeddings:
+                logger.warning(f'No word embedding exists for \'{x}\'')
+
         return func(
             self._word_embeddings.get_vector(x, norm=norm)
             for x in tokens if x in self._word_embeddings
