@@ -6,8 +6,8 @@ if __name__ == '__main__':
     # start_time=time.time()
     # winner, move_sequence = run_game([RandomPlayer(), RandomPlayer()])
     # print(f'Player {winner + 1} won the game!')
-    # # pprint.pprint(move_sequence)
     # print('Took {:.2f} seconds to run a game'.format(time.time() - start_time))
+    # pprint.pprint(move_sequence)
 
     start_time=time.time()
     n = 1000
