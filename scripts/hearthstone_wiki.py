@@ -20,6 +20,14 @@ from hsbg.utils import parallel_map
 API_URL = 'https://hearthstone.fandom.com/api.php?action={action}&format=json'
 # A regex pattern to find hypenated words.
 HYPENATED_WORDS_PATTERN = re.compile(r'(\w+)(-)(\w+)')
+# A Regex pattern to match urls starting with or without http(s).
+URL_MATCH_PATTERN = re.compile(
+    r'(?i)(https?:\/\/(?:www\.|(?!www))'
+    r'[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|'
+    r'www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|'
+    r'https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|'
+    r'www\.[a-zA-Z0-9]+\.[^\s]{2,})'
+)
 
 
 def request_from_api(params: dict) -> dict:
@@ -151,15 +159,23 @@ def make_corpus_from_pages(directory: Path, output_filepath: Path,
     with open(output_filepath, 'w+', encoding='utf-8') as fp:
         for file in tqdm(files):
             text = file.read_text(encoding='utf-8')
+            # Remove links
+            text = re.sub(URL_MATCH_PATTERN, '', text)
             # Expand contractions
             text = contractions.fix(text)
             # Replace hyphenated words
             text = re.sub(HYPENATED_WORDS_PATTERN, r'\1_\3', text)
             # Replace "+X/+Y" with "X attack and Y health"
-            replace_func = lambda x: '{} attack and {} health'.format(x.group(1), x.group(2))
-            text = re.sub(r'\+(\d*)\/\+(\d*)', replace_func, text)
-            # Replace numbers with word representation
-            text = re.sub(r'\+?(\d+)', lambda x: num2words(int(x.group(0))), text)
+            replace_func = lambda x: ' {} attack and {} health '.format(
+                num2words(int(x.group(1))),
+                num2words(int(x.group(2)))
+            )
+            text = re.sub(r'\+?(\d+)\/\+?(\d+)', replace_func, text)
+            # Replace special characters
+            text = text.replace('|', ' ')
+            text = text.replace('"', '')
+            text = text.replace('“', '')
+            text = text.replace('”', '')
             # Output text to corpus file
             fp.write(text + '\n')
 
