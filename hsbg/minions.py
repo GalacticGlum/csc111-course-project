@@ -297,6 +297,7 @@ VULGAR_HOMUNCULUS_GOLDEN = Minion(
     _on_this_played=lambda self, board: board.attack_hero(2)
 )
 
+
 def _wrath_weaver_on_any_played(self: Minion, board: TavernGameBoard, played_minion: Minion) -> None:
     """Handle the effect for the Wrath Weaver minion when a card is played from the hand.
     Effect: After you play a demon, deal 1 damage to your hero, and gain +2/+2 (or +4/+4 if golden).
@@ -310,6 +311,7 @@ def _wrath_weaver_on_any_played(self: Minion, board: TavernGameBoard, played_min
 
     self.add_buff(buff)
     board.attack_hero(1)
+
 
 WRATH_WEAVER = Minion(
     'Wrath Weaver', CardClass.NEUTRAL, MinionRace.NONE, 1, 3,
@@ -419,6 +421,7 @@ MICRO_MUMMY_GOLDEN = Minion(
     _on_end_turn=_micro_mummy_on_end_turn
 )
 
+
 # Murloc Pool
 def _murloc_tidecaller_on_any_summoned(self: Minion, board: TavernGameBoard,
                                         summoned_minion: Minion) -> None:
@@ -430,6 +433,7 @@ def _murloc_tidecaller_on_any_summoned(self: Minion, board: TavernGameBoard,
         self.add_buff(Buff(2, 0, CardAbility.NONE))
     else:
         self.add_buff(Buff(1, 0, CardAbility.NONE))
+
 
 MURLOC_TIDECALLER = Minion(
     'Murloc Tidecaller', CardClass.NEUTRAL, MinionRace.MURLOC, 1, 2,
@@ -463,6 +467,7 @@ MURLOC_TIDEHUNTER_GOLDEN = Minion(
     _on_this_played=lambda self, board: board.summon_minion(board.pool.find(name='Murloc Scout', is_golden=True))
 )
 
+
 def _rockpool_hunter_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the Rockpool Hunter battlecry effect.
     Effect: Give a friendly Murloc +1/+1 (or +2/+2 if golden).
@@ -478,6 +483,7 @@ def _rockpool_hunter_on_this_played(self: Minion, board: TavernGameBoard) -> Non
         minion.add_buff(Buff(2, 2, CardAbility.NONE))
     else:
         minion.add_buff(Buff(1, 1, CardAbility.NONE))
+
 
 ROCKPOOL_HUNTER = Minion(
     'Rockpool Hunter', CardClass.NEUTRAL, MinionRace.MURLOC, 2, 3,
@@ -554,6 +560,7 @@ KINDLY_GRANDMOTHER_GOLDEN = Minion(
     cost=2, tier=2, is_golden=True, abilities=CardAbility.DEATH_RATTLE
 )
 
+
 def _pack_leader_on_any_summoned(self: Minion, board: TavernGameBoard,
                                   summoned_minion: Minion) -> None:
     """Handle the Pack Leader effect.
@@ -566,6 +573,7 @@ def _pack_leader_on_any_summoned(self: Minion, board: TavernGameBoard,
     else:
         summoned_minion.add_buff(Buff(2, 0, CardAbility.NONE))
 
+
 PACK_LEADER = Minion(
     'Pack Leader', CardClass.NEUTRAL, MinionRace.BEAST, 2, 3,
     cost=2, tier=2, rarity=CardRarity.RARE,
@@ -576,6 +584,7 @@ PACK_LEADER_GOLDEN = Minion(
     cost=2, tier=2, rarity=CardRarity.RARE, is_golden=True,
     _on_any_summoned=_pack_leader_on_any_summoned
 )
+
 
 def _rabid_saurolisk_on_any_played(self: Minion, board: TavernGameBoard, played_minion: Minion) \
         -> None:
@@ -588,6 +597,7 @@ def _rabid_saurolisk_on_any_played(self: Minion, board: TavernGameBoard, played_
         self.add_buff(Buff(2, 4, CardAbility.NONE))
     else:
         self.add_buff(Buff(1, 2, CardAbility.NONE))
+
 
 RABID_SAUROLISK = Minion(
     'Rabid Saurolisk', CardClass.HUNTER, MinionRace.BEAST, 3, 2,
@@ -665,6 +675,7 @@ GLYPH_GUARDIAN_GOLDEN = Minion(
     cost=3, tier=2, is_golden=True
 )
 
+
 def _steward_of_time_on_this_sold(self: Minion, board: TavernGameBoard) -> None:
     """Handle the effect for the Steward of Time minion.
     Effect: When you sell this minion, give all minions in Bob's Tavern +1/+1 (or +2/+2 if golden).
@@ -674,6 +685,7 @@ def _steward_of_time_on_this_sold(self: Minion, board: TavernGameBoard) -> None:
             minion.add_buff(Buff(2, 2, CardAbility.NONE))
         else:
             minion.add_buff(Buff(1, 1, CardAbility.NONE))
+
 
 STEWARD_OF_TIME = Minion(
     'Steward of Time', CardClass.NEUTRAL, MinionRace.DRAGON, 3, 4,
@@ -783,6 +795,7 @@ KABOOM_BOT_GOLDEN = Minion(
     cost=3, tier=2, is_golden=True, abilities=CardAbility.DEATH_RATTLE
 )
 
+
 def _metaltooth_leaper_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Metaltooth Leaper minion.
     Effect: Give your other Mechs +2 (or +4 if golden) Attack.
@@ -791,6 +804,7 @@ def _metaltooth_leaper_on_this_played(self: Minion, board: TavernGameBoard) -> N
     minions = board.get_minions_on_board(race=MinionRace.MECH, ignore=[self])
     for minion in minions:
         minion.add_buff(Buff(additional_attack, 0, CardAbility.NONE))
+
 
 METALTOOTH_LEAPER = Minion(
     'Metaltooth Leaper', CardClass.HUNTER, MinionRace.MECH, 3, 3,
@@ -858,6 +872,7 @@ YO_HO_OGRE_GOLDEN = Minion(
 )
 
 # Neutral Pool
+
 def _managerie_mug_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Menagerie Mug minion.
     Effect: Give 3 random friendly minions of different minion types +1/+1 (or +2/+2 if golden).
@@ -875,6 +890,7 @@ def _managerie_mug_on_this_played(self: Minion, board: TavernGameBoard) -> None:
             minion.add_buff(Buff(2, 2, CardAbility.NONE))
         else:
             minion.add_buff(Buff(1, 1, CardAbility.NONE))
+
 
 MENAGERIE_MUG = Minion(
     'Menagerie Mug', CardClass.NEUTRAL, MinionRace.NONE, 2, 2,
@@ -969,6 +985,7 @@ MONSTROUS_MACAW_GOLDEN = Minion(
     cost=3, tier=3, is_golden=True
 )
 
+
 def _houndmaster_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Houndmaster minion.
     Effect: Give a friendly Beast +2/+2 (or +4/+4 if golden) and Taunt.
@@ -984,6 +1001,7 @@ def _houndmaster_on_this_played(self: Minion, board: TavernGameBoard) -> None:
         minion.add_buff(Buff(4, 4, CardAbility.TAUNT))
     else:
         minion.add_buff(Buff(2, 2, CardAbility.TAUNT))
+
 
 HOUNDMASTER = Minion(
     'Houndmaster', CardClass.HUNTER, MinionRace.NONE, 4, 3,
@@ -1031,6 +1049,7 @@ IMP_GANG_BOSS_GOLDEN = Minion(
     cost=3, tier=3, is_golden=True, abilities=CardAbility.SUMMON
 )
 
+
 def _crystal_weaver_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Crystalweaver minion.
     Effect: Give your Demons +1/+1 (or +2/+2 if golden).
@@ -1041,6 +1060,7 @@ def _crystal_weaver_on_this_played(self: Minion, board: TavernGameBoard) -> None
             minion.add_buff(Buff(2, 2, CardAbility.NONE))
         else:
             minion.add_buff(Buff(1, 1, CardAbility.NONE))
+
 
 CRYSTAL_WEAVER = Minion(
     'Crystalweaver', CardClass.WARLOCK, MinionRace.NONE, 5, 4,
@@ -1157,6 +1177,7 @@ TWILIGHT_EMISSARY_GOLDEN = Minion(
     _on_this_played=_twilight_emissary_on_this_played
 )
 
+
 # Elemental Pool
 def _arcane_assistant_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Arcane Assistant minion.
@@ -1166,6 +1187,7 @@ def _arcane_assistant_on_this_played(self: Minion, board: TavernGameBoard) -> No
     minions = board.get_minions_on_board(race=MinionRace.ELEMENTAL, ignore=[self])
     for minion in minions:
         minion.add_buff(Buff(buff_amount, buff_amount, CardAbility.NONE))
+
 
 ARCANE_ASSISTANT = Minion(
     'Arcane Assistant', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 3, 3,
@@ -1253,6 +1275,7 @@ PILOTED_SHREDDER_GOLDEN = Minion(
     cost=4, tier=3, is_golden=True, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
 )
 
+
 def _screwjank_clunker_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Screwjank Clunker minion.
     Effect: Give a friendly Mech +2/+2 (or +4/+4 if golden).
@@ -1301,6 +1324,7 @@ REPLICATING_MENACE_GOLDEN = Minion(
     abilities=CardAbility.MAGNETIC | CardAbility.DEATH_RATTLE | CardAbility.SUMMON
 )
 
+
 # Murloc Pool
 def _coldlight_seer_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Coldlight Seer minion.
@@ -1310,6 +1334,7 @@ def _coldlight_seer_on_this_played(self: Minion, board: TavernGameBoard) -> None
     minions = board.get_minions_on_board(race=MinionRace.MURLOC, ignore=[self])
     for minion in minions:
         minion.add_buff(Buff(0, additional_health, CardAbility.NONE))
+
 
 COLDLIGHT_SEER = Minion(
     'Coldlight Seer', CardClass.NEUTRAL, MinionRace.MURLOC, 2, 3,
@@ -1322,6 +1347,7 @@ COLDLIGHT_SEER_GOLDEN = Minion(
     _on_this_played=_coldlight_seer_on_this_played
 )
 
+
 def _felfin_navigator_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Felfin Navigator minion.
     Effect: Give your other Murlocs +1/+1 (or +2/+2 if golden).
@@ -1330,6 +1356,7 @@ def _felfin_navigator_on_this_played(self: Minion, board: TavernGameBoard) -> No
     minions = board.get_minions_on_board(race=MinionRace.MURLOC, ignore=[self])
     for minion in minions:
         minion.add_buff(Buff(buff_amount, buff_amount, CardAbility.NONE))
+
 
 FELFIN_NAVIGATOR = Minion(
     'Felfin Navigator', CardClass.NEUTRAL, MinionRace.MURLOC, 4, 4,
@@ -1342,6 +1369,7 @@ FELFIN_NAVIGATOR_GOLDEN = Minion(
     _on_this_played=_felfin_navigator_on_this_played
 )
 
+
 # Pirate Pool
 def _bloodsail_cannoneer_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Bloodsail Cannoneer minion.
@@ -1351,6 +1379,7 @@ def _bloodsail_cannoneer_on_this_played(self: Minion, board: TavernGameBoard) ->
     minions = board.get_minions_on_board(race=MinionRace.PIRATE, ignore=[self])
     for minion in minions:
         minion.add_buff(Buff(additional_attack, 0, CardAbility.NONE))
+
 
 BLOODSAIL_CANNONEER = Minion(
     'Bloodsail Cannoneer', CardClass.NEUTRAL, MinionRace.PIRATE, 4, 3,
@@ -1615,6 +1644,7 @@ HERALD_OF_FLAME_GOLDEN = Minion(
     cost=5, tier=4, is_golden=True, abilities=CardAbility.OVERKILL
 )
 
+
 # Elemental Pool
 def _majordomo_executus_on_end_turn(self: Minion, board: TavernGameBoard) -> None:
     """Handle the effect for the Majordomo Executus minion.
@@ -1629,6 +1659,7 @@ def _majordomo_executus_on_end_turn(self: Minion, board: TavernGameBoard) -> Non
     multiplier = len(board.get_minions_played_this_turn(race=MinionRace.ELEMENTAL)) + 1
     base_buff = 2 if self.is_golden else 1
     minion.add_buff(Buff(multiplier * base_buff, multiplier * base_buff, CardAbility.NONE))
+
 
 MAJORDOMO_EXECUTUS = Minion(
     'Majordomo Executus', CardClass.NEUTRAL, MinionRace.DRAGON, 6, 3,
@@ -1751,6 +1782,7 @@ TOXFIN_GOLDEN = Minion(
     _on_this_played=_toxfin_on_this_played
 )
 
+
 # Pirate Pool
 def _goldgrubber_on_end_turn(self: Minion, board: TavernGameBoard) -> None:
     """Handle the effect for the Goldgrubber minion.
@@ -1760,6 +1792,7 @@ def _goldgrubber_on_end_turn(self: Minion, board: TavernGameBoard) -> None:
     multiplier = len(board.get_minions_on_board(is_golden=True))
     base_buff = 4 if self.is_golden else 2
     self.add_buff(Buff(multiplier * base_buff, multiplier * base_buff, CardAbility.NONE))
+
 
 GOLDGRUBBER = Minion(
     'Goldgrubber', CardClass.NEUTRAL, MinionRace.PIRATE, 2, 2,
@@ -1807,6 +1840,7 @@ CHAMPION_OF_YSHAARJ_GOLDEN = Minion(
     cost=4, tier=4, is_golden=True
 )
 
+
 def _defender_of_argus_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Defender of Argus minion.
     Effect: Give adjacent minions +1/+1 (or +2/+2 if golden) and Taunt.
@@ -1833,6 +1867,7 @@ DEFENDER_OF_ARGUS_GOLDEN = Minion(
     cost=4, tier=4, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.BATTLECRY,
     _on_this_played=_defender_of_argus_on_this_played
 )
+
 
 def _managerie_jug_on_this_played(self: Minion, board: TavernGameBoard) -> None:
     """Handle the battlecry effect for the Menagerie Jug effect.
@@ -1874,6 +1909,422 @@ QIRAJI_HARBINGER_GOLDEN = Minion(
     cost=6, tier=4, is_golden=True
 )
 
+################################################################################
+# Tier 5 cards
+################################################################################
+# Beast Pool
+# Ironhide Runt summoned by Ironhide Direhorn
+IRONHIDE_RUNT = Minion(
+    'Ironhide Direhorn', CardClass.DRUID, MinionRace.BEAST, 5, 5,
+    cost=5, tier=1, purchasable=False
+)
+
+IRONHIDE_RUNT_GOLDEN = Minion(
+    'Ironhide Direhorn', CardClass.DRUID, MinionRace.BEAST, 10, 10,
+    cost=5, tier=1, is_golden=True, purchasable=False
+)
+
+# TODO: Implement overkill (summon a 5/5 Ironhide Runt) How do i do this without knowing overkill
+IRONHIDE_DIREHORN = Minion(
+    'Ironhide Direhorn', CardClass.DRUID, MinionRace.BEAST, 7, 7,
+    cost=7, tier=5, abilities=CardAbility.OVERKILL | CardAbility.SUMMON
+)
+
+IRONHIDE_DIREHORN_GOLDEN = Minion(
+    'Ironhide Direhorn', CardClass.DRUID, MinionRace.BEAST, 14, 14,
+    cost=7, tier=5, is_golden=True, abilities=CardAbility.OVERKILL | CardAbility.SUMMON
+)
+
+
+def _mama_bear_on_any_summoned(self: Minion, summoned_minion: Minion) -> None:
+    """Handle the Mama Bear effect
+    Effect: Whenever you summon a Beast, give it +4/+4 (or +8/+8 if golden)."""
+    if MinionRace.BEAST not in summoned_minion.race:
+        return
+    if self.is_golden:
+        self.add_buff(Buff(8, 8, CardAbility.NONE))
+    else:
+        self.add_buff(Buff(4, 4, CardAbility.NONE))
+
+
+MAMA_BEAR = Minion(
+    'Mama Bear', CardClass.NEUTRAL, MinionRace.BEAST, 4, 4,
+    cost=8, tier=5, rarity=CardRarity.EPIC,
+    _on_any_summoned=_mama_bear_on_any_summoned
+)
+
+MAMA_BEAR_Golden = Minion(
+    'Mama Bear', CardClass.NEUTRAL, MinionRace.BEAST, 8, 8,
+    cost=8, tier=5, rarity=CardRarity.EPIC, is_golden=True,
+    _on_any_summoned=_mama_bear_on_any_summoned
+)
+
+
+# Demon Pool
+def _annihilian_battlemaster_on_any_played(self: Minion, board: TavernGameBoard) -> None:
+    """Handle the effect for the Annihilan Battlemaster minion.
+    Effect: Gain +1 (+2 if Golden) Health for each damage your hero has taken.
+    """
+    # TODO: is hero health even 40 always at the start
+    to_gain = 40 - board.hero_health
+    if self.is_golden:
+        buff = Buff(2 * to_gain, 0, CardAbility.NONE)
+    else:
+        buff = Buff(to_gain, 0, CardAbility.NONE)
+
+    self.add_buff(buff)
+
+
+ANNIHILAN_BATTLEMASTER = Minion(
+    'Annihilan Battlemaster', CardClass.NEUTRAL, MinionRace.DEMON, 3, 1,
+    cost=8, tier=5, rarity=CardRarity.EPIC, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_annihilian_battlemaster_on_any_played
+)
+
+ANNIHILAN_BATTLEMASTER_GOLDEN = Minion(
+    'Annihilan Battlemaster', CardClass.NEUTRAL, MinionRace.DEMON, 6, 2,
+    cost=8, tier=5, rarity=CardRarity.EPIC, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_annihilian_battlemaster_on_any_played
+)
+
+# TODO: Implement effect: your other demons have a +2/+2 and your hero is immune
+MAL_GANIS = Minion(
+    'Mal\'Ganis', CardClass.WARLOCK, MinionRace.DEMON, 9, 7,
+    cost=9, tier=5, rarity=CardRarity.LEGENDARY,
+)
+
+MAL_GANIS_GOLDEN = Minion(
+    'Mal\'Ganis', CardClass.WARLOCK, MinionRace.DEMON, 18, 14,
+    cost=9, tier=5, rarity=CardRarity.LEGENDARY, is_golden=True
+)
+
+# Voidwalker summoned by voidlord
+VOIDWALKER = Minion(
+    'Voidwalker', CardClass.WARLOCK, MinionRace.Demon, 1, 3,
+    cost=1, tier=1, abilities=CardAbility.TAUNT, purchasable=False
+)
+
+VOIDWALKER_GOLDEN = Minion(
+    'Voidwalker', CardClass.WARLOCK, MinionRace.Demon, 2, 6, is_golden=True,
+    cost=1, tier=1, abilities=CardAbility.TAUNT, purchasable=False
+)
+
+# TODO: Deathrattle: summon three 1/3 (2/6 if golden) demons with taunt
+VOIDLORD = Minion(
+    'Voidlord', CardClass.WARLOCK, MinionRace.Demon, 3, 9,
+    cost=9, tier=5, rarity=CardRarity.EPIC,
+    abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+VOIDLORD_GOLDEN = Minion(
+    'Voidlord', CardClass.WARLOCK, MinionRace.Demon, 6, 18,
+    cost=9, tier=5, rarity=CardRarity.EPIC, is_golden=True,
+    abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+# Dragon Pool
+# TODO: Implement effect: Battlecry: Add a minion from your last opponent's warband to your hand
+MUROZOND = Minion(
+    'Murozond', CardClass.NEUTRAL, MinionRace.DRAGON, 5, 5,
+    cost=7, tier=5, abilities=CardAbility.BATTLECRY | CardAbility.GENERATE
+)
+
+# TODO: and make the added card golden
+MUROZOND_GOLDEN = Minion(
+    'Murozond', CardClass.NEUTRAL, MinionRace.DRAGON, 10, 10,
+    cost=7, tier=5, is_golden=True, abilities=CardAbility.BATTLECRY | CardAbility.GENERATE
+)
+
+
+def _razorgore_on_end_turn(self: Minion, board: TavernGameBoard) -> None:
+    """Handle the effect for the Razorgore, the untamed minion.
+    Effect: At the end of your turn, gain +1/+1 (or +2/+2 if golden)
+    for each dragon you have.
+    """
+    multiplier = len(board.get_minions_on_board(race=MinionRace.DRAGON))
+    base_buff = 2 if self.is_golden else 1
+    self.add_buff(Buff(multiplier * base_buff, multiplier * base_buff, CardAbility.NONE))
+
+
+RAZORGORE_THE_UNTAMED = Minion(
+    'Razorgore, the Untamed', CardClass.NEUTRAL, MinionRace.DRAGON, 2, 4,
+    cost=8, tier=5,
+    _on_end_turn=_razorgore_on_end_turn
+)
+
+RAZORGORE_THE_UNTAMED_GOLDEN = Minion(
+    'Razorgore, the Untamed', CardClass.NEUTRAL, MinionRace.DRAGON, 4, 8,
+    cost=8, tier=5, is_golden=True,
+    _on_end_turn=_razorgore_on_end_turn
+)
+
+# Elemental Pool
+
+
+def _nomi_on_this_played(self: Minion, board: TavernGameBoard, played_minion: Minion) -> None:
+    """Handle the effect for the Nomi, Kitchen Nightmare minion.
+    Effect: After you play an Elemental, Elementals in Bob's Tavern have +1/+1 (or +2/+2 if golden)
+    for the rest of the game.
+    """
+    # TODO: do i need if played_minion is self also this probably isnt right
+    if MinionRace.ELEMENTAL not in played_minion.race:
+        return
+    for minion in board.get_minions_on_board(race=MinionRace.ELEMENTAL):
+        if self.is_golden:
+            minion.add_buff(Buff(2, 2, CardAbility.NONE))
+        else:
+            minion.add_buff(Buff(1, 1, CardAbility.NONE))
+
+
+NOMI_KITCHEN_NIGHTMARE = Minion(
+    "Nomi, Kitchen Nightmare", CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 4,
+    cost=7, tier=5, rarity=CardRarity.LEGENDARY,
+    _on_this_played=_nomi_on_this_played
+)
+
+NOMI_KITCHEN_NIGHTMARE_GOLDEN = Minion(
+    "Nomi, Kitchen Nightmare", CardClass.NEUTRAL, MinionRace.NEUTRAL, 8, 8,
+    cost=7, tier=5, rarity=CardRarity.LEGENDARY, is_golden=True,
+    _on_this_played=_nomi_on_this_played
+)
+
+
+def _tavern_tempest_on_this_played(self: Minion, board: TavernGameBoard) -> None:
+    """Handle the effect for the Sellemental minion.
+    Effect: When you sell this, add a 2/2 Elemental to your hand (or 2 if golden).
+    """
+    n = 2 if self.is_golden else 1
+
+    minions = board.get_minions(race=MinionRace.ELEMENTAL)
+    for _ in range(n):
+        board.add_minion_to_hand(random.choice(minions))
+
+
+TAVERN_TEMPEST = Minion(
+    "Tavern Tempest", CardClass.NEUTRAL, MinionRace.ELEMENTAL, 4, 4,
+    cost=5, tier=5, abilities=CardAbility.BATTLECRY | CardAbility.GENERATE,
+    _on_this_played=_tavern_tempest_on_this_played
+)
+
+TAVERN_TEMPEST_GOLD = Minion(
+    "Tavern Tempest", CardClass.NEUTRAL, MinionRace.ELEMENTAL, 8, 8,
+    cost=5, tier=5, is_golden=True, abilities=CardAbility.BATTLECRY | CardAbility.GENERATE,
+    _on_this_played=_tavern_tempest_on_this_played
+)
+
+# Mech Pool
+# TODO: Implement effect: whenever a friendly Mech dies, gain +2/+2 (+4/+4 if golden)
+JUNKBOT = Minion(
+    "Junkbot", CardClass.NEUTRAL, MinionRace.MECH, 1, 5,
+    cost=5, tier=5
+)
+
+JUNKBOT_GOLDEN = Minion(
+    "Junkbot", CardClass.NEUTRAL, MinionRace.MECH, 2, 10,
+    cost=5, tier=5, is_golden=True
+)
+
+# TODO: Implement deathrattle (Summon a random legendary minion) or 2
+SNEED_OLD_SHREDDER = Minion(
+    "Sneed's Old Shredder", CardClass.NEUTRAL, MinionRace.MECH, 5, 7,
+    cost=8, tier=5, rarity=CardRarity.LEGENDARY,
+    abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+SNEED_OLD_SHREDDER_GOLDEN = Minion(
+    "Sneed's Old Shredder", CardClass.NEUTRAL, MinionRace.MECH, 10, 14,
+    cost=8, tier=5, rarity=CardRarity.LEGENDARY, is_golden=True,
+    abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+
+# Murloc pool
+def _king_bargurgle_on_this_played(self: Minion, board: TavernGameBoard) -> None:
+    """Handle the battlecry effect for the King Bagurgle minion.
+    Effect: Give your other Murloc +2/+2 (or +4/+4 if golden).
+    """
+    additional = 4 if self.is_golden else 2
+    minions = board.get_minions_on_board(race=MinionRace.MURLOC, ignore=[self])
+    for minion in minions:
+        minion.add_buff(Buff(additional, additional, CardAbility.NONE))
+
+
+# TODO: Handle the deathrattle effect (same as battlecry effect)
+KING_BAGURGLE = Minion(
+    "King Bargurgle", CardClass.NEUTRAL, MinionRace.MURLOC, 6, 3,
+    cost=6, tier=5, rarity=CardRarity.LEGENDARY,
+    abilities=CardAbility.BATTLECRY | CardAbility.DEATH_RATTLE,
+    _on_this_played=_king_bargurgle_on_this_played
+)
+
+KING_BAGURGLE_GOLDEN = Minion(
+    "King Bargurgle", CardClass.NEUTRAL, MinionRace.MURLOC, 12, 6,
+    cost=6, tier=5,  is_golden=True, rarity=CardRarity.LEGENDARY,
+    abilities=CardAbility.BATTLECRY | CardAbility.DEATH_RATTLE,
+    _on_this_played=_king_bargurgle_on_this_played
+)
+
+# Pirate Pool
+# TODO: implement effect: after you buy a pirate, gain 1 gold this turn only
+CAPN_HOGGARR = Minion(
+    'Cap\'n Hoggarr', CardClass.NEUTRAL, MinionRace.PIRATE, 6, 6,
+    cost=6, tier=5
+)
+
+CAPN_HOGGARR_GOLDEN = Minion(
+    'Cap\'n Hoggarr', CardClass.NEUTRAL, MinionRace.PIRATE, 12, 12,
+    cost=6, tier=5, is_golden=True
+)
+
+# TODO: Implement effect: When this attacks and kills a minion, add a random minion to your hand
+NAT_PAGLE = Minion(
+    'Nat Pagle, Extreme Angler', CardClass.NEUTRAL, MinionRace.PIRATE, 8, 5,
+    cost=7, tier=5, abilities=CardAbility.GENERATE
+)
+
+NAT_PAGLE_GOLDEN = Minion(
+    'Nat Pagle, Extreme Angler', CardClass.NEUTRAL, MinionRace.PIRATE, 16, 10,
+    cost=7, tier=5, is_golden=True, abilities=CardAbility.GENERATE
+)
+
+# TODO: Implement Overkill: Gives your other Pirates +2/+2 (+4/+4 if golden)
+SEABREAKER_GOLIATH = Minion(
+    'Seabreaker Goliath', CardClass.NEUTRAL, MinionRace.PIRATE, 6, 7,
+    cost=7, tier=5, abilities=CardAbility.OVERKILL | CardAbility.WINDFURY
+)
+
+SEABREAKER_GOLIATH_GOLDEN = Minion(
+    'Seabreaker Goliath', CardClass.NEUTRAL, MinionRace.PIRATE, 12, 14,
+    cost=7, tier=5, is_golden=True, abilities=CardAbility.OVERKILL | CardAbility.MEGA_WINDFURY
+)
+
+# Neutral
+# TODO: Implement effect: your minions trigger their Death rattles twice (thrice for golden)
+BARON_RIVENDARE = Minion(
+    'Baron Rivendare', CardClass.NEUTRAL, MinionRace.NEUTRAL, 1, 7,
+    cost=4, tier=5, rarity=CardRarity.LEGENDARY
+)
+
+BARON_RIVENDARE_GOLDEN = Minion(
+    'Baron Rivendare', CardClass.NEUTRAL, MinionRace.NEUTRAL, 2, 14,
+    cost=4, tier=5, is_golden=True, rarity=CardRarity.LEGENDARY
+)
+
+# TODO: implement effect your battlecries trigger twice
+BRANN_BRONZEBEARD = Minion(
+    'Brann Bronzebeard', CardClass.NEUTRAL, MinionRace.NEUTRAL, 2, 4,
+    cost=3, tier=5, rarity=CardRarity.LEGENDARY
+)
+
+BRANN_BRONZEBEARD_GOLDEN = Minion(
+    'Brann Bronzebeard', CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 8,
+    cost=3, tier=5, rarity=CardRarity.LEGENDARY, is_golden=True
+)
+
+DEADLY_SPORE = Minion(
+    'Deadly Spore', CardClass.NEUTRAL, MinionRace.NEUTRAL, 1, 1,
+    cost=4, tier=5, abilities=CardAbility.POISONOUS
+)
+
+DEADLY_SPORE_GOLDEN = Minion(
+    'Deadly Spore', CardClass.NEUTRAL, MinionRace.NEUTRAL, 2, 2,
+    cost=4, tier=5, is_golden=True, abilities=CardAbility.POISONOUS
+)
+
+# TODO: Battlecry: choose minion in Bob's tavern and transform into a plain/golden copy of it
+FACELESS_TAVERNGOER = Minion(
+    'Faceless Taverngoer', CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 4,
+    cost=4, tier=5, abilities=CardAbility.BATTLECRY
+)
+
+FACELESS_TAVERNGOER_GOLDEN = Minion(
+    'Faceless Taverngoer', CardClass.NEUTRAL, MinionRace.NEUTRAL, 8, 8,
+    cost=4, tier=5, is_golden=True, abilities=CardAbility.BATTLECRY
+)
+
+
+def _lightfang_enforcer_on_end_turn(self: Minion, board: TavernGameBoard) -> None:
+    """Handle the effect for the Lightfang Enforcer minion.
+    Effect: At the end of your turn, give a friendly minion of each minion type a +2/+2 (+4/+4)/
+    """
+    minions_by_race = {}
+    for minion in board.get_minions_on_board(ignore=[self]):
+        if minion.race not in minions_by_race:
+            minions_by_race[minion.race] = []
+        minions_by_race[minion.race].append(minion)
+
+    for minion in minions_by_race:
+        if self.is_golden:
+            minion.add_buff(Buff(4, 4, CardAbility.NONE))
+        else:
+            minion.add_buff(Buff(2, 2, CardAbility.NONE))
+
+
+# TODO: look over the function
+LIGHTFANG_ENFORCER = Minion(
+    'Lightfang Enforcer', CardClass.NEUTRAL, MinionRace.NEUTRAL, 2, 2,
+    cost=4, tier=5,
+    _on_end_turn=_lightfang_enforcer_on_end_turn
+)
+
+LIGHTFANG_ENFORCER_GOLDEN = Minion(
+    'Lightfang Enforcer', CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 4,
+    cost=4, tier=5, is_golden=True,
+    _on_end_turn=_lightfang_enforcer_on_end_turn
+)
+
+
+def _mythrax_on_end_turn(self: Minion, board: TavernGameBoard) -> None:
+    """Handle the effect for the Mythrax, the unraveler minion.
+    Effect: At the end of your turn, gain +1/+2 (+2/+4) for each minion type you control.
+    """
+    minions_by_race = {}
+    for minion in board.get_minions_on_board(ignore=[self]):
+        if minion.race not in minions_by_race:
+            minions_by_race[minion.race] = []
+        minions_by_race[minion.race].append(minion)
+
+    multiplier = len(minions_by_race)
+    base_buff = 2 if self.is_golden else 1
+    self.add_buff(Buff(multiplier * base_buff, multiplier * base_buff * 2, CardAbility.NONE))
+
+
+# TODO: aint no way i did that function right
+MYTHRAX_THE_UNRAVELER = Minion(
+    'Mythrax the Unraveler', CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 4,
+    cost=5, tier=5,
+    _on_end_turn=_mythrax_on_end_turn
+)
+
+MYTHRAX_THE_UNRAVELER_GOLDEN = Minion(
+    'Mythrax the Unraveler', CardClass.NEUTRAL, MinionRace.NEUTRAL, 8, 8,
+    cost=5, tier=5, is_golden=True,
+    _on_end_turn=_mythrax_on_end_turn
+)
+
+
+def _strongshell_scavenger_on_this_played(self: Minion, board: TavernGameBoard) -> None:
+    """Handle the battlecry effect for the Strongshell Scavenger minion.
+    Effect: Give your Taunt minions +2/+2 (+4/+4 if golden)
+    """
+    # TODO: THIS IS NOT CORRECT PLESAE FIX I DONT KNOW HOW TO GET ALL THE TAUNT MINIONS
+    additional = 4 if self.is_golden else 2
+    minions = board.get_minions_on_board(abilities=CardAbility.TAUNT)
+    for minion in minions:
+        minion.add_buff(Buff(additional, additional, CardAbility.NONE))
+
+
+STRONGSHELL_SCAVENGER = Minion(
+    'Strongshell Scavenger', CardClass.NEUTRAL, MinionRace.NEUTRAL, 2, 3,
+    cost=4, tier=5, rarity=CardRarity.RARE, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_strongshell_scavenger_on_this_played
+)
+
+STRONGSHELL_SCAVENGER_GOLDEN = Minion(
+    'Strongshell Scavenger', CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 6,
+    cost=4, tier=5, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.BATTLECRY,
+    _on_this_played=_strongshell_scavenger_on_this_played
+)
 
 if __name__ == '__main__':
     import doctest
