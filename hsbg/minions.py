@@ -871,6 +871,7 @@ YO_HO_OGRE_GOLDEN = Minion(
     cost=6, tier=2, is_golden=True, abilities=CardAbility.TAUNT
 )
 
+
 # Neutral Pool
 
 def _managerie_mug_on_this_played(self: Minion, board: TavernGameBoard) -> None:
@@ -1857,6 +1858,7 @@ def _defender_of_argus_on_this_played(self: Minion, board: TavernGameBoard) -> N
     if right is not None:
         right.add_buff(buff)
 
+
 DEFENDER_OF_ARGUS = Minion(
     'Defender of Argus', CardClass.NEUTRAL, MinionRace.NONE, 2, 3,
     cost=4, tier=4, rarity=CardRarity.RARE, abilities=CardAbility.BATTLECRY,
@@ -1886,6 +1888,7 @@ def _managerie_jug_on_this_played(self: Minion, board: TavernGameBoard) -> None:
             minion.add_buff(Buff(4, 4, CardAbility.NONE))
         else:
             minion.add_buff(Buff(2, 2, CardAbility.NONE))
+
 
 MENAGERIE_JUG = Minion(
     'Menagerie Jug', CardClass.NEUTRAL, MinionRace.NONE, 3, 3,
@@ -2061,7 +2064,7 @@ RAZORGORE_THE_UNTAMED_GOLDEN = Minion(
 # Elemental Pool
 
 
-def _nomi_on_this_played(self: Minion, board: TavernGameBoard, played_minion: Minion) -> None:
+def _nomi_on_any_played(self: Minion, board: TavernGameBoard, played_minion: Minion) -> None:
     """Handle the effect for the Nomi, Kitchen Nightmare minion.
     Effect: After you play an Elemental, Elementals in Bob's Tavern have +1/+1 (or +2/+2 if golden)
     for the rest of the game.
@@ -2085,7 +2088,7 @@ NOMI_KITCHEN_NIGHTMARE = Minion(
 NOMI_KITCHEN_NIGHTMARE_GOLDEN = Minion(
     "Nomi, Kitchen Nightmare", CardClass.NEUTRAL, MinionRace.NEUTRAL, 8, 8,
     cost=7, tier=5, rarity=CardRarity.LEGENDARY, is_golden=True,
-    _on_this_played=_nomi_on_this_played
+    _on_any_played=_nomi_on_any_played
 )
 
 
@@ -2325,6 +2328,228 @@ STRONGSHELL_SCAVENGER_GOLDEN = Minion(
     cost=4, tier=5, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.BATTLECRY,
     _on_this_played=_strongshell_scavenger_on_this_played
 )
+
+################################################################################
+# Tier 6 cards
+################################################################################
+# Beast Pool
+# TODO: Add random ability if needed
+# TODO: Implement effect: Deathrattle: summon 2(4) random deathrattle minions
+GHASTCOILER = Minion(
+    'Ghastcoiler', CardClass.PRIEST, MinionRace.BEAST, 7, 7,
+    cost=6, tier=6, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+GHASTCOILER_GOLDEN = Minion(
+    'Ghastcoiler', CardClass.PRIEST, MinionRace.BEAST, 14, 14,
+    cost=6, tier=6, is_golden=True, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+# TODO: Implement Deathrattle: Give your beasts +5/+5 (+10/+10)
+GOLDRINN = Minion(
+    'Goldrinn, the Great Wolf', CardClass.NEUTRAL, MinionRace.BEAST, 4, 4,
+    cost=8, rarity=CardRarity.LEGENDARY, tier=6, abilities=CardAbility.DEATH_RATTLE
+)
+
+GOLDRINN_GOLDEN = Minion(
+    'Goldrinn, the Great Wolf', CardClass.NEUTRAL, MinionRace.BEAST, 8, 8,
+    cost=8, rarity=CardRarity.LEGENDARY, tier=6, is_golden=True, abilities=CardAbility.DEATH_RATTLE
+)
+
+MAEXXNA = Minion(
+    'Maexxna', CardClass.NEUTRAL, MinionRace.BEAST, 2, 8,
+    cost=6, rarity=CardRarity.LEGENDARY, tier=6, abilities=CardAbility.POISONOUS
+)
+
+MAEXXNA_GOLD = Minion(
+    'Maexxna', CardClass.NEUTRAL, MinionRace.BEAST, 4, 16,
+    cost=6, rarity=CardRarity.LEGENDARY, tier=6, is_golden=True, abilities=CardAbility.POISONOUS
+)
+
+# Demon Pool
+# TODO: Implement whenever this minion takes damage, summon 1(2) random Demon and give taunt
+IMP_MAMA = Minion(
+    'Imp Mama', CardClass.NEUTRAL, MinionRace.Demon, 6, 10,
+    cost=8, tier=6, abilities=CardAbility.SUMMON
+)
+
+IMP_MAMA_GOLDEN = Minion(
+    'Imp Mama', CardClass.NEUTRAL, MinionRace.Demon, 12, 20,
+    cost=8, tier=6, is_golden=True, abilities=CardAbility.SUMMON
+)
+
+
+# Dragon Pool
+def _kalecgos_on_any_played(self: Minion, board: TavernGameBoard, played_minion: Minion) \
+        -> None:
+    """Handle the Kalecgos, Arcane Aspect effect.
+    Effect: After you play a minion with Battlecry, give your Dragons +1/+1.
+    """
+    if CardAbility.BATTLECRY not in played_minion.abilities:
+        return
+    additional = 2 if self.is_golden else 1
+    minions = board.get_minions_on_board(race=MinionRace.DRAGON, ignore=[self])
+    for minion in minions:
+        minion.add_buff(Buff(additional, additional, CardAbility.NONE))
+
+
+KALECGOS = Minion(
+    'Kalecgos, Arcane Aspect', CardClass.NEUTRAL, MinionRace.DRAGON, 4, 12,
+    cost=8, tier=6,
+    _on_any_played=_kalecgos_on_any_played
+)
+
+KALECGOS_GOLDEN = Minion(
+    'Kalecgos, Arcane Aspect', CardClass.NEUTRAL, MinionRace.DRAGON, 8, 24,
+    cost=8, tier=6, is_golden=True,
+    _on_any_played=_kalecgos_on_any_played
+)
+
+# TODO: Implement Deathrattle: Give your dragons divine shield
+NADINA_THE_RED = Minion(
+    'Nadina the Red', CardClass.NEUTRAL, MinionRace.DRAGON, 7, 4,
+    cost=6, tier=6, abilities=CardAbility.DEATH_RATTLE
+)
+
+NADINA_THE_RED_GOLDEN = Minion(
+    'Nadina the Red', CardClass.NEUTRAL, MinionRace.DRAGON, 14, 8,
+    cost=6, tier=6, is_golden=True, abilities=CardAbility.DEATH_RATTLE
+)
+
+# Elemental Pool
+# TODO: Implement deathrattle: summon another(or 2) random elemental and add copy of it to your hand
+GENTLE_DJINNI = Minion(
+    'Gentle Djinni', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 4, 5,
+    cost=6, tier=6, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
+)
+
+GENTLE_DJINNI_GOLDEN = Minion(
+    'Gentle Djinni', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 8, 10,
+    cost=6, tier=6, is_golden=True, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
+)
+
+
+def _lieutenant_garr_on_any_played(self: Minion, board: TavernGameBoard, played_minion: Minion) \
+        -> None:
+    """Handle the effect for the Lieutenant Garr minion.
+    Effect: After you play an Elemental, gain +1 Health for each Elemental you have.
+    """
+    if played_minion is self or MinionRace.ELEMENTAL not in played_minion.race:
+        return
+    multiplier = len(board.get_minions_on_board(race=MinionRace.ELEMENTAL))
+    base_buff = 2 if self.is_golden else 1
+    self.add_buff(Buff(multiplier * base_buff, 0, CardAbility.NONE))
+
+
+LIEUTENANT_GARR = Minion(
+    'Lieutenant Garr', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 8, 1,
+    cost=8, rarity=CardRarity.LEGENDARY, tier=6, abilities=CardAbility.TAUNT,
+    _on_any_played=_lieutenant_garr_on_any_played
+)
+
+LIEUTENANT_GARR_GOLDEN = Minion(
+    'Lieutenant Garr', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 16, 2,
+    cost=8, rarity=CardRarity.LEGENDARY, tier=6, is_golden=True, abilities=CardAbility.TAUNT,
+    _on_any_played=_lieutenant_garr_on_any_played
+)
+
+
+def _lil_rag_on_any_played(self: Minion, board: TavernGameBoard, played_minion: Minion) \
+        -> None:
+    """Handle the effect for the Lil' Rag minion.
+    Effect: After you play an Elemental, give a friendly minion stats equal
+    to the Elemental's Tavern Tier.
+    """
+    if played_minion is self or MinionRace.ELEMENTAL not in played_minion.race:
+        return
+    times = 2 if self.is_golden else 1
+    for _ in range(times):
+        minion = board.get_random_minion_on_board(ignore=[self, played_minion])
+        minion.add_buff(Buff(played_minion.tier, played_minion.tier, CardAbility.NONE))
+
+
+LIL_RAG = Minion(
+    'Lil\' Rag', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 6, 6,
+    cost=6, rarity=CardRarity.LEGENDARY, tier=6,
+    _on_any_played=_lil_rag_on_any_played
+)
+
+LIL_RAG_GOLDEN = Minion(
+    'Lil\' Rag', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 12, 12,
+    cost=6, rarity=CardRarity.LEGENDARY, tier=6, is_golden=True,
+    _on_any_played=_lil_rag_on_any_played
+)
+
+# Mech Pool
+# TODO: Implement effect: Also damages the minions next to whomever it attacks.
+FOE_REAPER_4000 = Minion(
+    'Foe Reaper 4000', CardClass.NEUTRAL, MinionRace.MECH, 6, 9,
+    cost=8, rarity=CardRarity.LEGENDARY, tier=6
+)
+
+FOE_REAPER_4000_GOLDEN = Minion(
+    'Foe Reaper 4000', CardClass.NEUTRAL, MinionRace.MECH, 12, 18,
+    cost=8, rarity=CardRarity.LEGENDARY, tier=6, is_golden=True
+)
+
+# TODO: Implement Deathrattle: summon the first 2 (or 4) friendly mechs that died this combat
+KANGORS_APPRENTICE = Minion(
+    'Kangor\'s Apprentice', CardClass.NEUTRAL, MinionRace.MECH, 4, 8,
+    cost=9, rarity=CardRarity.EPIC, tier=6, abilities=CardAbility.DEATH_RATTLE
+)
+
+KANGORS_APPRENTICE_GOLDEN = Minion(
+    'Kangor\'s Apprentice', CardClass.NEUTRAL, MinionRace.MECH, 8, 16,
+    cost=9, rarity=CardRarity.EPIC, tier=6, is_golden=True, abilities=CardAbility.DEATH_RATTLE
+)
+
+# Pirate Pool
+# TODO: Whenever a friendly pirate attacks, give all friednly minions +2/+1 (+4/+2)
+DREAD_ADMIRAL_ELIZA = Minion(
+    'Dread Admiral Eliza', CardClass.NEUTRAL, MinionRace.PIRATE, 6, 7,
+    cost=6, tier=6
+)
+
+DREAD_ADMIRAL_ELIZA_GOLDEN = Minion(
+    'Dread Admiral Eliza', CardClass.NEUTRAL, MinionRace.PIRATE, 12, 14,
+    cost=6, tier=6, is_golden=True
+)
+
+# TODO: Implement deathrattle: summon 3 (or 6) random Pirates
+THE_TIDE_RAZOR = Minion(
+    'The Tide Razor', CardClass.NEUTRAL, MinionRace.PIRATE, 6, 4,
+    cost=7, tier=6, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+THE_TIDE_RAZOR_GOLDEN = Minion(
+    'The Tide Razor', CardClass.NEUTRAL, MinionRace.PIRATE, 12, 8,
+    cost=7, tier=6, is_golden=True, abilities=CardAbility.DEATH_RATTLE | CardAbility.SUMMON
+)
+
+# Neutral Pool
+# TODO: Implement battlecry: for each different minion type you have among other minions,
+# TODO: adapt randomly (or adapt randomly twice???) (Also implement adapt ability?)
+AMALGADON = Minion(
+    'Amalgadon', CardClass.NEUTRAL, MinionRace.ALL, 6, 6,
+    cost=8, tier=6, abilities=CardAbility.BATTLECRY
+)
+
+AMALGADON_GOLDEN = Minion(
+    'Amalgadon', CardClass.NEUTRAL, MinionRace.ALL, 12, 12,
+    cost=8, tier=6, is_golden=True, abilities=CardAbility.BATTLECRY
+)
+
+# TODO: implement ability: this minion always attacks the enemy minion with lowest Attack
+ZAPP_SLYWICK = Minion(
+    'Zapp Slywick', CardClass.NEUTRAL, MinionRace.NEUTRAL, 7, 10,
+    cost=8, rarity=CardRarity.LEGENDARY, tier=6, abilities=CardAbility.WINDFURY
+)
+
+ZAPP_SLYWICK_GOLDEN = Minion(
+    'Zapp Slywick', CardClass.NEUTRAL, MinionRace.NEUTRAL, 14, 20,
+    cost=8, rarity=CardRarity.LEGENDARY, tier=6, is_golden=True, abilities=CardAbility.MEGA_WINDFURY
+)
+
 
 if __name__ == '__main__':
     import doctest
