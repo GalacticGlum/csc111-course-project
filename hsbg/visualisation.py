@@ -39,6 +39,33 @@ def _partition_rect(width: int, height: int, n: int, merit: Optional[callable] =
           merit function, which measures how good a partition size is.
         - Adapted from https://stackoverflow.com/a/5595244/7614083 (License: CC BY-SA 3.0).
     """
+    def _default_merit_function(partition_width: float, partition_height: float) -> float:
+        """Default merit function that looks at how close the aspect ratios are.
+        The closer, the higher the merit.
+        """
+        target_ratio = width / height
+        current_ratio = partition_width / partition_height
+        return 1 / math.exp((target_ratio - current_ratio)**2)
+
+    merit_function = merit or _default_merit_function
+
+    best_merit_yet = float('-inf')
+    best_configuration_yet = None
+    for p in range(math.floor(math.sqrt(n)), 0, -1):
+        q = math.ceil(n / p)
+        merit1 = merit_function(width / p, height / q)
+        merit2 = merit_function(width / q, height / p)
+        current_merit = max(merit1, merit2)
+        if current_merit > best_merit_yet:
+            # Update best_merit_yet
+            best_merit_yet = current_merit
+            # Update best_configuration_yet
+            if merit1 > merit2:
+                best_configuration_yet = (p, q)
+            else:
+                best_configuration_yet = (q, p)
+
+    # TODO: Partition based on best_configuration_yet
     raise NotImplementedError
 
 
