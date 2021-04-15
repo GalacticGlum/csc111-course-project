@@ -5,17 +5,23 @@ python-ta
 
 # General packages
 tqdm
+click
 colorama
 texttable
 hurry.filesize
 
-# Data scraping
-bs4
-num2words
-
 # Tooling
 setuptools
 wheel
+
+# Data scraping
+bs4
+num2words
+contractions
+
+# Pandoc
+pandoc
+pypandoc
 
 # Word embeddings
 nltk
