@@ -28,10 +28,7 @@ nltk
 gensim
 sklearn
 python-Levenshtein
-#numpy>=1.20.0
-
-# Deep learning
-tensorflow
+numpy>=1.20.0
 
 # Visualisation
 matplotlib
