@@ -2260,7 +2260,8 @@ def _lightfang_enforcer_on_end_turn(self: Minion, board: TavernGameBoard) -> Non
             minions_by_race[minion.race] = []
         minions_by_race[minion.race].append(minion)
 
-    for minion in minions_by_race:
+    for minion_race in minions_by_race:
+        minion = random.choice(minions_by_race[minion_race])
         if self.is_golden:
             minion.add_buff(Buff(4, 4, CardAbility.NONE))
         else:
