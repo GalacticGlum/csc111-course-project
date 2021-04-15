@@ -93,3 +93,45 @@ def draw_minion(surface: pygame.Surface, minion: Minion, size: Tuple[int, int], 
         position: The centre position of the minion given as an x-y int tuple.
     """
     raise NotImplementedError
+
+
+if __name__ == '__main__':
+    # Draw the following game state:
+    # Board
+    #   * Pack Leader
+    #   * Alleycat
+    # Hand
+    #   * Kindly Grandmother
+    #   * Scavenging Hyena
+    board = TavernGameBoard()
+    board.next_turn()
+    board.add_minion_to_hand(minions.PACK_LEADER)
+    board.add_minion_to_hand(minions.ALLEYCAT)
+    board.add_minion_to_hand(minions.KINDLY_GRANDMOTHER)
+    board.add_minion_to_hand(minions.SCAVENGING_HYENA)
+    board.play_minion(0)
+    board.play_minion(1)
+
+    BACKGROUND_COLOUR = (0, 0, 0)
+    SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+
+    pygame.init()
+    screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])
+
+    running = True
+    while running:
+        # Search for a quit event
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Fill the background
+        screen.fill(BACKGROUND_COLOUR)
+
+        visualise_game_board(board)
+
+        # Flip screen buffers
+        pygame.display.flip()
+
+    pygame.quit()
