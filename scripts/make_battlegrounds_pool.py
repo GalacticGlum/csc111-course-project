@@ -16,8 +16,8 @@ from datetime import datetime
 def _is_battlegrounds_card(card: dict) -> bool:
     """Return whether this card is a battlegrounds card."""
     return card.get('SET', None) == 'BATTLEGROUNDS' or \
-           'battlegroundsNormalDbfId' in card or \
-           'battlegroundsPremiumDbfId' in card
+        'battlegroundsNormalDbfId' in card or \
+        'battlegroundsPremiumDbfId' in card
 
 
 def _is_golden(card: dict) -> bool:
@@ -61,7 +61,9 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Make the Hearthstone Battlegrounds card pool dataset.')
+    parser = argparse.ArgumentParser(
+                        description='Make the Hearthstone Battlegrounds card pool dataset.'
+    )
     parser.add_argument('card_data_file', type=Path,
                         help='A json file containing card data extracted from the Hearthstone '
                              'game client. This should match the HearthstoneJSON format.')

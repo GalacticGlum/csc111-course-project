@@ -5,6 +5,7 @@ import argparse
 from pathlib import Path
 from gensim.models import Word2Vec
 
+
 def main(args: argparse.Namespace) -> None:
     """Main entrypoint for the script."""
     model = Word2Vec.load(str(args.model_checkpoint))
@@ -22,7 +23,7 @@ def main(args: argparse.Namespace) -> None:
     metadata_filename = args.output_filepath.with_suffix('').name + '_metadata' + extension
     metadata_filepath = args.output_filepath.parent / metadata_filename
     with open(args.output_filepath, 'w+') as output_fp,\
-        open(metadata_filepath, 'w+') as metadata_fp:
+         open(metadata_filepath, 'w+') as metadata_fp:
         # Write data
         for word in model.wv.index_to_key:
             if words is not None and word not in words:
@@ -31,11 +32,14 @@ def main(args: argparse.Namespace) -> None:
             output_fp.write(line + '\n')
             metadata_fp.write(word + '\n')
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Make the embedding projector TSV file.')
     parser.add_argument('model_checkpoint', type=Path, help='The path to the model checkpoint.')
-    parser.add_argument('output_filepath', default=None, type=Path, help='The name of the output file.')
+    parser.add_argument('output_filepath', default=None, type=Path,
+                        help='The name of the output file.')
     parser.add_argument('--words', dest='words_filepath', required=False, type=Path,
-                        help='The path to a file containing a list of words, separated by a new line. '
+                        help='The path to a file containing a list of words, '
+                             'separated by a new line. '
                              'If specified, only words from this list are included in the output.')
     main(parser.parse_args())

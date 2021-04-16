@@ -166,6 +166,7 @@ class MonteCarloTreeSearcher:
         """Return a path to an unexplored descendent of the given node."""
         path = []
         while True:
+            print(node)
             path.append(node)
             if node not in self._children or not self._children[node]:
                 # The current node is either unexplored, or done.
@@ -173,6 +174,7 @@ class MonteCarloTreeSearcher:
                 return path
             # Get the remaining unexplored nodes
             unexplored = self._children[node] - self._children.keys()
+            print(len(unexplored))
             if unexplored:
                 # Select any unexplored node, and we are done!
                 path.append(unexplored.pop())
@@ -194,6 +196,7 @@ class MonteCarloTreeSearcher:
             if node.game.is_done:
                 winning_player = node.game.winner
                 assert winning_player is not None
+                print(winning_player)
                 return int(winning_player == self._friendly_player)
 
             node = self._get_random_successor(node)
@@ -243,7 +246,8 @@ class MonteCarloTreeSearcher:
                     move = random.choice(game_copy.get_valid_moves())
                     game_copy.make_move(move)
             game_copy.next_round()
-            game_copy.start_turn_for_player(self._friendly_player)
+            if not game_copy.is_done:
+                game_copy.start_turn_for_player(self._friendly_player)
 
         n = self._make_node_from_game(game_copy)
         assert n.move == move

@@ -75,7 +75,7 @@ def main(args: argparse.Namespace) -> None:
     """Main entrypoint for the script."""
     if args.output.exists() and not args.overwrite:
         raise ValueError(f'The given output file \'{args.output.absolute()}\' already exists! '
-                           'Use the --overwrite flag to ignore this.')
+                         'Use the --overwrite flag to ignore this.')
     cards_by_tier = {}
     # Get wiki html and parse it
     soup = BeautifulSoup(requests.get(DATA_URL).content, 'html.parser')

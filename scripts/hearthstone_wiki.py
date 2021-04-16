@@ -1,11 +1,8 @@
 """Tools for scraping, cleaning, and processing pages from the Hearthstone wiki."""
 import re
-import json
 import requests
-import argparse
 from pathlib import Path
 from typing import Tuple, List, Optional
-from urllib.parse import quote as url_quote
 
 import click
 import pypandoc
@@ -14,7 +11,6 @@ from tqdm import tqdm
 from num2words import num2words
 
 from hsbg.utils import parallel_map
-
 
 # Base api url for the Hearthstone wiki
 API_URL = 'https://hearthstone.fandom.com/api.php?action={action}&format=json'
@@ -64,7 +60,7 @@ def get_pages(from_page: Optional[str] = '') -> Tuple[List[dict], Optional[str]]
 
     try:
         next_page = request['continue']['apcontinue']
-    except:
+    except KeyError:
         next_page = None
 
     return pages, next_page
@@ -82,7 +78,7 @@ def get_page_wikitext(page_id: int) -> str:
     request = request_from_api(params)
     try:
         return request['parse']['wikitext']
-    except:
+    except KeyError:
         raise ValueError(f'Failed to retrieve wikitext for page with id "{page_id}".')
 
 
@@ -170,7 +166,7 @@ def make_corpus_from_pages(directory: Path, output_filepath: Path,
                 num2words(int(x.group(1))),
                 num2words(int(x.group(2)))
             )
-            text = re.sub(r'\+?(\d+)\/\+?(\d+)', replace_func, text)
+            text = re.sub(r'\+?(\d+)/\+?(\d+)', replace_func, text)
             # Replace special characters
             text = text.replace('|', ' ')
             text = text.replace('"', '')
@@ -185,11 +181,13 @@ if __name__ == '__main__':
     def cli() -> None:
         """Tools for scraping, cleaning, and processing pages from the Hearthstone wiki."""
 
+
     @cli.command()
     @click.argument('output_directory', type=Path)
     def scrape(output_directory: Path) -> None:
         """Scrape pages from the Hearthstone wiki."""
         scrape_pages(output_directory)
+
 
     @cli.command()
     @click.argument('directory', type=Path)
@@ -201,10 +199,11 @@ if __name__ == '__main__':
 
         NOTE: This is an IRREVERSIBLE operation, and will remove files!
         """
-        message = 'This is an IRREVERSIBLE operation, and will remove files! '\
+        message = 'This is an IRREVERSIBLE operation, and will remove files! ' \
                   'Do you want to continue'
         if click.confirm(message, default=True):
             clean_pages(directory, glob_pattern=glob_pattern, num_workers=num_workers)
+
 
     @cli.command()
     @click.argument('directory', type=Path)
@@ -216,7 +215,9 @@ if __name__ == '__main__':
         """Convert wikitext data into raw text with pandoc. The given directory should only
         contain text files with wikitext data.
         """
-        convert_pages(directory, output_directory, glob_pattern=glob_pattern, num_workers=num_workers)
+        convert_pages(directory, output_directory, glob_pattern=glob_pattern,
+                      num_workers=num_workers)
+
 
     @cli.command()
     @click.argument('directory', type=Path)
@@ -225,6 +226,7 @@ if __name__ == '__main__':
     def make_corpus(directory: Path, output_filepath: Path, glob_pattern: Optional[str]) -> None:
         """Make a Hearthstone wiki corpus from converted wikitext files."""
         make_corpus_from_pages(directory, output_filepath, glob_pattern=glob_pattern)
+
 
     # Start cli
     cli()

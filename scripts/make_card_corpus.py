@@ -52,7 +52,7 @@ def main(args: argparse.Namespace) -> None:
 
     name_map = {}
     with open(args.output_filepath, 'w+', encoding='utf-8') as fp,\
-        tqdm(card_data) as progress_bar:
+            tqdm(card_data) as progress_bar:
         visited = set()
         for card in progress_bar:
             # Required attributes

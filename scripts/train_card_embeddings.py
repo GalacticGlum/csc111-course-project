@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Iterator, List, Optional
 
 import tensorflow as tf
-from gensim.models import  Word2Vec
+from gensim.models import Word2Vec
 from gensim.models.callbacks import CallbackAny2Vec
 from gensim.utils import simple_preprocess, RULE_KEEP
 
