@@ -4,6 +4,8 @@ import copy
 import time
 import math
 import random
+import dill as pickle
+from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Tuple, List, FrozenSet, Set, Dict, Callable, Optional
@@ -259,6 +261,17 @@ class MonteCarloTreeSearcher:
             move = None
         return _GameTreeNode(state, move, game)
 
+    def save(self, filepath: Path) -> None:
+        """Save the state of this MonteCarloTreeSearcher to a file."""
+        with open(filepath, 'wb+') as fp:
+            pickle.dump(self, fp)
+
+    @staticmethod
+    def load(filepath: Path) -> MonteCarloTreeSearcher:
+        """Load a MonteCarloTreeSearcher from a file."""
+        with open(filepath, 'rb') as fp:
+            return pickle.load(fp)
+
 
 class MCTSPlayer(Player):
     """A Hearthstone Battlegrounds AI that uses a Monte Carlo tree searcher to pick moves."""
@@ -271,7 +284,7 @@ class MCTSPlayer(Player):
     _warmup_iterations: int
 
     def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 1,
-                 warmup_iterations: int = 0):
+                 warmup_iterations: int = 0, mcts: Optional[MonteCarloTreeSearcher] = None):
         """Initialise this MCTSPlayer.
 
         Preconditions:
@@ -283,8 +296,12 @@ class MCTSPlayer(Player):
             exploration_weight: Exploration weight in the UCT bound.
             iterations: The number of rollouts to perform before making a move.
             warmup_iterations: The number of rollouts to perform when initialising the tree.
+            mcts: The MonteCarloTreeSearcher instance to use. If None, initialises one instead.
         """
-        self._mcts = MonteCarloTreeSearcher(index, exploration_weight=exploration_weight)
+        if mcts is None:
+            self._mcts = MonteCarloTreeSearcher(index, exploration_weight=exploration_weight)
+        else:
+            self._mcts = mcts
         self._iterations = iterations
         self._warmup_iterations = warmup_iterations
 
