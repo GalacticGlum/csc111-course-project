@@ -1,10 +1,11 @@
 """Framework for making Hearthstone Battlegrounds AI."""
 import copy
 import random
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
-from hsbg import BattlegroundsGame, Action, Move
+from hsbg import BattlegroundsGame, Move
+from hsbg.mcts import MonteCarloTreeSearcher
 
 
 class Player:
@@ -33,6 +34,49 @@ class RandomPlayer(Player):
         """
         possible_moves = game.get_valid_moves()
         return random.choice(possible_moves)
+
+
+class MCTSPlayer(Player):
+    """A Hearthstone Battlegrounds AI that uses a Monte Carlo tree searcher to pick moves."""
+    # Private Instance Attributes
+    #   - _mcts: The Montre Carlo tree searcher.
+    #   - _iterations: The number of rollouts to perform before making a move.
+    #   - _warmup_iterations: The number of rollouts to perform before making a move.
+    def __init__(self, exploration_weight: float = 2**0.5, iterations: int = 50,
+                 warmup_iterations: int = 0):
+        """Initialise this MCTSPlayer.
+
+        Preconditions:
+            - iterations >= 0
+            - warmup_iterations >= 0
+
+        Args:
+            exploration_weight: Exploration weight in the UCT bound.
+            iterations: The number of rollouts to perform before making a move.
+            warmup_iterations: The number of rollouts to perform when initialising the tree.
+        """
+        self._mcts = MonteCarloTreeSearcher(exploration_weight=exploration_weight)
+        self._iterations = iterations
+        self._warmup_iterations = warmup_iterations
+
+    def make_move(self, game: BattlegroundsGame) -> Move:
+        """Make a move given the current game.
+
+        Preconditions:
+            - There is at least one valid move for the given game
+        """
+        if game._previous_move is None:
+            self._train(game, self._warmup_iterations)
+        self._train(game, self._iterations)
+        next_game = self._mcts.choose(game)
+        return next_game._previous_move[1]
+
+    def _train(self, game: BattlegroundsGame, n_iterations: int) -> None:
+        """Train the Monte Carlo tree searcher by performing the given amount of rollouts
+        from the given game state.
+        """
+        for _ in range(n_iterations):
+            self._mcts.rollout(game)
 
 
 def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: bool = False) \
