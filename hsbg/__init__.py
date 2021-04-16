@@ -1302,7 +1302,7 @@ class TavernGameBoard:
     def get_valid_moves(self) -> List[Move]:
         """Return a list of valid moves."""
         moves = []
-        if self.gold >= self.get_tavern_upgrade_cost():
+        if self.gold >= self.get_tavern_upgrade_cost() and self._tavern_tier < MAX_TAVERN_TIER:
             moves.append(Move(Action.UPGRADE))
         if self.gold >= self.refresh_cost and not self.is_frozen:
             # Only refresh if we aren't frozen! It makes no sense to refresh if we are frozen.
