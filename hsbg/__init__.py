@@ -1347,6 +1347,15 @@ class TavernGameBoard:
         else:
             raise ValueError(f'{move} is not a valid move!')
 
+    def copy_and_make_move(self, move: Move) -> TavernGameBoard:
+        """Make the given move in a copy of this TavernGameBoard, and return that copy.
+
+        If move is not a currently valid move, do nothing.
+        """
+        board_copy = copy.deepcopy(self)
+        board_copy.make_move(move)
+        return board_copy
+
     @property
     def won_previous(self) -> bool:
         """Return whether this player won its most recent battle."""
@@ -1664,6 +1673,11 @@ class BattlegroundsGame:
         or None if no player is completing their turn.
         """
         return None if self._active_player is None else self._boards[self._active_player]
+
+    @property
+    def incomplete_turn_players(self) -> List[int]:
+        """Return a list of players that have yet to complete their turn for this round."""
+        return [index for index in self.alive_players if not self.has_completed_turn(index)]
 
     @property
     def is_turn_in_progress(self) -> bool:
