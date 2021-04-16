@@ -168,6 +168,25 @@ class _GameTree:
         """Return whether this tree has been expanded."""
         return len(self._subtrees) > 0
 
+    def select(self) -> List[_GameTree]:
+        """Return a path to an unexplored descendent of this tree."""
+        path = []
+        tree = self
+        while True:
+            path.append(tree)
+            if tree.get_subtrees() == []:
+                # We've reached a leaf node, so we are done.
+                return path
+            unexplored = [subtree for subtree in tree.get_subtrees() if not subtree.expanded]
+            if unexplored:
+                # Select any uunexplored child, and we are done!
+                path.append(unexplored.pop())
+                return path
+            else:
+                # Select a node according to the upper confidence bound.
+                tree = tree.uct_select()
+        raise RuntimeError('tree select failed!')
+
     def get_possible_subtrees(self) -> Set[_GameTree]:
         """Return all the possible subtrees from this tree."""
         return {
@@ -209,7 +228,7 @@ class _GameTree:
         """Return an indented string representation of the board for this tree."""
         board = self.board
 
-        health = colourise_string(f'health {board.hero_health}', colorama.Fore.LIGHTRED_EX)
+        health = colourise_string(f'health {board.hero_health}', colorama.Fore.LIGHTGREEN_EX)
         turn = colourise_string(f'turn {board.turn_number}', colorama.Fore.LIGHTBLUE_EX)
         tier = colourise_string(f'tier {board.tavern_tier}', colorama.Fore.LIGHTCYAN_EX)
         gold = colourise_string(f'{board.gold} gold', colorama.Fore.YELLOW)
@@ -303,23 +322,6 @@ class MonteCarloTreeSearcher:
 
         reward = self._simulate(game)
         self._backpropagate(path, reward)
-
-    def _select(self, tree: _GameTree) -> List[_GameTree]:
-        """Return a path to an unexplored descendent of the given node."""
-        path = []
-        while True:
-            path.append(tree)
-            if tree.get_subtrees() == []:
-                # We've reached a leaf node, so we are done.
-                return path
-            unexplored = [subtreee for subtree in tree.get_subtrees() if not subtree.expanded]
-            if unexplored:
-                # Select any uunexplored child, and we are done!
-                path.append(unexplored.pop())
-                return path
-            else:
-                # Select a node according to the upper confidence bound.
-                tree = tree.uct_select()
 
     def _simulate(self, game: BattlegroundsGame) -> int:
         """Return the reward for a random simulation of the given game until completion."""
