@@ -4,9 +4,9 @@ import copy
 import time
 import math
 import random
-from dataclasses import dataclass
 from collections import defaultdict
-from typing import Tuple, List, Set, Dict, Callable, Optional
+from dataclasses import dataclass, field
+from typing import Tuple, List, FrozenSet, Set, Dict, Callable, Optional
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from hsbg import BattlegroundsGame, Move
@@ -40,11 +40,9 @@ class RandomPlayer(Player):
         return random.choice(possible_moves)
 
 
-@dataclass
-class GameTreeNode:
-    """A node of the Monte Carlo game tree.
-
-    This is a simplified representation of the BattlegroundsGame for a single player.
+@dataclass(eq=True, frozen=True)
+class _CompactGameState:
+    """This is a simplified representation of the BattlegroundsGame for a single player.
     Note that minions are stored as a string representation.
 
     Instance Attributes:
@@ -55,35 +53,47 @@ class GameTreeNode:
         - hand: The minions in the hand.
         - board: The minions on the board.
         - recruits: The minions available for purchase.
-        - move: The move that resulted in this game state, or None if the start of a turn.
     """
     tavern_tier: int
     hero_health: int
     gold: int
     is_frozen: bool
-    hand: Set[str]
-    board: Set[str]
-    recruits: Set[str]
+    hand: FrozenSet[str]
+    board: FrozenSet[str]
+    recruits: FrozenSet[str]
     round_number: int
 
-
-    def from_game(game: BattlegroundsGame, player: int) -> GameTreeNode:
+    def from_game(game: BattlegroundsGame, player: int) -> _CompactGameState:
         """Return a game tree node for the given player in the given BattlegroundsGame.
 
         Preconditions:
             - 0 <= player < game.num_total_players
         """
-        board = game.board[player]
-        return GameTreeNode(
+        board = game.boards[player]
+        return _CompactGameState(
             board.tavern_tier,
             board.hero_health,
             board.gold,
             board.is_frozen,
-            {str(x) for x in board.get_minions_in_hand()},
-            {str(x) for x in board.get_minions_on_board()},
-            {str(x) for x in board.recruits if x is not None},
-            board.round_number
+            frozenset({str(x) for x in board.get_minions_in_hand()}),
+            frozenset({str(x) for x in board.get_minions_on_board()}),
+            frozenset({str(x) for x in board.recruits if x is not None}),
+            game.round_number
         )
+
+
+@dataclass(eq=True, frozen=True, unsafe_hash=True)
+class _GameTreeNode:
+    """A node of the Monte Carlo game tree. This represents a transition between two states.
+
+    Instance Attributes:
+        - state: The current game state.
+        - move: The move that resulted in this game state, or None if the start of a turn.
+        - game: The BattlegroundsGame instance corresponding to this state.
+    """
+    state: _CompactGameState
+    move: Optional[Move]
+    game: BattlegroundsGame = field(compare=False, hash=False)
 
 
 class MonteCarloTreeSearcher:
@@ -96,19 +106,22 @@ class MonteCarloTreeSearcher:
     #   - _total_rewards: A dict mapping the total reward of each game state.
     #   - _visit_counts: A dict mapping the total visit count for each game state.
     #   - _children: A dict mapping the children of each game state.
+    #   - _friendly_player: The index of the friendly player.
     exploration_weight: float
-    _total_rewards: Dict[GameTreeNode, int]
-    _visit_counts: Dict[GameTreeNode, int]
-    _children: Dict[GameTreeNode, Set[GameTreeNode]]
+    _total_rewards: Dict[_GameTreeNode, int]
+    _visit_counts: Dict[_GameTreeNode, int]
+    _children: Dict[_GameTreeNode, Set[_GameTreeNode]]
+    _friendly_player: int
 
-    def __init__(self, exploration_weight: float = 2**0.5):
+    def __init__(self, friendly_player: int, exploration_weight: float = 2**0.5):
         self.exploration_weight = exploration_weight
         self._total_rewards = defaultdict(int)
         self._visit_counts = defaultdict(int)
         self._children = dict()
+        self._friendly_player = friendly_player
 
     def choose(self, game: BattlegroundsGame,
-               metric: Optional[Callable[[BattlegroundsGame], float]] = None) -> BattlegroundsGame:
+               metric: Optional[Callable[[BattlegroundsGame], float]] = None) -> _GameTreeNode:
         """Return the best successor of the given game state according to the given metric function
         That is, find a child of the given game state which maximizes the given metric.
 
@@ -123,115 +136,129 @@ class MonteCarloTreeSearcher:
         if game.is_done:
             raise ValueError(f'choose called on a game state that is done {game}')
 
-        if game not in self._children:
-            return MonteCarloTreeSearcher._get_random_successor(game)
+        node = self._make_node_from_game(game)
+        if node not in self._children:
+            return self._get_random_successor(node)
 
         metric = metric or self._average_reward
-        return max(self._children[game], key=metric)
+        return max(self._children[node], key=metric)
 
-    def _average_reward(self, game: BattlegroundsGame) -> float:
-        """Return the average reward of the given game state.
-        Return ``float(-inf)`` (negative infinity) if the game state has not been visited.
+    def _average_reward(self, node: _GameTreeNode) -> float:
+        """Return the average reward of the given node.
+        Return ``float(-inf)`` (negative infinity) if the node has not been visited.
         """
-        if self._visit_counts[game] == 0:
+        if self._visit_counts[node] == 0:
             return float('-inf')
         else:
-            return self._total_rewards[game] / self._visit_counts[game]
+            return self._total_rewards[node] / self._visit_counts[node]
 
     def rollout(self, game: BattlegroundsGame) -> None:
         """Rollout the tree from the given game state."""
-        path = self._select(game)
+        node = self._make_node_from_game(game)
+        path = self._select(node)
         leaf = path[-1]
+        print(f'Expanding node {leaf}')
         self._expand(leaf)
-        winning_player = self._simulate(leaf)
-        self._backpropagate(path, winning_player)
+        reward = self._simulate(leaf)
+        self._backpropagate(path, reward)
 
-    def _select(self, game: BattlegroundsGame) -> List[BattlegroundsGame]:
-        """Return a path to an unexplored descendent of the given game state."""
+    def _select(self, node: _GameTreeNode) -> List[_GameTreeNode]:
+        """Return a path to an unexplored descendent of the given node."""
         path = []
         while True:
-            path.append(game)
-            if game not in self._children or not self._children[game]:
-                # The current game state is either unexplored, or done.
+            path.append(node)
+            if node not in self._children or not self._children[node]:
+                # The current node is either unexplored, or done.
                 # In either case, we are done!
                 return path
-            # Get the remaining unexplored game states
-            unexplored = self._children[game] - self._children.keys()
+            # Get the remaining unexplored nodes
+            unexplored = self._children[node] - self._children.keys()
             if unexplored:
-                # Select any unexplored game state, and we are done!
+                # Select any unexplored node, and we are done!
                 path.append(unexplored.pop())
                 return path
             else:
-                # Select a game state according to the upper confidence bound
-                game = self._uct_select(game)
+                # Select a node according to the upper confidence bound
+                node = self._uct_select(node)
 
-    def _expand(self, game: BattlegroundsGame) -> None:
-        """Expand the tree at the given game state with the possible moves available."""
-        if game in self._children:
+    def _expand(self, node: _GameTreeNode) -> None:
+        """Expand the tree at the given node with the possible moves available."""
+        if node in self._children:
             return
         else:
-            self._children[game] = MonteCarloTreeSearcher._get_successors(game)
+            self._children[node] = self._get_successors(node)
 
-    def _simulate(self, game: BattlegroundsGame) -> int:
-        """Return the winner for a random simulation from the given game state."""
+    def _simulate(self, node: _GameTreeNode) -> int:
+        """Return the reward for a random simulation from the given node."""
         while True:
-            if game.is_done:
-                winning_player = game.winner
+            if node.game.is_done:
+                winning_player = node.game.winner
                 assert winning_player is not None
-                return winning_player
+                return int(winning_player == self._friendly_player)
 
-            game = MonteCarloTreeSearcher._get_random_successor(game)
+            node = self._get_random_successor(node)
 
-    def _backpropagate(self, path: List[BattlegroundsGame], winning_player: int) -> None:
+    def _backpropagate(self, path: List[_GameTreeNode], reward: int) -> None:
         """Propogate the reward up the given path. This is a classical monte carlo update."""
-        for game in reversed(path):
-            # Add reward, making sure to invert if this game represents the enemy player
-            reward = int(winning_player == game.active_player)
-            print(f'Adding reward {reward} (active_player={game.active_player})')
-            self._total_rewards[game] += reward
-            self._visit_counts[game] += 1
+        for node in reversed(path):
+            print(f'Adding reward {reward}')
+            self._total_rewards[node] += reward
+            self._visit_counts[node] += 1
 
-    def _uct_select(self, game: BattlegroundsGame) -> BattlegroundsGame:
-        """Return a child of the given game which maximizes the upper confidence bound."""
-        # All children of game should already be expanded
-        assert all(x in self._children for x in self._children[game])
+    def _uct_select(self, node: _GameTreeNode) -> _GameTreeNode:
+        """Return a child of the given node which maximizes the upper confidence bound."""
+        # All children of node should already be expanded
+        assert all(x in self._children for x in self._children[node])
 
-        log_visit_count = math.log(self._visit_counts[game])
-        def _uct(n: BattlegroundsGame) -> float:
-            """Return the upper confidence bound for the given game."""
+        log_visit_count = math.log(self._visit_counts[node])
+        def _uct(n: _GameTreeNode) -> float:
+            """Return the upper confidence bound for the given node."""
             exploration_coefficient = math.sqrt(log_visit_count / self._visit_counts[n])
             return self._average_reward(n) + self.exploration_weight * exploration_coefficient
 
-        return max(self._children[game], key=_uct)
+        return max(self._children[node], key=_uct)
 
-    @staticmethod
-    def _get_successors(game: BattlegroundsGame) -> Set[BattlegroundsGame]:
+    def _get_successors(self, node: _GameTreeNode) -> Set[_GameTreeNode]:
         """Return all the possible successors from the given game."""
         return {
-            MonteCarloTreeSearcher._get_successor(game, move)
-            for move in game.get_valid_moves()
+            self._get_successor(node, move)
+            for move in node.game.get_valid_moves()
         }
 
-    @staticmethod
-    def _get_random_successor(game: BattlegroundsGame) -> BattlegroundsGame:
+    def _get_random_successor(self, node: _GameTreeNode) -> _GameTreeNode:
         """Return a random successor of the given game."""
-        move = random.choice(game.get_valid_moves())
-        return MonteCarloTreeSearcher._get_successor(game, move)
+        move = random.choice(node.game.get_valid_moves())
+        return self._get_successor(node, move)
 
-    @staticmethod
-    def _get_successor(game: BattlegroundsGame, move: Move) -> GameTreeNode:
+    def _get_successor(self, node: _GameTreeNode, move: Move) -> _GameTreeNode:
         """Return the succeeding game state after making the given move."""
-        game_copy = game.copy_and_make_move(move)
-        # Do matchup if all the turns are completed
-        if all(game_copy.has_completed_turn(i) for i in game_copy.alive_players):
+        game_copy = node.game.copy_and_make_move(move)
+        # Randomly simulate every other player, if the friendly player turn is done.
+        if game_copy.has_completed_turn(self._friendly_player):
+            for index in game_copy.alive_players:
+                if game_copy.has_completed_turn(index):
+                    continue
+                game_copy.start_turn_for_player(index)
+                while game_copy.is_turn_in_progress:
+                    move = random.choice(game_copy.get_valid_moves())
+                    game_copy.make_move(move)
             game_copy.next_round()
+            game_copy.start_turn_for_player(self._friendly_player)
 
-        if not game_copy.is_done and not game_copy.is_turn_in_progress:
-            # Start the turn for the next player
-            next_player = next(i for i in game_copy.alive_players if not game_copy.has_completed_turn(i))
-            game_copy.start_turn_for_player(next_player)
+        n = self._make_node_from_game(game_copy)
+        assert n.move == move
+        return n
 
-        return game_copy
+    def _make_node_from_game(self, game: BattlegroundsGame) -> _GameTreeNode:
+        """Return the _GameTreeNode corresponding to the given game."""
+        state = _CompactGameState.from_game(game, self._friendly_player)
+        # Get the move that led to this state
+        move_history = game._move_history[self._friendly_player]
+        if move_history:
+            move = move_history[-1]
+        else:
+            move = None
+        return _GameTreeNode(state, move, game)
 
 
 class MCTSPlayer(Player):
@@ -244,7 +271,7 @@ class MCTSPlayer(Player):
     _iterations: int
     _warmup_iterations: int
 
-    def __init__(self, exploration_weight: float = 2**0.5, iterations: int = 1,
+    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 50,
                  warmup_iterations: int = 0):
         """Initialise this MCTSPlayer.
 
@@ -253,11 +280,12 @@ class MCTSPlayer(Player):
             - warmup_iterations >= 0
 
         Args:
+            index: The index of this player.
             exploration_weight: Exploration weight in the UCT bound.
             iterations: The number of rollouts to perform before making a move.
             warmup_iterations: The number of rollouts to perform when initialising the tree.
         """
-        self._mcts = MonteCarloTreeSearcher(exploration_weight=exploration_weight)
+        self._mcts = MonteCarloTreeSearcher(index, exploration_weight=exploration_weight)
         self._iterations = iterations
         self._warmup_iterations = warmup_iterations
 
@@ -267,13 +295,11 @@ class MCTSPlayer(Player):
         Preconditions:
             - There is at least one valid move for the given game
         """
-        if game._previous_move is None:
-            self._train(game, self._warmup_iterations)
+        # if game._previous_move is None:
+        #     self._train(game, self._warmup_iterations)
         self._train(game, self._iterations)
-        next_game = self._mcts.choose(game)
-        move = next_game._previous_move[1]
-        print(move)
-        return move
+        node = self._mcts.choose(game)
+        return node.move
 
     def _train(self, game: BattlegroundsGame, n_iterations: int) -> None:
         """Train the Monte Carlo tree searcher by performing the given amount of rollouts
