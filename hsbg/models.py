@@ -306,11 +306,11 @@ class Minion:
         name_and_buffs = ', '.join([name] + buffs)
         return f'{self.current_attack}/{self.current_health} {name_and_buffs}'
 
-    # def __deepcopy__(self, memo: dict) -> Minion:
-    #     """Deepcopy this Minion."""
-    #     minion_copy = self.clone()
-    #     memo[id(self)] = minion_copy
-    #     return minion_copy
+    def __deepcopy__(self, memo: dict) -> Minion:
+        """Deepcopy this Minion."""
+        minion_copy = self.clone()
+        memo[id(self)] = minion_copy
+        return minion_copy
 
 
 if __name__ == '__main__':

@@ -1682,24 +1682,24 @@ class BattlegroundsGame:
         """Return the number of total players in the game."""
         return self._num_players
 
-    # def __deepcopy__(self, memo: dict) -> BattlegroundsGame:
-    #     """Deepcopy this BattlegroundsGame."""
-    #     cls = self.__class__
-    #     game_copy = cls.__new__(cls)
+    def __deepcopy__(self, memo: dict) -> BattlegroundsGame:
+        """Deepcopy this BattlegroundsGame."""
+        cls = self.__class__
+        game_copy = cls.__new__(cls)
 
-    #     # Update memo dict
-    #     memo[id(self)] = game_copy
+        # Update memo dict
+        memo[id(self)] = game_copy
 
-    #     # Copy attributes
-    #     for k, v in self.__dict__.items():
-    #         if k == '_boards':
-    #             game_copy._boards = []
-    #             for board in self._boards:
-    #                 game_copy._boards.append(copy.copy(board))
-    #         else:
-    #             setattr(game_copy, k, copy.deepcopy(v, memo))
+        # Copy attributes
+        for k, v in self.__dict__.items():
+            if k == '_boards':
+                game_copy._boards = []
+                for board in self._boards:
+                    game_copy._boards.append(copy.copy(board))
+            else:
+                setattr(game_copy, k, copy.deepcopy(v, memo))
 
-    #     return game_copy
+        return game_copy
 
 
 @dataclass(eq=True, frozen=True)
