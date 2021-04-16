@@ -214,7 +214,9 @@ class _GameTree:
 
         The indentation level is specified by the <depth> parameter.
         """
-        move_desc = f'{self._move_str()} -> '
+        expanded = ', expanded' if self.expanded else ''
+        stats = f'({self.total_reward}/{self.visit_count})'
+        move_desc = f'{self._move_str()} {stats}{expanded} -> '
         s = '    ' * depth + move_desc
         s += self._board_str(len(s)) + '\n'
         if self._subtrees == []:
