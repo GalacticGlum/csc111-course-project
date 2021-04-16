@@ -7,9 +7,11 @@ from dataclasses import dataclass
 from contextlib import contextmanager
 from typing import Iterable, List, Optional, Dict, Tuple
 
+import colorama
+
 from hsbg.minions import Minion, MinionPool
 from hsbg.combat import Battle, simulate_combat
-from hsbg.utils import filter_minions, make_frequency_table
+from hsbg.utils import filter_minions, make_frequency_table, colourise_string
 
 
 # The maximum number of minions a player can have in their hand.
@@ -115,7 +117,8 @@ class TavernGameBoard:
     _bought_minions: Dict[int, List[Minion]]
 
     def __init__(self, pool: Optional[MinionPool] = None, hero_health: int = 40,
-                 tavern_tier: int = 1, max_freeze_times: Optional[int] = 5) -> None:
+                 tavern_tier: int = 1, max_freeze_times: Optional[int] = 5) \
+            -> None:
         """Initialise the TavernGameBoard.
 
         Args:
@@ -1418,6 +1421,31 @@ class TavernGameBoard:
     def pool(self) -> MinionPool:
         """Return the pool of minions to select recruits from."""
         return self._pool
+
+    def as_format_str(self) -> str:
+        """Return an indented string representation of the board for this tree."""
+        health = colourise_string(f'health {self.hero_health}', colorama.Fore.LIGHTGREEN_EX)
+        turn = colourise_string(f'turn {self.turn_number}', colorama.Fore.LIGHTBLUE_EX)
+        tier = colourise_string(f'tier {self.tavern_tier}', colorama.Fore.LIGHTCYAN_EX)
+        gold = colourise_string(f'{self.gold} gold', colorama.Fore.YELLOW)
+
+        recruit_label = colourise_string('recruits: ', colorama.Fore.LIGHTBLACK_EX)
+        board_label = colourise_string('board: ', colorama.Fore.LIGHTBLACK_EX)
+        hand_label = colourise_string('hand: ', colorama.Fore.LIGHTBLACK_EX)
+
+        def _colourise_minion(minion: Optional[Minion]) -> str:
+            """Return a colourised string representation of the given minion."""
+            if minion is None:
+                return colourise_string('(empty)', colorama.Fore.LIGHTBLACK_EX)
+            else:
+                return colourise_string(f'({str(minion)})', colorama.Fore.LIGHTWHITE_EX)
+
+        return '\n'.join([
+            f'{turn}, {health}, {tier}, {gold}',
+            recruit_label + ', '.join(_colourise_minion(x) for x in self.recruits),
+            board_label + ', '.join(_colourise_minion(x) for x in self.board),
+            hand_label + ', '.join(_colourise_minion(x) for x in self.hand)
+        ])
 
 
 class TurnClock:
