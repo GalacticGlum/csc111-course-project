@@ -1499,9 +1499,10 @@ class BattlegroundsGame:
         self._boards = [TavernGameBoard(pool=self._pool) for _ in range(num_players)]
         # Turn state
         self._active_player = None
-        self._turn_completion = [False] * num_players
+        self._turn_completion = []
         self._round_number = 1
         self._move_history = {index: [] for index in range(num_players)}
+        self.clear_turn_completion()
 
     @contextmanager
     def turn_for_player(self, player: int) -> TavernGameBoard:
@@ -1545,6 +1546,11 @@ class BattlegroundsGame:
         self._turn_completion[self._active_player] = True
         self._active_player = None
 
+    def clear_turn_completion(self) -> None:
+        """Clear the turn completion for all players."""
+        self._active_player = None
+        self._turn_completion = [False] * self._num_players
+
     def next_round(self) -> None:
         """Matchups pairs of players and starts the combat phase. Resets the game to the next
         round. Do nothing if the game is done.
@@ -1568,7 +1574,7 @@ class BattlegroundsGame:
             board_a.battle(board_b)
 
         # Reset turn completion
-        self._turn_completion = [False] * self._num_players
+        self.clear_turn_completion()
         self._round_number += 1
 
     def get_valid_moves(self) -> List[Move]:
@@ -1684,24 +1690,24 @@ class BattlegroundsGame:
         """Return the number of total players in the game."""
         return self._num_players
 
-    def __deepcopy__(self, memo: dict) -> BattlegroundsGame:
-        """Deepcopy this BattlegroundsGame."""
-        cls = self.__class__
-        game_copy = cls.__new__(cls)
+    # def __deepcopy__(self, memo: dict) -> BattlegroundsGame:
+    #     """Deepcopy this BattlegroundsGame."""
+    #     cls = self.__class__
+    #     game_copy = cls.__new__(cls)
 
-        # Update memo dict
-        memo[id(self)] = game_copy
+    #     # Update memo dict
+    #     memo[id(self)] = game_copy
 
-        # Copy attributes
-        for k, v in self.__dict__.items():
-            if k == '_boards':
-                game_copy._boards = []
-                for board in self._boards:
-                    game_copy._boards.append(copy.copy(board))
-            else:
-                setattr(game_copy, k, copy.deepcopy(v, memo))
+    #     # Copy attributes
+    #     for k, v in self.__dict__.items():
+    #         if k == '_boards':
+    #             game_copy._boards = []
+    #             for board in self._boards:
+    #                 game_copy._boards.append(copy.copy(board))
+    #         else:
+    #             setattr(game_copy, k, copy.deepcopy(v, memo))
 
-        return game_copy
+    #     return game_copy
 
 
 @dataclass(eq=True, frozen=True)
