@@ -659,13 +659,14 @@ class TavernGameBoard:
         False
         """
         if index < 0 or index >= len(self._hand) or self._hand[index] is None:
-            # We can't add the minion to hand since the index is out of range,
+            # We can't play the minion from the hand since the index is out of range,
             # or the given index refers to an empty position.
             return False
 
         minion = self._hand[index]
         self._hand[index] = None
-        self.summon_minion(minion, board_index, clone=False, call_events=False)
+        if not self.summon_minion(minion, board_index, clone=False, call_events=False):
+            return False
 
         # Add to history
         if self._turn_number not in self._played_minions:
@@ -1318,10 +1319,11 @@ class TavernGameBoard:
         for index, minion in enumerate(self.board):
             if minion is not None:
                 moves.append(Move(Action.SELL_MINION, index))
-        # Add play minion moves
-        for index, minion in enumerate(self.hand):
-            if minion is not None:
-                moves.append(Move(Action.PLAY_MINION, index))
+        # Add play minion moves (if the board is not full!)
+        if len(self.get_minions_on_board()) < len(self._board):
+            for index, minion in enumerate(self.hand):
+                if minion is not None:
+                    moves.append(Move(Action.PLAY_MINION, index))
         return moves
 
     def make_move(self, move: Move) -> None:
