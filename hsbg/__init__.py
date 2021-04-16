@@ -693,8 +693,8 @@ class TavernGameBoard:
                    does NOT keep any buffs.
             call_events: Whether to call events on the summoned minion.
         """
-        index_none = self._board[index] is not None
-        if index is None or index < 0 or index >= len(self._board) or index_none:
+        if index is None or index < 0 or index >= len(self._board) \
+            or self._board[index] is not None:
             # The board index is None, out of range, or refers to a non-empty position.
             # Use the first non-empty position instead.
             try:
