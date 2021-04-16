@@ -634,7 +634,7 @@ class TavernGameBoard:
                          empty position is used instead.
             call_events: Whether to call events on the played minion.
 
-        >>> random.seed(69)
+        >>> random.seed(71)
         >>> board = TavernGameBoard()
         >>> for _ in range(10):  # Go to turn 10 so we have 10 gold.
         ...     board.next_turn()
