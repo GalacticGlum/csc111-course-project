@@ -82,6 +82,16 @@ class CardAbility(Flag):
         return ' '.join(x[0].upper() + x[1:].lower() for x in parts)
 
 
+# A list of abilities that are also mechanics
+MECHANIC_ABILITIES = [
+    CardAbility.TAUNT,
+    CardAbility.DIVINE_SHIELD,
+    CardAbility.POISONOUS,
+    CardAbility.WINDFURY,
+    CardAbility.REBORN
+]
+
+
 class MinionRace(Flag):
     """The race of the minion."""
     NONE = 0
@@ -279,6 +289,28 @@ class Minion:
         """Handle the end of a turn."""
         if self._on_end_turn is not None:
             self._on_end_turn(self, board)
+
+    def __str__(self) -> str:
+        """Return a string representation of this minion.
+
+        >>> from hsbg import minions
+        >>> str(minions.MURLOC_SCOUT)
+        '1/1 Murloc Scout'
+        """
+        buffs = [
+            ability.as_format_str().lower() for ability in MECHANIC_ABILITIES
+            if ability in self.current_abilities
+        ]
+
+        name = ('golden ' if self.is_golden else '') + self.name
+        name_and_buffs = ', '.join([name] + buffs)
+        return f'{self.current_attack}/{self.current_health} {name_and_buffs}'
+
+    def __deepcopy__(self, memo: dict) -> Minion:
+        """Deepcopy this Minion."""
+        minion_copy = self.clone()
+        memo[id(self)] = minion_copy
+        return minion_copy
 
 
 if __name__ == '__main__':

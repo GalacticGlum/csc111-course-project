@@ -15,15 +15,6 @@ from hsbg_sim import (
 
 from hsbg.models import CardAbility
 
-# A list of abilities supported by the C++ simulator
-SIMULATOR_ABILITIES = [
-    CardAbility.TAUNT,
-    CardAbility.DIVINE_SHIELD,
-    CardAbility.POISONOUS,
-    CardAbility.WINDFURY,
-    CardAbility.REBORN
-]
-
 
 @dataclass
 class Battle:
@@ -232,16 +223,7 @@ def game_board_to_commands(board: TavernGameBoard) -> List[str]:
     for minion in board.board:
         if minion is None:
             continue
-
-        buffs = [
-            ability.as_format_str().lower() for ability in SIMULATOR_ABILITIES
-            if ability in minion.current_abilities
-        ]
-
-        name = ('golden ' if minion.is_golden else '') + minion.name
-        name_and_buffs = ', '.join([name] + buffs)
-        line = f'* {minion.current_attack}/{minion.current_health} {name_and_buffs}'
-        lines.append(line)
+        lines.append(f'* {minion}')
 
     return lines
 
