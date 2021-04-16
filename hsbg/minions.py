@@ -41,7 +41,7 @@ def get_all_minions(gold_suffix: str = '_golden', whitelist: Optional[Set[str]] 
         whitelist: A set containing the names of minions to include.
                    If None, then all minions are included.
     """
-    all_minions = {}
+    _ALL_MINIONS = {}
     globals_copy = globals().copy()
     for obj in globals_copy.values():
         if not isinstance(obj, Minion) or (whitelist is not None and obj.name not in whitelist):
@@ -49,11 +49,11 @@ def get_all_minions(gold_suffix: str = '_golden', whitelist: Optional[Set[str]] 
         key = obj.name + (gold_suffix if obj.is_golden else '')
 
         # Warn the user if duplicate minions were found!
-        if key in all_minions:
+        if key in _ALL_MINIONS:
             logging.warn(f'Found duplicate minion (\'{key}\')')
 
-        all_minions[key] = obj
-    return all_minions
+        _ALL_MINIONS[key] = obj
+    return _ALL_MINIONS
 
 
 def _scan_minion_list() -> None:
@@ -115,34 +115,35 @@ TIER_NUM_COPIES = {
     6: 6
 }
 
+_ALL_MINIONS = None
+_MINIONS_BELOW_TIER = {}
 
 class MinionPool:
     """A class representing the pool of available minions."""
     # Private Instance Attributes:
-    #   - _all_minions: A dict containing all the minions mapped by name.
     #   - _pool: A list of minions representing the current pool.
     #   - _gold_suffix: The suffix used to denote gold copies of minions.
-    _all_minions: Dict[str, Minion]
-    _pool: List[Minion]
+    _pool: List[str]
     _gold_suffix: str
 
-    def __init__(self, gold_suffix: str = '_golden') -> None:
-        self._all_minions = {}
+    def __init__(self, gold_suffix='_golden', force_rebuild: bool = False) -> None:
         self._pool = []
         self._gold_suffix = gold_suffix
 
-        minions = get_all_minions(gold_suffix=gold_suffix)
-        # Build the pool
-        for key, minion in minions.items():
-            self._all_minions[key] = minion
+        # Build _ALL_MINIONS if it is None
+        global _ALL_MINIONS
+        if _ALL_MINIONS is None or force_rebuild:
+            _ALL_MINIONS = get_all_minions(gold_suffix=gold_suffix)
 
+        # Build the pool
+        for minion in _ALL_MINIONS.values():
             # Don't include unpurchasable minions or golden copies in the pool.
             if not minion.purchasable or minion.is_golden:
                 continue
 
             copies = TIER_NUM_COPIES[minion.tier]
             for _ in range(copies):
-                self._pool.append(minion)
+                self._pool.append(minion.name)
 
     def find_all(self, limit: Optional[int] = None, **kwargs: dict) -> List[Minion]:
         """Find all the minions matching the given keyword arguments.
@@ -150,7 +151,7 @@ class MinionPool:
 
         Note: the returned list contains COPIES of the minions in the pool.
         """
-        return filter_minions(self._all_minions.values(), clone=True, limit=limit, **kwargs)
+        return filter_minions(_ALL_MINIONS.values(), clone=True, limit=limit, **kwargs)
 
     def find(self, **kwargs) -> Optional[Minion]:
         """Find the first minion matching the given keyword arguments.
@@ -159,8 +160,8 @@ class MinionPool:
         minions = self.find_all(limit=1, **kwargs)
         return None if len(minions) == 0 else minions[0]
 
-    def get_random(self, n: int = 1, max_tier: Optional[int] = None, remove: bool = True,
-                   predicate: Optional[callable] = None) -> List[Minion]:
+    def get_random(self, n: int = 1, max_tier: Optional[int] = None, remove: bool = True) \
+            -> List[Minion]:
         """Return a list of random minions from the pool.
 
         Args:
@@ -181,39 +182,42 @@ class MinionPool:
         >>> pool.size == previous_pool_size - 10  # Test that minions were removed.
         True
         """
-        def _predicate(x: Minion) -> bool:
+        def predicate(minion_name: str) -> bool:
             # TODO: Remove this! This is only a temporary fix so that unimplemented minions
             # are not added to the recruitment pool.
-            if x.name not in MINION_LIST:
+            if minion_name not in MINION_LIST:
                 return False
 
-            if max_tier is not None and x.tier > max_tier:
-                return False
-            if predicate is not None:
-                return predicate(x)
-            return True
+            minion = _ALL_MINIONS[minion_name]
+            return max_tier is None or minion.tier <= max_tier
 
-        pool_subset = list(filter(_predicate, self._pool))
+        global _MINIONS_BELOW_TIER
+        if max_tier in _MINIONS_BELOW_TIER:
+            pool_subset = _MINIONS_BELOW_TIER[max_tier]
+        else:
+            pool_subset = list(filter(predicate, self._pool))
+            _MINIONS_BELOW_TIER[max_tier] = pool_subset
+
         minions = random.sample(pool_subset, k=n)
         if remove:
             # Remove each minion from the pool
             for minion in minions:
                 self._pool.remove(minion)
         # Make a clone of each minion
-        return [minion.clone() for minion in minions]
+        return [_ALL_MINIONS[minion].clone() for minion in minions]
 
     def get_golden(self, name: str) -> Minion:
         """Return a golden copy of the minion with the given name.
         Raise a ValueError if there is no minion with that name, or if it has no golden copy.
         """
-        if name not in self._all_minions:
+        if name not in _ALL_MINIONS:
             raise ValueError(f'Could not find minion with name \'{name}\' in the pool.')
 
         golden_copy_name = name + self._gold_suffix
-        if golden_copy_name not in self._all_minions:
+        if golden_copy_name not in _ALL_MINIONS:
             raise ValueError(f'The minion with name \'{name}\' has no golden copy.')
 
-        return self._all_minions[golden_copy_name].clone()
+        return _ALL_MINIONS[golden_copy_name].clone()
 
     def insert(self, values: Union[Minion, List[Minion]]) -> None:
         """Insert the given minions into the pool.
@@ -232,12 +236,9 @@ class MinionPool:
         if isinstance(values, Minion):
             values = [values]
         for minion in values:
-            if minion.is_golden:
-                # Add 3 regular versions of the minion
-                regular_minion = self._all_minions[minion.name]
-                self._pool.extend(regular_minion.clone() for _ in range(3))
-            else:
-                self._pool.append(minion.clone())
+            # Add 3 regular versions of the minion, if golden.
+            times = 3 if minion.is_golden else 1
+            self._pool.extend([minion.name] * times)
 
     @property
     def size(self) -> int:
