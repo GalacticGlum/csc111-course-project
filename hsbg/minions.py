@@ -901,7 +901,6 @@ SOUTHSEA_CAPTAIN_GOLDEN = Minion(
     cost=3, tier=2, rarity=CardRarity.EPIC, is_golden=True
 )
 
-# TODO: Implement effect: After this minion survives being attacked, attack immediately.
 YO_HO_OGRE = Minion(
     'Yo-Ho-Ogre', CardClass.NEUTRAL, MinionRace.PIRATE, 2, 6,
     cost=6, tier=2, abilities=CardAbility.TAUNT

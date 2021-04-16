@@ -241,7 +241,7 @@ if __name__ == '__main__':
     play_board.play_minion(1)
 
     BACKGROUND_COLOUR = (255, 255, 255)
-    SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
+    SCREEN_WIDTH, SCREEN_HEIGHT = 1080, 720
 
     pygame.init()
     screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])

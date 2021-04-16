@@ -3,6 +3,7 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Iterable, Tuple, List, Dict, Callable, Optional, Union
 
+import colorama
 from tqdm import tqdm
 
 
@@ -165,6 +166,11 @@ def parallel_map(iterables: Union[list, iter], function: callable, n_jobs: Optio
                 _add_func(exception, output)
 
     return output
+
+def colourise_string(string: str, colour: str) -> str:
+    """Return a string with a stdout colour format."""
+    reset_style = colorama.Style.RESET_ALL
+    return f'{colour}{string}{reset_style}'
 
 
 if __name__ == '__main__':
