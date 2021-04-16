@@ -47,41 +47,35 @@ class RandomPlayer(Player):
 
 
 @dataclass(eq=True, frozen=True)
-class _CompactGameState:
-    """This is a simplified representation of the TavernGameBoard.
+class _DeterministicTavernGameBoard:
+    """This is a simplified and deterministic representation of the TavernGameBoard.
     Note that minions are stored as a string representation.
 
     Instance Attributes:
         - tavern_tier: The tier of the tavern.
-        - hero_health: The health of the hero.
         - gold: The amount of gold available.
         - is_frozen: Whether the recruits are frozen.
         - hand: The minions in the hand.
         - board: The minions on the board.
         - recruits: The minions available for purchase.
-        - valid_moves: A list of valid moves from this board state.
     """
     tavern_tier: int
-    hero_health: int
     gold: int
     is_frozen: bool
     hand: FrozenSet[str]
     board: FrozenSet[str]
     recruits: FrozenSet[str]
-    valid_moves: List[Move]
 
     @staticmethod
-    def from_game(board: TavernGameBoard) -> _CompactGameState:
+    def from_board(board: TavernGameBoard) -> _DeterministicTavernGameBoard:
         """Return a game tree node for the given TavernGameBoard."""
-        return _CompactGameState(
+        return _DeterministicTavernGameBoard(
             board.tavern_tier,
-            board.hero_health,
             board.gold,
             board.is_frozen,
             frozenset({str(x) for x in board.get_minions_in_hand()}),
             frozenset({str(x) for x in board.get_minions_on_board()}),
-            frozenset({str(x) for x in board.recuits if x is not None}),
-            board.get_valid_moves()
+            frozenset({str(x) for x in board.recruits if x is not None}),
         )
 
 
@@ -105,6 +99,7 @@ class _GameTree:
     #   - _seed: The seed used.
     _subtrees: List[_GameTree]
     _seed: Optional[int]
+    _deterministic_state: _DeterministicTavernGameBoard
 
     def __init__(self, board: Optional[TavernGameBoard] = None, move: Optional[Move] = None,
                  seed: int = None) -> None:
@@ -119,6 +114,7 @@ class _GameTree:
         self.total_reward = 0
         self._subtrees = []
         self._seed = seed
+        self._deterministic_state = _DeterministicTavernGameBoard.from_board(self.board)
 
     def get_subtrees(self) -> List[_GameTree]:
         """Return the subtrees of this game tree."""
@@ -208,6 +204,7 @@ class _GameTree:
         if move.action == Action.END_TURN:
             board_copy.next_turn()
         else:
+            random.seed(self._seed)
             board_copy.make_move(move)
         return _GameTree(board_copy, move, seed=self._seed)
 
@@ -289,7 +286,11 @@ class MonteCarloTreeSearcher:
         if not tree.expanded:
             return tree.get_random_possible_subtree()
 
-        metric = metric or self._average_reward
+        def _average_reward_metric(x: _GameTree) -> float:
+            """Return the average reward of the given tree."""
+            return x.average_reward
+
+        metric = metric or _average_reward_metric
         return max(tree.get_subtrees(), key=metric)
 
     def rollout(self, game: BattlegroundsGame) -> None:
@@ -317,7 +318,8 @@ class MonteCarloTreeSearcher:
                         move = random.choice(game.get_valid_moves())
                         game.make_move(move)
                 game.next_round()
-                game.start_turn_for_player(self._friendly_player)
+                if not game.has_completed_turn(self._friendly_player):
+                    game.start_turn_for_player(self._friendly_player)
 
         reward = self._simulate(game)
         self._backpropagate(path, reward)
@@ -347,10 +349,10 @@ class MonteCarloTreeSearcher:
         """Return the game tree corresponding to the given board."""
         q = Queue()
         q.put(self._game_tree)
-        board_str = board.as_format_str()
+        state = _DeterministicTavernGameBoard.from_board(board)
         while not q.empty():
             tree = q.get()
-            if tree.board.as_format_str() == board_str:
+            if tree._deterministic_state == state:
                 return tree
             for subtree in tree.get_subtrees():
                 q.put(subtree)
@@ -386,7 +388,7 @@ class MCTSPlayer(Player):
     _iterations: int
     _warmup_iterations: int
 
-    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 2,
+    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 50,
                  warmup_iterations: int = 0, mcts: Optional[MonteCarloTreeSearcher] = None) -> None:
         """Initialise this MCTSPlayer.
 
@@ -417,9 +419,10 @@ class MCTSPlayer(Player):
         # if game._previous_move is None:
         #     self._train(game, self._warmup_iterations)
         self._train(game, self._iterations)
-        node = self._mcts.choose(game)
-        print('chose: ', node.move)
-        return node.move
+        tree = self._mcts.choose(game)
+        print('chose: ', tree.move)
+        random.seed(tree._seed)
+        return tree.move
 
     def _train(self, game: BattlegroundsGame, n_iterations: int) -> None:
         """Train the Monte Carlo tree searcher by performing the given amount of rollouts
@@ -530,7 +533,7 @@ def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: b
         print(f'Player {player}: {stats[player]}/{n} ({100.0 * stats[player] / n:.2f}%)')
 
 
-def run_game(players: List[Player]) -> Tuple[int, List[Tuple[int, Move]]]:
+def run_game(players: List[Player], seed: int = None) -> Tuple[int, List[Tuple[int, Move]]]:
     """Run a Battlegrounds game between the given players.
 
     Return the index of the winning player and a list of moves made in the game,
@@ -540,10 +543,13 @@ def run_game(players: List[Player]) -> Tuple[int, List[Tuple[int, Move]]]:
         - len(players) > 0 and len(players) % 2 == 0
     """
     game = BattlegroundsGame(num_players=len(players))
+
     move_sequence = []
     while game.winner is None:
         for index, player in enumerate(players):
+            random.seed(seed)
             game.start_turn_for_player(index)
+
             while game.is_turn_in_progress:
                 move = player.make_move(game)
                 game.make_move(move)

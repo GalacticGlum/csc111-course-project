@@ -1577,7 +1577,8 @@ class BattlegroundsGame:
             raise ValueError(f'Player {player} has already completed their turn for this round.')
 
         self._active_player = player
-        self.active_board.next_turn()
+        if self.round_number == 1:
+            self.active_board.next_turn()
 
     def end_turn(self) -> None:
         """End the turn for the currently active player.
@@ -1586,6 +1587,7 @@ class BattlegroundsGame:
         if not self.is_turn_in_progress:
             raise ValueError('No player is currently in a turn!')
         self._turn_completion[self._active_player] = True
+        self.active_board.next_turn()
         self._active_player = None
 
     def clear_turn_completion(self) -> None:
