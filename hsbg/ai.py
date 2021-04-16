@@ -339,6 +339,9 @@ class GreedyPlayer(Player):
     # Private Instance Attributes
     #   - _player_index: The index of this player.
     #   - _games_per_move: The number of games to simulate per move.
+    _player_index: int
+    _games_per_move: int
+
     def __init__(self, index: int, games_per_move: int = 10) -> None:
         """Initialise this GreedyPlayer.
 
@@ -361,10 +364,9 @@ class GreedyPlayer(Player):
         moves = game.get_valid_moves()
 
         best_move_yet = None
-        best_reward = 0
+        best_reward = float('-inf')
         for move in moves:
             total_reward = 0
-            start_time = time.time()
             for game_index in range(self._games_per_move):
                 game_copy = game.copy_and_make_move(move)
                 total_reward += self._simulate(game_copy)
@@ -373,9 +375,6 @@ class GreedyPlayer(Player):
             if average_reward > best_reward:
                 best_reward = average_reward
                 best_move_yet = move
-
-            elapsed = time.time() - start_time
-            print(f'Finished simulating for move \'{move.action.name}\' (took {elapsed:.2f} seconds) - Average Reward: {average_reward}')
 
         return best_move_yet
 
