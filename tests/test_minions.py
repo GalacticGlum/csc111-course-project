@@ -51,7 +51,7 @@ def test_wrath_weaver_effect_1() -> None:
     board.play_minion(1)
     # When a Demon is played, Wrath Weaver deals 1 damage to the hero, and gains +2/+2.
     assert board.hero_health == 39 and wrath_weaver.current_attack == 3 \
-                                   and wrath_weaver.current_health == 5
+           and wrath_weaver.current_health == 5
 
 
 def test_wrath_weaver_effect_2() -> None:
@@ -65,7 +65,7 @@ def test_wrath_weaver_effect_2() -> None:
     board.play_minion(1)
     # When a Demon is played, Wrath Weaver deals 1 damage to the hero, and gains +2/+2.
     assert board.hero_health == 40 and wrath_weaver.current_attack == 1 \
-                                   and wrath_weaver.current_health == 3
+           and wrath_weaver.current_health == 3
 
 
 def test_golden_wrath_weaver_effect_1() -> None:
@@ -79,7 +79,7 @@ def test_golden_wrath_weaver_effect_1() -> None:
     board.play_minion(1)
     # When a Demon is played, Wrath Weaver deals 1 damage to the hero, and gains +2/+2.
     assert board.hero_health == 39 and wrath_weaver.current_attack == 6 \
-                                   and wrath_weaver.current_health == 10
+           and wrath_weaver.current_health == 10
 
 
 def test_golden_wrath_weaver_effect_2() -> None:
@@ -93,7 +93,7 @@ def test_golden_wrath_weaver_effect_2() -> None:
     board.play_minion(1)
     # When a Demon is played, Wrath Weaver deals 1 damage to the hero, and gains +2/+2.
     assert board.hero_health == 40 and wrath_weaver.current_attack == 2 \
-                                   and wrath_weaver.current_health == 6
+           and wrath_weaver.current_health == 6
 
 
 def test_refreshing_anomaly_battlecry() -> None:
@@ -210,7 +210,7 @@ def test_golden_micro_mummy_effect() -> None:
         # but the health should not change.
         assert tabbycat.current_attack == 2 * i + 1 and tabbycat.current_health == 1
         board.next_turn()
-        assert tabbycat.current_attack == 2 * (i + 1) + 1  and tabbycat.current_health == 1
+        assert tabbycat.current_attack == 2 * (i + 1) + 1 and tabbycat.current_health == 1
 
 
 def test_murloc_tidecaller_effect() -> None:
@@ -385,8 +385,9 @@ def test_rabid_saurolisk_effect_2() -> None:
     assert rabid_saurolisk.current_attack == 3 and rabid_saurolisk.current_health == 2
 
 
-def test_rabid_saurolisk_effect_2() -> None:
-    """Test the effect for the Rabid Saurolisk minion when a minion without Deathrattle is played."""
+def test_rabid_saurolisk_effect_3() -> None:
+    """Test the effect for the Rabid Saurolisk
+    minion when a minion without Deathrattle is played."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.RABID_SAUROLISK)
     board.play_minion(0)
@@ -399,7 +400,8 @@ def test_rabid_saurolisk_effect_2() -> None:
 
 
 def test_golden_rabid_saurolisk_effect_1() -> None:
-    """Test the effect for the golden Rabid Saurolisk minion when a minion with Deathrattle is played."""
+    """Test the effect for the golden Rabid Saurolisk minion
+    when a minion with Deathrattle is played."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.RABID_SAUROLISK_GOLDEN)
     board.play_minion(0)
@@ -424,7 +426,8 @@ def test_golden_rabid_saurolisk_effect_2() -> None:
 
 
 def test_golden_rabid_saurolisk_effect_3() -> None:
-    """Test the effect for the Rabid Saurolisk minion when a minion without Deathrattle is played."""
+    """Test the effect for the Rabid Saurolisk minion
+    when a minion without Deathrattle is played."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.RABID_SAUROLISK_GOLDEN)
     board.play_minion(0)
@@ -679,6 +682,7 @@ def test_freedealing_gambler_effect() -> None:
     # The minion sells for 3 gold.
     assert board.gold == 3
 
+
 def test_golden_freedealing_gambler_effect() -> None:
     """Test the effect for the golden Freedealing Gambler minion."""
     board = TavernGameBoard()
@@ -785,7 +789,7 @@ def test_houndmaster_battlecry_1() -> None:
 
     minion = board.board[0]
     assert minion.current_attack == 3 and minion.current_health == 3 \
-                                      and minion.current_abilities == CardAbility.TAUNT
+           and minion.current_abilities == CardAbility.TAUNT
 
 
 def test_houndmaster_battlecry_2() -> None:
@@ -798,11 +802,12 @@ def test_houndmaster_battlecry_2() -> None:
 
     minion = board.board[0]
     assert minion.current_attack == 1 and minion.current_health == 1 \
-                                      and minion.current_abilities == CardAbility.NONE
+           and minion.current_abilities == CardAbility.NONE
 
 
 def test_golden_houndmaster_battlecry_1() -> None:
-    """Test the battlecry effect for the golden Houndmaster minion when there is a friendly Beast."""
+    """Test the battlecry effect for the golden Houndmaster minion
+    when there is a friendly Beast."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.TABBYCAT)
     board.add_minion_to_hand(minions.HOUNDMASTER_GOLDEN)
@@ -811,11 +816,12 @@ def test_golden_houndmaster_battlecry_1() -> None:
 
     minion = board.board[0]
     assert minion.current_attack == 5 and minion.current_health == 5 \
-                                      and minion.current_abilities == CardAbility.TAUNT
+           and minion.current_abilities == CardAbility.TAUNT
 
 
 def test_golden_houndmaster_battlecry_2() -> None:
-    """Test the battlecry effect for the golden Houndmaster minion when there is no friendly Beast."""
+    """Test the battlecry effect for the golden Houndmaster minion
+    when there is no friendly Beast."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.HOUNDMASTER_GOLDEN)
@@ -824,7 +830,7 @@ def test_golden_houndmaster_battlecry_2() -> None:
 
     minion = board.board[0]
     assert minion.current_attack == 1 and minion.current_health == 1 \
-                                      and minion.current_abilities == CardAbility.NONE
+           and minion.current_abilities == CardAbility.NONE
 
 
 def test_crystal_weaver_battlecry() -> None:
@@ -924,7 +930,8 @@ def test_soul_devourer_battlecry_4() -> None:
 
 
 def test_golden_soul_devourer_battlecry_1() -> None:
-    """Test the battlecry effect for the golden Soul Devourer when there is another friendly Demon."""
+    """Test the battlecry effect for the golden Soul Devourer
+    when there is another friendly Demon."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.IMP)
     board.add_minion_to_hand(minions.SOUL_DEVOURER_GOLDEN)
@@ -937,7 +944,8 @@ def test_golden_soul_devourer_battlecry_1() -> None:
 
 
 def test_golden_soul_devourer_battlecry_2() -> None:
-    """Test the battlecry effect for the golden Soul Devourer when there is another friendly Demon."""
+    """Test the battlecry effect for the golden Soul Devourer
+    when there is another friendly Demon."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.IMP_GANG_BOSS)
     board.add_minion_to_hand(minions.SOUL_DEVOURER_GOLDEN)
@@ -950,7 +958,8 @@ def test_golden_soul_devourer_battlecry_2() -> None:
 
 
 def test_golden_soul_devourer_battlecry_3() -> None:
-    """Test the battlecry effect for the golden Soul Devourer when there is another friendly Demon."""
+    """Test the battlecry effect for the golden Soul Devourer
+    when there is another friendly Demon."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.IMP_GANG_BOSS)
     board.add_minion_to_hand(minions.IMP_GANG_BOSS)
@@ -1056,7 +1065,8 @@ def test_golden_hangry_dragon_effect_2() -> None:
 
 
 def test_twilight_emissary_battlecry_1() -> None:
-    """Test the battlecry effect for the Twilight Emissary minion when there is a friendly Dragon."""
+    """Test the battlecry effect for the Twilight Emissary minion
+    when there is a friendly Dragon."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.HANGRY_DRAGON)
     board.add_minion_to_hand(minions.TWILIGHT_EMISSARY)
@@ -1068,7 +1078,8 @@ def test_twilight_emissary_battlecry_1() -> None:
 
 
 def test_twilight_emissary_battlecry_2() -> None:
-    """Test the battlecry effect for the Twilight Emissary minion when there isn't a friendly Dragon."""
+    """Test the battlecry effect for the Twilight Emissary minion
+    when there isn't a friendly Dragon."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.TWILIGHT_EMISSARY)
@@ -1080,7 +1091,8 @@ def test_twilight_emissary_battlecry_2() -> None:
 
 
 def test_golden_twilight_emissary_battlecry_1() -> None:
-    """Test the battlecry effect for the golden Twilight Emissary minion when there is a friendly Dragon."""
+    """Test the battlecry effect for the golden Twilight Emissary minion
+    when there is a friendly Dragon."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.HANGRY_DRAGON)
     board.add_minion_to_hand(minions.TWILIGHT_EMISSARY_GOLDEN)
@@ -1092,7 +1104,8 @@ def test_golden_twilight_emissary_battlecry_1() -> None:
 
 
 def test_golden_twilight_emissary_battlecry_2() -> None:
-    """Test the battlecry effect for the golden Twilight Emissary minion when there isn't a friendly Dragon."""
+    """Test the battlecry effect for the golden Twilight Emissary minion
+    when there isn't a friendly Dragon."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.TWILIGHT_EMISSARY_GOLDEN)
@@ -1174,7 +1187,8 @@ def test_iron_sensei_effect_2() -> None:
 
 
 def test_golden_iron_sensei_effect_1() -> None:
-    """Test the effect for the golden Iron Sensei minion when there is a friendly Mech on the board."""
+    """Test the effect for the golden Iron Sensei minion when
+    there is a friendly Mech on the board."""
     board = TavernGameBoard()
     board.next_turn()
 
@@ -1190,7 +1204,8 @@ def test_golden_iron_sensei_effect_1() -> None:
 
 
 def test_golden_iron_sensei_effect_2() -> None:
-    """Test the effect for the golden Iron Sensei minion when there is no friendly Mech on the board."""
+    """Test the effect for the golden Iron Sensei minion when
+    there is no friendly Mech on the board."""
     board = TavernGameBoard()
     board.next_turn()
 
@@ -1206,7 +1221,8 @@ def test_golden_iron_sensei_effect_2() -> None:
 
 
 def test_screwjank_clunker_battlecry_1() -> None:
-    """Test the battlecry effect for the Screwjank Clunker minion when there is a friendly Mechc on the board."""
+    """Test the battlecry effect for the Screwjank Clunker minion when
+    there is a friendly Mechc on the board."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.DEFLECT_O_BOT)
     board.add_minion_to_hand(minions.SCREWJANK_CLUNKER)
@@ -1219,7 +1235,8 @@ def test_screwjank_clunker_battlecry_1() -> None:
 
 
 def test_screwjank_clunker_battlecry_2() -> None:
-    """Test the battlecry effect for the Screwjank Clunker minion when there is no friendly Mechc on the board."""
+    """Test the battlecry effect for the Screwjank Clunker minion when
+    there is no friendly Mechc on the board."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.SCREWJANK_CLUNKER)
@@ -1232,7 +1249,8 @@ def test_screwjank_clunker_battlecry_2() -> None:
 
 
 def test_golden_screwjank_clunker_battlecry_1() -> None:
-    """Test the battlecry effect for the golden Screwjank Clunker minion when there is a friendly Mechc on the board."""
+    """Test the battlecry effect for the golden Screwjank Clunker minion
+    when there is a friendly Mechc on the board."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.DEFLECT_O_BOT)
     board.add_minion_to_hand(minions.SCREWJANK_CLUNKER_GOLDEN)
@@ -1245,7 +1263,8 @@ def test_golden_screwjank_clunker_battlecry_1() -> None:
 
 
 def test_golden_screwjank_clunker_battlecry_2() -> None:
-    """Test the battlecry effect for the golden Screwjank Clunker minion when there is no friendly Mechc on the board."""
+    """Test the battlecry effect for the golden Screwjank Clunker minion
+    when there is no friendly Mechc on the board."""
     board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.SCREWJANK_CLUNKER_GOLDEN)
@@ -1347,7 +1366,7 @@ def test_golden_felfin_navigator_battlecry() -> None:
 
 def test_bloodsail_cannoneer_battlecry() -> None:
     """Test the Bloodsail Cannoneer minion."""
-    board =  TavernGameBoard()
+    board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.GOLDGRUBBER)
     board.add_minion_to_hand(minions.RIPSNARL_CAPTAIN)
@@ -1754,7 +1773,7 @@ def test_golden_goldgrubber_effect() -> None:
 
 def test_defender_of_argus_battlecry_1() -> None:
     """Test the battlecry effect for the Defender of Argus minion."""
-    board =  TavernGameBoard()
+    board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.GOLDGRUBBER)
     board.add_minion_to_hand(minions.DEFENDER_OF_ARGUS)
@@ -1764,14 +1783,14 @@ def test_defender_of_argus_battlecry_1() -> None:
 
     minion_a, minion_b = board.board[0], board.board[2]
     assert minion_a.current_attack == 2 and minion_a.current_health == 2 \
-                                        and CardAbility.TAUNT in minion_a.current_abilities
+           and CardAbility.TAUNT in minion_a.current_abilities
     assert minion_b.current_attack == 3 and minion_b.current_health == 3 \
-                                        and CardAbility.TAUNT in minion_b.current_abilities
+           and CardAbility.TAUNT in minion_b.current_abilities
 
 
 def test_defender_of_argus_battlecry_2() -> None:
     """Test the battlecry effect for the Defender of Argus minion."""
-    board =  TavernGameBoard()
+    board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.DEFENDER_OF_ARGUS)
     board.play_minion(0)
@@ -1779,12 +1798,12 @@ def test_defender_of_argus_battlecry_2() -> None:
 
     minion = board.board[0]
     assert minion.current_attack == 2 and minion.current_health == 2 \
-                                      and CardAbility.TAUNT in minion.current_abilities
+           and CardAbility.TAUNT in minion.current_abilities
 
 
 def test_defender_of_argus_battlecry_3() -> None:
     """Test the battlecry effect for the Defender of Argus minion."""
-    board =  TavernGameBoard()
+    board = TavernGameBoard()
     board.add_minion_to_hand(minions.DEFENDER_OF_ARGUS)
     board.play_minion(0)
 
@@ -1794,7 +1813,7 @@ def test_defender_of_argus_battlecry_3() -> None:
 
 def test_golden_defender_of_argus_battlecry_1() -> None:
     """Test the battlecry effect for the golden Defender of Argus minion."""
-    board =  TavernGameBoard()
+    board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.GOLDGRUBBER)
     board.add_minion_to_hand(minions.DEFENDER_OF_ARGUS_GOLDEN)
@@ -1804,14 +1823,14 @@ def test_golden_defender_of_argus_battlecry_1() -> None:
 
     minion_a, minion_b = board.board[0], board.board[2]
     assert minion_a.current_attack == 3 and minion_a.current_health == 3 \
-                                        and CardAbility.TAUNT in minion_a.current_abilities
+           and CardAbility.TAUNT in minion_a.current_abilities
     assert minion_b.current_attack == 4 and minion_b.current_health == 4 \
-                                        and CardAbility.TAUNT in minion_b.current_abilities
+           and CardAbility.TAUNT in minion_b.current_abilities
 
 
 def test_golden_defender_of_argus_battlecry_2() -> None:
     """Test the battlecry effect for the golden Defender of Argus minion."""
-    board =  TavernGameBoard()
+    board = TavernGameBoard()
     board.add_minion_to_hand(minions.MURLOC_SCOUT)
     board.add_minion_to_hand(minions.DEFENDER_OF_ARGUS_GOLDEN)
     board.play_minion(0)
@@ -1819,12 +1838,12 @@ def test_golden_defender_of_argus_battlecry_2() -> None:
 
     minion = board.board[0]
     assert minion.current_attack == 3 and minion.current_health == 3 \
-                                      and CardAbility.TAUNT in minion.current_abilities
+           and CardAbility.TAUNT in minion.current_abilities
 
 
 def test_golden_defender_of_argus_battlecry_3() -> None:
     """Test the battlecry effect for the golden Defender of Argus minion."""
-    board =  TavernGameBoard()
+    board = TavernGameBoard()
     board.add_minion_to_hand(minions.DEFENDER_OF_ARGUS_GOLDEN)
     board.play_minion(0)
 
