@@ -108,14 +108,14 @@ def visualise_game_board(surface: pygame.Surface, board: TavernGameBoard) -> Non
                          padding + s_width // 30 - font_padding), (255, 0, 0))
 
     # BOB'S SQUADRON
-    card_width = SCREEN_WIDTH // 9
+    card_width = SCREEN_WIDTH // 11
     card_length = card_width * 6 // 5
-    card_padding = (card_width - SCREEN_WIDTH // 10) // 2
+    card_padding = (SCREEN_WIDTH // 10 - card_width) // 2
     for i in range(len(board.recruits)):
         if board.recruits[i] is None:
             continue
         x_pos = card_padding * (i + 1) + card_width * i
-        y_pos = s_height // 7
+        y_pos = 2 * s_height // 9
         draw_minion(surface, board.recruits[i], (card_width, card_length), (x_pos, y_pos))
 
     # YOUR PLAYED CARDS
@@ -123,7 +123,7 @@ def visualise_game_board(surface: pygame.Surface, board: TavernGameBoard) -> Non
         if board.board[i] is None:
             continue
         x_pos = card_padding * (i + 1) + card_width * i
-        y_pos = 3 * s_height // 7
+        y_pos = 4 * s_height // 9
         draw_minion(surface, board.board[i], (card_width, card_length), (x_pos, y_pos))
 
     # YOUR HAND
@@ -135,31 +135,18 @@ def visualise_game_board(surface: pygame.Surface, board: TavernGameBoard) -> Non
         draw_minion(surface, board.hand[i], (card_width, card_length), (x_pos, y_pos))
 
 
-def draw_text_for_board(screen: pygame.Surface, text: str, pos: tuple[int, int],
+def draw_text_for_board(surface: pygame.Surface, text: str, pos: tuple[int, int],
                         color: tuple = (0, 0, 0)) -> None:
     """Draw the given text to the pygame screen at the given position.
 
     pos represents the *upper-left corner* of the text.
     """
-    font_size = min(50 * screen.get_height() // 1080, 50 * screen.get_width() // 1980)
+    font_size = min(50 * surface.get_height() // 1080, 50 * surface.get_width() // 1980)
     font = pygame.font.SysFont('inconsolata', font_size)
     text_surface = font.render(text, True, color)
     width, height = text_surface.get_size()
-    screen.blit(text_surface,
-                pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
-
-
-def draw_text_for_card(screen: pygame.Surface, text: str, pos: tuple[int, int]) -> None:
-    """Draw the given text to the pygame screen at the given position.
-
-    pos represents the *upper-left corner* of the text.
-    """
-    font_size = min(20 * screen.get_height() // 1080, 20 * screen.get_width() // 1980)
-    font = pygame.font.SysFont('inconsolata', font_size)
-    text_surface = font.render(text, True, (0, 0, 0))
-    width, height = text_surface.get_size()
-    screen.blit(text_surface,
-                pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
+    surface.blit(text_surface,
+                 pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
 
 
 def draw_minion(surface: pygame.Surface, minion: Minion, size: Tuple[int, int],
@@ -174,7 +161,7 @@ def draw_minion(surface: pygame.Surface, minion: Minion, size: Tuple[int, int],
     """
     card_w, card_l = size
     x, y = position
-    font_padding = min(20 * screen.get_height() // 1080, 20 * screen.get_width() // 1980) // 4
+    font_padding = min(16 * screen.get_height() // 1080, 16 * screen.get_width() // 1980) // 4
     # padding within the card
     side = card_w // (25 // 3)
     color = (218, 165, 32) if minion.is_golden else (0, 0, 0)
@@ -220,6 +207,19 @@ def draw_minion(surface: pygame.Surface, minion: Minion, size: Tuple[int, int],
                        (x + card_w - card_w // 2 + 5, y + card_l // 12 - font_padding))
 
 
+def draw_text_for_card(surface: pygame.Surface, text: str, pos: tuple[int, int]) -> None:
+    """Draw the given text to the pygame screen at the given position.
+
+    pos represents the *upper-left corner* of the text.
+    """
+    font_size = min(17 * surface.get_height() // 1080, 17 * surface.get_width() // 1980)
+    font = pygame.font.SysFont('inconsolata', font_size)
+    text_surface = font.render(text, True, (0, 0, 0))
+    width, height = text_surface.get_size()
+    surface.blit(text_surface,
+                 pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
+
+
 if __name__ == '__main__':
     from hsbg import minions
     # from hsbg.models import Buff
@@ -230,13 +230,15 @@ if __name__ == '__main__':
     # Hand
     #   * Kindly Grandmother
     #   * Scavenging Hyena
-    board = TavernGameBoard()
-    board.next_turn()
-    board.add_minion_to_hand(minions.ALLEYCAT)
-    board.add_minion_to_hand(minions.KINDLY_GRANDMOTHER)
-    board.add_minion_to_hand(minions.SCAVENGING_HYENA)
-    board.play_minion(0)
-    board.play_minion(1)
+    play_board = TavernGameBoard()
+    play_board.next_turn()
+    play_board.add_minion_to_hand(minions.ALLEYCAT)
+    play_board.add_minion_to_hand(minions.KINDLY_GRANDMOTHER)
+    play_board.add_minion_to_hand(minions.SCAVENGING_HYENA)
+    play_board.add_minion_to_hand(minions.NAT_PAGLE)
+
+    play_board.play_minion(0)
+    play_board.play_minion(1)
 
     BACKGROUND_COLOUR = (255, 255, 255)
     SCREEN_WIDTH, SCREEN_HEIGHT = 1920, 1080
@@ -255,10 +257,10 @@ if __name__ == '__main__':
         # Fill the background
         screen.fill(BACKGROUND_COLOUR)
 
-        visualise_game_board(screen, board)
-        card_width = SCREEN_WIDTH // 10
-        card_length = card_width * 6 // 5
-        # draw_minion(screen, board.board[0], (card_width, card_length), (800, 800))
+        visualise_game_board(screen, play_board)
+        # w_card = SCREEN_WIDTH // 10
+        # l_card = w_card * 6 // 5
+        # draw_minion(screen, board.board[0], (w_card_width, l_card), (800, 800))
 
         # Flip screen buffers
         pygame.display.flip()

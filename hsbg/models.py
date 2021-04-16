@@ -4,7 +4,6 @@ import copy
 from enum import Enum, Flag, auto
 from dataclasses import dataclass, field
 from typing import List, Optional, Callable
-from abc import ABC, abstractproperty, abstractmethod
 
 
 class CardClass(Enum):

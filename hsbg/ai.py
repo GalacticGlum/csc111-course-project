@@ -275,7 +275,7 @@ class MCTSPlayer(Player):
     _iterations: int
     _warmup_iterations: int
 
-    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 50,
+    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 1,
                  warmup_iterations: int = 0):
         """Initialise this MCTSPlayer.
 
