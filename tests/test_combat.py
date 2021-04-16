@@ -44,11 +44,11 @@ def test_battle_1() -> None:
 
     battle = friendly_board.battle(enemy_board)
     assert battle.win_probability == 1 and battle.tie_probability == 0 \
-                                       and battle.lose_probability == 0
+           and battle.lose_probability == 0
     # Test that the battle for the enemy board has the opposite stats
     battle = enemy_board._battle_history[-1]
     assert battle.win_probability == 0 and battle.tie_probability == 0 \
-                                       and battle.lose_probability == 1
+           and battle.lose_probability == 1
     assert friendly_board.won_previous and not enemy_board.won_previous
 
 
@@ -111,11 +111,11 @@ def test_battle_2() -> None:
 
     battle = friendly_board.battle(enemy_board)
     assert battle.win_probability == 1 and battle.tie_probability == 0 \
-                                       and battle.lose_probability == 0
+           and battle.lose_probability == 0
     # Test that the battle for the enemy board has the opposite stats
     battle = enemy_board._battle_history[-1]
     assert battle.win_probability == 0 and battle.tie_probability == 0 \
-                                       and battle.lose_probability == 1
+           and battle.lose_probability == 1
     assert friendly_board.won_previous and not enemy_board.won_previous
 
 
@@ -162,11 +162,11 @@ def test_battle_3() -> None:
 
     battle = friendly_board.battle(enemy_board)
     assert battle.win_probability == 0 and battle.tie_probability == 0 \
-                                       and battle.lose_probability == 1
+           and battle.lose_probability == 1
     # Test that the battle for the enemy board has the opposite stats
     battle = enemy_board._battle_history[-1]
     assert battle.win_probability == 1 and battle.tie_probability == 0 \
-                                       and battle.lose_probability == 0
+           and battle.lose_probability == 0
     assert not friendly_board.won_previous and enemy_board.won_previous
 
 
