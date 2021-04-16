@@ -5,7 +5,7 @@ import random
 from enum import IntEnum
 from dataclasses import dataclass
 from contextlib import contextmanager
-from typing import Iterable, List, Optional, Dict
+from typing import Iterable, List, Optional, Dict, Tuple
 
 from hsbg.minions import Minion, MinionPool
 from hsbg.combat import Battle, simulate_combat
@@ -79,7 +79,8 @@ class TavernGameBoard:
     #   - _refresh_cost: The current cost of refreshing the recruitment pool.
     #   - _refresh_cost_clock: Clock to manage when to change the refresh cost.
     #   - _tavern_upgrade_discount: A discount applied to the next tavern upgrade.
-    #   - _tavern_upgrade_discount_clock: Clock to manage when to change the tavern upgrade cost discount.
+    #   - _tavern_upgrade_discount_clock: Clock to manage when to change the tavern upgrade
+    #       cost discount.
     #   - _minion_buy_price: The amount of gold it costs to buy a minion.
     #   - _minion_sell_price: The amount of gold the player gets when they sell a minion.
     #   - _battle_history: A history of the battles between this board and enemy boards,
@@ -180,7 +181,7 @@ class TavernGameBoard:
         # Call the new turn events
         self._handle_on_new_turn()
 
-    def _handle_on_new_turn(self):
+    def _handle_on_new_turn(self) -> None:
         """Call the _on_new_turn event on minions in the hand and on the board."""
         minions = self._hand + self._board
         for x in minions:
@@ -188,7 +189,7 @@ class TavernGameBoard:
                 continue
             x.on_new_turn(self)
 
-    def _handle_on_end_turn(self):
+    def _handle_on_end_turn(self) -> None:
         """Call the _on_end_turn event on minions in the hand and on the board."""
         minions = self._hand + self._board
         for x in minions:
@@ -251,7 +252,7 @@ class TavernGameBoard:
 
         Args:
             amount: The new cost of refreshing the recruitment pool.
-            turns: The amount of times to keep this cost.
+            times: The amount of times to keep this cost.
                    If None, then the new refresh cost is indefinite.
 
         >>> board = TavernGameBoard()
@@ -305,7 +306,7 @@ class TavernGameBoard:
         self._num_recruits += RECRUIT_NUM_PROGRESSION[self._tavern_tier]
         self._tavern_tier += 1
 
-         # Update discount
+        # Update discount
         if self._tavern_upgrade_discount_clock is not None:
             self._tavern_upgrade_discount_clock.step()
 
@@ -321,7 +322,7 @@ class TavernGameBoard:
 
         Args:
             amount: The discount applied to the tavern upgrade cost.
-            turns: The amount of times to apply the discount.
+            times: The amount of times to apply the discount.
                    If None, then the discount is applied infinitely many times.
 
         >>> board = TavernGameBoard()
@@ -387,7 +388,8 @@ class TavernGameBoard:
 
     def _can_freeze(self) -> bool:
         """Return whether the recruits can be frozen."""
-        not_past_limit = self._max_freeze_times is None or self._times_frozen < self._max_freeze_times
+        less_than = self._times_frozen < self._max_freeze_times
+        not_past_limit = self._max_freeze_times is None or less_than
         return not self._is_frozen and not_past_limit
 
     def unfreeze(self) -> bool:
@@ -544,6 +546,7 @@ class TavernGameBoard:
         """Add the given minion to the hand. Return whether the minion could be added to the hand.
 
         Args:
+            minion: The minion given to the hand
             index: The index to place the minion. If None, places the minion at the right-most
                    available position (i.e. the first index in the hand that is empty).
             clone: Whether to clone the minion before adding it to hand.
@@ -567,7 +570,7 @@ class TavernGameBoard:
         >>> board.add_minion_to_hand(minion, index=10)  # This index is out of range
         False
         """
-        if index is not None and (index < 0 or index >= len(self._hand) \
+        if index is not None and (index < 0 or index >= len(self._hand)
                                   or self._hand[index] is not None):
             # We can't add the minion to hand since the index is out of range,
             # or the given index is not empty.
@@ -621,7 +624,8 @@ class TavernGameBoard:
     def play_minion(self, index: int, board_index: Optional[int] = None, call_events: bool = True)\
             -> bool:
         """Play the minion from the hand at the given index. Do nothing if there is no minion in
-        the hand at the given index, or if the board is full. Return whether the minion could be played.
+        the hand at the given index, or if the board is full.
+        Return whether the minion could be played.
 
         Args:
             index: The index of the minion to play from the hand.
@@ -677,8 +681,8 @@ class TavernGameBoard:
 
     def summon_minion(self, minion: Minion, index: Optional[int] = None, clone: bool = True,
                       call_events: bool = True) -> bool:
-        """Summon the given minion onto the board at the given index. Do nothing if the board is full.
-        Return whether the minion could be summoned.
+        """Summon the given minion onto the board at the given index.
+        Do nothing if the board is full. Return whether the minion could be summoned.
 
         Args:
             minion: The minion to summon.
@@ -689,8 +693,8 @@ class TavernGameBoard:
                    does NOT keep any buffs.
             call_events: Whether to call events on the summoned minion.
         """
-        if index is None or index < 0 or index >= len(self._board) \
-                         or self._board[index] is not None:
+        index_none = self._board[index] is not None
+        if index is None or index < 0 or index >= len(self._board) or index_none:
             # The board index is None, out of range, or refers to a non-empty position.
             # Use the first non-empty position instead.
             try:
@@ -737,7 +741,7 @@ class TavernGameBoard:
         >>> from hsbg.models import CardAbility, Buff
         >>> board.board[0].add_buff(Buff(1, 1, CardAbility.TAUNT))
         >>> board.board[1].add_buff(Buff(0, 3, CardAbility.DIVINE_SHIELD))
-        >>> board.add_minion_to_hand(minion)  # We now have 3 Murloc Scouts! This will make a golden.
+        >>> board.add_minion_to_hand(minion)  # We now have 3 Murloc Scouts! This will make a golden
         True
         >>> golden_minion = board.pool.find(name='Murloc Scout', is_golden=True)
         >>> golden_minion.add_buff(Buff(1, 1, CardAbility.TAUNT))
@@ -1027,8 +1031,8 @@ class TavernGameBoard:
         minions = self.get_minions_on_board(clone=clone, ignore=ignore, **kwargs)
         return random.sample(minions, k=min(n, len(minions)))
 
-    def get_random_minion_on_board(self, clone: bool = False,
-                                    ignore: Optional[List[Minion]] = None, **kwargs) -> Minion:
+    def get_random_minion_on_board(self, clone: bool = False, ignore: Optional[List[Minion]] = None,
+                                   **kwargs) -> Optional[Minion]:
         """Get a random minion on the board matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
 
@@ -1104,7 +1108,7 @@ class TavernGameBoard:
         except ValueError:
             return None
 
-    def get_adjacent_minions(self, index: int) -> Tuple[Minion, Minion]:
+    def get_adjacent_minions(self, index: int) -> Tuple[Optional[Minion], Optional[Minion]]:
         """Return the minion to the left and right of the minion at the given board index.
         If there is no adjacent minion, then return None for that minion instead.
 
@@ -1431,6 +1435,7 @@ class TurnClock:
         """
         self.duration = duration
         self._on_complete = on_complete
+        self._remaining = 0
         self.reset()
 
     def step(self, n: int = 1) -> bool:
@@ -1706,8 +1711,10 @@ class Move:
         - index: An optional index for specifying a minion to apply the action on.
 
     Representation Invariants:
-        - self.index is not None or self.action in {Action.UPGRADE, Action.REFRESH, Action.FREEZE, Action.END_TURN}
-        - self.index is None or self.action in {Action.BUY_MINION, Action.SELL_MINION, Action.PLAY_MINION}
+        - self.index is not None or \
+        self.action in {Action.UPGRADE, Action.REFRESH, Action.FREEZE, Action.END_TURN}
+        - self.index is None or \
+        self.action in {Action.BUY_MINION, Action.SELL_MINION, Action.PLAY_MINION}
         - self.action != Action.BUY_MINION or 0 <= self.index < MAX_TAVERN_RECRUIT_SIZE
         - self.action != Action.SELL_MINION or 0 <= self.index < MAX_TAVERN_BOARD_SIZE
         - self.action != Action.PLAY_MINION or 0 <= self.index < MAX_HAND_SIZE

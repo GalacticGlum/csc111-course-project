@@ -152,7 +152,7 @@ class MinionPool:
         """
         return filter_minions(self._all_minions.values(), clone=True, limit=limit, **kwargs)
 
-    def find(self, **kwargs: dict) -> Optional[Minion]:
+    def find(self, **kwargs) -> Optional[Minion]:
         """Find the first minion matching the given keyword arguments.
         Each keyword argument should be an attribute of the Minion class.
         """

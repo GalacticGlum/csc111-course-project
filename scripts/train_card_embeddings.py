@@ -134,7 +134,8 @@ if __name__ == '__main__':
     # Training configuration
     parser.add_argument('--no-line-by-line', dest='line_by_line', action='store_false',
                         help='Whether to load the corpus line by line, or all at once. '
-                             'Note that loading it all at once (potentially) requires a lot of RAM.')
+                             'Note that loading it all at once (potentially) requires a lot of RAM.'
+                        )
     parser.add_argument('--run-name', type=str, default=None,
                         help='The name of the run. If unspecified, defaults to the name of the '
                         'first file in the given corpus.')
