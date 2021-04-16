@@ -1,8 +1,11 @@
-"""Tools for scraping, cleaning, and processing pages from the Hearthstone wiki."""
+"""Tools for scraping, cleaning, and processing pages from the Hearthstone wiki.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 import re
-import requests
 from pathlib import Path
 from typing import Tuple, List, Optional
+import requests
 
 import click
 import pypandoc
@@ -177,6 +180,22 @@ def make_corpus_from_pages(directory: Path, output_filepath: Path,
 
 
 if __name__ == '__main__':
+    # import doctest
+    # doctest.testmod()
+    #
+    # import python_ta
+    # python_ta.check_all(config={
+    #    'extra-imports': ['re', 'requests', 'pathlib', 'click', 'pypandoc', 'contractions',
+    #                       'tqdm', 'num2words', 'hsbg.utils'],
+    #     'allowed-io': ['make_corpus_from_pages', 'clean_pages', 'scrape_pages'],
+    #     'max-line-length': 100,
+    #     'disable': ['E1136', 'E9989']
+    # })
+    #
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()
+
+
     @click.group()
     def cli() -> None:
         """Tools for scraping, cleaning, and processing pages from the Hearthstone wiki."""

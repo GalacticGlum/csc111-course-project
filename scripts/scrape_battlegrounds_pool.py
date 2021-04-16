@@ -2,15 +2,16 @@
 https://www.hearthpwn.com/cards?display=1&filter-set=1117.
 
 This script outputs a json file containing a list of minions with their tavern tier.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 
 import json
 import argparse
-from enum import Enum
 from pathlib import Path
 from datetime import datetime
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional
 
 import requests
 from tqdm import tqdm
@@ -104,6 +105,21 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == '__main__':
+    # import doctest
+    # doctest.testmod()
+    #
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'extra-imports': ['pathlib', 'datetime', 'dataclasses', 'requests',
+    #                       'json', 'argparse', 'tqdm', 'bs4'],
+    #     'allowed-io': ['main'],
+    #     'max-line-length': 100,
+    #     'disable': ['E1136', 'E9989']
+    # })
+    #
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()
+
     parser = argparse.ArgumentParser(description='Scrape the Hearthstone Battlegrounds card pool.')
     parser.add_argument('-o', '--output', type=Path, default=None,
                         help='The filepath of the output json file.')

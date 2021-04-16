@@ -2,12 +2,14 @@
 
 It is ASSUMED that the given card data json file is a list consisting of json objects,
 where each object is in the format given by the HearthstoneJSON api.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 import json
 import re
 import argparse
-from tqdm import tqdm
 from pathlib import Path
+from tqdm import tqdm
 from num2words import num2words
 
 
@@ -105,6 +107,20 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == '__main__':
+    # import doctest
+    # doctest.testmod()
+    #
+    # import python_ta.contracts
+    # python_ta.check_all(config={
+    #     'extra-imports': ['re', 'pathlib', 'json', 'tqdm', 'num2words', 'argparse'],
+    #     'allowed-io': ['main'],
+    #     'max-line-length': 100,
+    #     'disable': ['E1136', 'E9989', 'R0914', 'R0912']
+    # })
+    #
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()
+
     parser = argparse.ArgumentParser(description='Make a corpus of textual card descriptions.')
     parser.add_argument('card_data_filepaths', nargs='+', type=Path,
                         help='A list of input card data json files.')
