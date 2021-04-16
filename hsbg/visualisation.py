@@ -3,9 +3,8 @@ import math
 import pygame
 from typing import Tuple, List, Optional
 
-from hsbg.models import Minion
+from hsbg.models import Minion, MECHANIC_ABILITIES
 from hsbg import TavernGameBoard, BattlegroundsGame
-from hsbg.combat import SIMULATOR_ABILITIES
 
 
 def visualise_game(surface: pygame.Surface, board: BattlegroundsGame) -> None:
@@ -216,7 +215,7 @@ def draw_minion(surface: pygame.Surface, minion: Minion, size: Tuple[int, int],
 
     # ABILITIES (ONLY THE ONES THE SIMULATOR CAN HANDLE)
     pygame.draw.rect(surface, color, (x + card_w - card_w // 2, y, card_w // 2, card_l // 6), 2)
-    abilities_to_draw = [x.name[0] for x in SIMULATOR_ABILITIES if x in minion.current_abilities]
+    abilities_to_draw = [x.name[0] for x in MECHANIC_ABILITIES if x in minion.current_abilities]
     draw_text_for_card(surface, str(','.join(abilities_to_draw)),
                        (x + card_w - card_w // 2 + 5, y + card_l // 12 - font_padding))
 
