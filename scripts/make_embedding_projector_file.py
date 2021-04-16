@@ -1,5 +1,7 @@
 """Make a TSV file representing the given word2vec model checkpoint in the format
 of the tensorflow embedding projector.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 import argparse
 from pathlib import Path
@@ -34,6 +36,20 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == '__main__':
+    # import doctest
+    # doctest.testmod()
+    #
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'extra-imports': ['pathlib', 'argparse', 'gensim.models'],
+    #     'allowed-io': ['main'],
+    #     'max-line-length': 100,
+    #     'disable': ['E1136', 'E9989']
+    # })
+    #
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()
+
     parser = argparse.ArgumentParser(description='Make the embedding projector TSV file.')
     parser.add_argument('model_checkpoint', type=Path, help='The path to the model checkpoint.')
     parser.add_argument('output_filepath', default=None, type=Path,

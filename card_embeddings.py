@@ -309,7 +309,7 @@ class CardEmbeddings:
     #         text = None
 
     #     buffs = [
-    #         ability.as_format_str().lower() for ability in SIMULATOR_ABILITIES
+    #         ability.as_format_str().lower() for ability in MECHANIC_ABILITIES
     #         if ability in minion.current_abilities
     #     ]
 

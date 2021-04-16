@@ -1,10 +1,11 @@
-"""A simulator of the combat phase in Hearthstone Battlegrounds."""
+"""A simulator of the combat phase in Hearthstone Battlegrounds.
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from pathlib import Path
-from typing import Union, List
+from typing import List
 
 from hsbg_sim import (
     run_simulator,
@@ -26,8 +27,10 @@ class Battle:
         - lose_probability: The probability of losing this battle.
         - mean_score: The mean score across all simulations of the battle.
         - median_score: The median score across all simulations of the battle.
-        - mean_damage_taken: The mean damage taken (by the friendly hero) across all simulations of the battle.
-        - mean_damage_dealt: The mean damage dealt (to the enemy hero) across all simulations of the battle.
+        - mean_damage_taken: The mean damage taken (by the friendly hero)
+            across all simulations of the battle.
+        - mean_damage_dealt: The mean damage dealt (to the enemy hero)
+            across all simulations of the battle.
         - expected_hero_health: The expected health of the hero after this battle.
         - expected_enemy_hero_health: The expected health of the enemy hero after this battle.
         - death_probability: The probability of the hero dying after this battle.
@@ -84,7 +87,7 @@ class Battle:
         """Return the Battle representing a string-based representation of the battle result.
         The output argument should match the output format of the C++ simulator.
 
-        >>> output = '''
+        >>> outputs = '''
         ... --------------------------------
         ... win: 76.9%, tie: 0.0%, lose: 23.1%
         ... mean score: 11.875, median score: -16
@@ -96,7 +99,7 @@ class Battle:
         ... --------------------------------'''
         >>> expected = Battle(0.769, 0, 0.231, 11.875, -16, 1.764, 14.408,\
                               29.236, 10.592, 0.0314, 0.052)
-        >>> expected == Battle.parse_simulator_output(output)
+        >>> expected == Battle.parse_simulator_output(outputs)
         True
         """
         def _get_field(name: str, value_suffix: str = '') -> float:
@@ -206,10 +209,8 @@ def to_simulator_board(board: TavernGameBoard) -> SimulatorBoard:
 def battle_to_commands(friendly_board: TavernGameBoard, enemy_board: TavernGameBoard) -> List[str]:
     """Return the series of simulator commands that define the given battle."""
     return (
-        ['Board'] + \
-        game_board_to_commands(friendly_board) + \
-        ['VS'] + \
-        game_board_to_commands(enemy_board)
+        ['Board'] + game_board_to_commands(friendly_board)
+        + ['VS'] + game_board_to_commands(enemy_board)
     )
 
 
@@ -276,5 +277,19 @@ def game_board_to_str(board: TavernGameBoard) -> str:
 
 
 if __name__ == '__main__':
+    # The problems underlined in red are PyCharm
+    # just not realizing copy was used, the code works!
     import doctest
     doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['re', 'hsbg_sim', 'hsbg.models'],
+        'allowed-io': [],
+        'max-line-length': 100,
+        'disable': ['E0611', 'E0602', 'R0902']
+    })
+
+    # Don't run on this, doesn't like defaultdict
+    #  import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()

@@ -1,3 +1,7 @@
+"""Tests for the AI framework.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 import time
 import pprint
 from hsbg.ai import RandomPlayer, GreedyPlayer, MCTSPlayer, run_game, run_games

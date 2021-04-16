@@ -1,4 +1,7 @@
-"""Model dataclasses for representing objects of the game."""
+"""Model dataclasses for representing objects of the game.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 from __future__ import annotations
 import copy
 from enum import Enum, Flag, auto
@@ -324,13 +327,13 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    import python_ta
-    python_ta.check_all(config={
-        'extra-imports': ['copy', 'enum'],
-        'allowed-io': [],
-        'max-line-length': 100,
-        'disable': ['E1136', 'E0602', 'E1101', 'R0902', 'E9959', 'E9972', 'E9997']
-    })
-
-    import python_ta.contracts
-    python_ta.contracts.check_all_contracts()
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'extra-imports': ['copy', 'enum'],
+    #     'allowed-io': [],
+    #     'max-line-length': 100,
+    #     'disable': ['E1136', 'E0602', 'E1101', 'R0902', 'E9959', 'E9972', 'E9997']
+    # })
+    #
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()

@@ -5,6 +5,8 @@ another json file containing every card in the Hearthstone Battlegrounds pool or
 tier. It outputs a new json file containing the full card information for each card in the pool.
 
 Cards that have been removed from the game, or that do not have a tavern tier are NOT included.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 
 import json
@@ -61,8 +63,22 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == '__main__':
+    # import doctest
+    # doctest.testmod()
+    #
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'extra-imports': ['pathlib', 'json', 'argparse', 'datetime'],
+    #     'allowed-io': ['main'],
+    #     'max-line-length': 100,
+    #     'disable': ['E1136', 'E9989']
+    # })
+    #
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()
+
     parser = argparse.ArgumentParser(
-                        description='Make the Hearthstone Battlegrounds card pool dataset.'
+        description='Make the Hearthstone Battlegrounds card pool dataset.'
     )
     parser.add_argument('card_data_file', type=Path,
                         help='A json file containing card data extracted from the Hearthstone '
