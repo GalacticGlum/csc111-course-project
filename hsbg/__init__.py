@@ -1330,7 +1330,7 @@ class TavernGameBoard:
         """Make the given move. This instance of TavernGameBoard will be mutated, and will
         afterwards represent the game state after move is made.
 
-        If move is not a currently valid move, do nothing.
+        Raise a ValueError if the move is invalid.
         """
         if move.action == Action.UPGRADE:
             self.upgrade_tavern()
@@ -1350,7 +1350,7 @@ class TavernGameBoard:
     def copy_and_make_move(self, move: Move) -> TavernGameBoard:
         """Make the given move in a copy of this TavernGameBoard, and return that copy.
 
-        If move is not a currently valid move, do nothing.
+        Raise a ValueError if the move is invalid.
         """
         board_copy = copy.deepcopy(self)
         board_copy.make_move(move)
