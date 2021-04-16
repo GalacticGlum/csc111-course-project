@@ -1299,7 +1299,8 @@ class TavernGameBoard:
         moves = []
         if self.gold >= self.get_tavern_upgrade_cost():
             moves.append(Move(Action.UPGRADE))
-        if self.gold >= self.refresh_cost:
+        if self.gold >= self.refresh_cost and not self.is_frozen:
+            # Only refresh if we aren't frozen! It makes no sense to refresh if we are frozen.
             moves.append(Move(Action.REFRESH))
         if self._can_freeze():
             moves.append(Move(Action.FREEZE))
