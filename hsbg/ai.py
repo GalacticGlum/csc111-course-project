@@ -184,7 +184,7 @@ class MonteCarloTreeSearcher:
 
     def _expand(self, node: _GameTreeNode) -> None:
         """Expand the tree at the given node with the possible moves available."""
-        if node in self._children:
+        if node in self._children or node.game.is_done:
             return
         else:
             self._children[node] = self._get_successors(node)
