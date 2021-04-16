@@ -67,7 +67,7 @@ def make_frequency_table(values: List[Any], key: Optional[Callable[[Any], Any]] 
 
     if key is not None:
         # Convert lists to tuples
-        for x in table.keys():
+        for x in table:
             table[x][1] = tuple(table[x][1])
             table[x] = tuple(table[x])
 
@@ -106,7 +106,7 @@ def parallel_map(iterables: Union[list, iter], function: callable, n_jobs: Optio
         - front_num >= 0
     """
     if isinstance(iterables, list):
-        front = [function(**a) if use_kwargs else function(a) for a in iterables[:front_num]]
+        front = [function(**b) if use_kwargs else function(b) for b in iterables[:front_num]]
         iterables = iterables[front_num:]
     else:
         front = []
@@ -142,8 +142,8 @@ def parallel_map(iterables: Union[list, iter], function: callable, n_jobs: Optio
 
     with ThreadPoolExecutor(max_workers=n_jobs) as pool:
         futures = [
-            pool.submit(function, **a) if use_kwargs else
-            pool.submit(function, a) for a in iterables
+            pool.submit(function, **c) if use_kwargs else
+            pool.submit(function, c) for c in iterables
         ]
 
         for _ in tqdm(as_completed(futures), total=len(futures), unit='it',
@@ -170,3 +170,14 @@ def parallel_map(iterables: Union[list, iter], function: callable, n_jobs: Optio
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['concurrent.futures', 'tqdm'],
+        'allowed-io': [],
+        'max-line-length': 100,
+        'disable': ['E0602', 'E1136', 'R0913', 'R0914', 'W0703', 'E9969']
+    })
+
+    import python_ta.contracts
+    python_ta.contracts.check_all_contracts()

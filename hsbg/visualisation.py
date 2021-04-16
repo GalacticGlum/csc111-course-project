@@ -1,7 +1,7 @@
 """A module containing visualisation related functionality."""
 import math
-import pygame
 from typing import Tuple, List, Optional
+import pygame
 
 from hsbg.models import Minion, MECHANIC_ABILITIES
 from hsbg import TavernGameBoard, BattlegroundsGame
@@ -202,7 +202,7 @@ def draw_minion(surface: pygame.Surface, minion: Minion, size: Tuple[int, int],
 
     # ABILITIES (ONLY THE ONES THE SIMULATOR CAN HANDLE)
     pygame.draw.rect(surface, color, (x + card_w - card_w // 2, y, card_w // 2, card_l // 6), 2)
-    abilities_to_draw = [x.name[0] for x in MECHANIC_ABILITIES if x in minion.current_abilities]
+    abilities_to_draw = [a.name[0] for a in MECHANIC_ABILITIES if a in minion.current_abilities]
     draw_text_for_card(surface, str(','.join(abilities_to_draw)),
                        (x + card_w - card_w // 2 + 5, y + card_l // 12 - font_padding))
 
@@ -266,3 +266,18 @@ if __name__ == '__main__':
         pygame.display.flip()
 
     pygame.quit()
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['math', 'pygame', 'hsbg', 'hsbg.models'],
+        'allowed-io': [],
+        'max-line-length': 100,
+        'disable': ['E0602', 'E1136', 'R0913', 'R0914', 'W0703', 'E9969']
+    })
+
+    import python_ta.contracts
+    python_ta.contracts.check_all_contracts()

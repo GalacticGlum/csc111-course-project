@@ -205,7 +205,7 @@ class TavernGameBoard:
             return False
 
         # Insert non-None minions back into the pool.
-        self._pool.insert([minion for minion in self._recruits if minion is not None])
+        self._pool.insert([any_minion for any_minion in self._recruits if any_minion is not None])
         # Roll new minions from pool
         minions = self._pool.get_random(n=self._num_recruits, max_tier=self._tavern_tier)
         # Fill recruit list from left to right
@@ -695,7 +695,7 @@ class TavernGameBoard:
             call_events: Whether to call events on the summoned minion.
         """
         if index is None or index < 0 or index >= len(self._board) \
-            or self._board[index] is not None:
+                or self._board[index] is not None:
             # The board index is None, out of range, or refers to a non-empty position.
             # Use the first non-empty position instead.
             try:
@@ -762,7 +762,7 @@ class TavernGameBoard:
             for minion in minions:
                 # Carry over all buffs from the regular minions
                 # NOTE: We shouldn't be accessing the private _buffs attribute!
-                golden_copy._buffs += minion._buffs
+                golden_copy._buffs += minion.buffs
                 # Remove the regular minion
                 self.remove_minion(minion)
             self.add_minion_to_hand(golden_copy, clone=False)
@@ -1004,7 +1004,7 @@ class TavernGameBoard:
         b = self.get_minions_on_board(clone=clone, ignore=ignore, **kwargs)
         return a + b
 
-    def get_random_minions_on_board(self, n, clone: bool = False,
+    def get_random_minions_on_board(self, n: int, clone: bool = False,
                                     ignore: Optional[List[Minion]] = None, **kwargs) \
             -> List[Minion]:
         """Get a list of random minions on the board matching the given keyword arguments.
@@ -1424,8 +1424,11 @@ class TurnClock:
     True
     """
     # Private Instance Attributes:
-    #   - _remaining: The number of turns remaining.
-    #   - _on_complete: A function called when the clock is complete.
+    # - _remaining: The number of turns remaining.
+    # - _on_complete: A function called when the clock is complete.
+    duration: int
+    _remaining: int
+    _on_complete: Optional[callable]
 
     def __init__(self, duration: int, on_complete: Optional[callable] = None) -> None:
         """Initialise the TurnClock with a duration.
@@ -1557,7 +1560,7 @@ class BattlegroundsGame:
 
         Raise a ValueError if a player has not yet completed their turn.
         """
-        if any(not self.has_completed_turn(i) for i in self.alive_players):
+        if any(not self.has_completed_turn(b) for b in self.alive_players):
             raise ValueError('A player has not completed their turn!')
 
         if self.is_done:
@@ -1796,3 +1799,16 @@ class Action(IntEnum):
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['copy', 'random', 'enum',
+                          'contextlib', 'hsbg.minions',
+                          'hsbg.combat', 'hsbg.utils'],  # the names (strs) of imported modules
+        'allowed-io': [],  # the names (strs) of functions that call print/open/input
+        'max-line-length': 100,
+        'disable': ['E1136', 'R0902']
+    })
+
+    import python_ta.contracts
+    python_ta.contracts.check_all_contracts()
