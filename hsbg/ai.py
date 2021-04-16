@@ -4,17 +4,16 @@ import copy
 import time
 import math
 import random
+from queue import Queue
 from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Tuple, List, FrozenSet, Set, Dict, Callable, Optional
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
-import colorama
 import dill as pickle
 
-from hsbg.utils import colourise_string
-from hsbg import BattlegroundsGame, TavernGameBoard, Move
+from hsbg import BattlegroundsGame, TavernGameBoard, Move, Action
 
 
 class Player:
@@ -101,11 +100,14 @@ class _GameTree:
     #  - _subtrees:
     #      the subtrees of this tree, which represent the game trees after a possible
     #      move by the current player
+    #   - _seed: The seed used.
     _subtrees: List[_GameTree]
+    _seed: Optional[int]
 
-    def __init__(self, board: Optional[TavernGameBoard] = None, move: Optional[Move] = None) \
-            -> None:
+    def __init__(self, board: Optional[TavernGameBoard] = None, move: Optional[Move] = None,
+                 seed: int = None) -> None:
         """Initialize a new game tree."""
+        random.seed(seed)
         self.board = board or TavernGameBoard()
         if board is None:
             self.board.next_turn()
@@ -114,6 +116,7 @@ class _GameTree:
         self.visit_count = 0
         self.total_reward = 0
         self._subtrees = []
+        self._seed = seed
 
     def get_subtrees(self) -> List[_GameTree]:
         """Return the subtrees of this game tree."""
@@ -153,7 +156,7 @@ class _GameTree:
         """Return a subtree of this tree which maximizes the upper confidence bound."""
         # All subtrees should already be expanded
         assert all(x.expanded for x in self._subtrees)
-        return max(self._subtrees, key=self._get_uct)
+        return max(self._subtrees, key=lambda x: x._get_uct())
 
     def expand(self) -> None:
         """Expand this tree with the possible moves available."""
@@ -189,21 +192,22 @@ class _GameTree:
 
     def get_possible_subtrees(self) -> Set[_GameTree]:
         """Return all the possible subtrees from this tree."""
-        return {
-            self._make_subtree_from_move(move)
-            for move in self.board.get_valid_moves()
-        }
+        moves = self.board.get_valid_moves() + [Move(Action.END_TURN)]
+        return {self._make_subtree_from_move(move) for move in moves}
 
     def get_random_possible_subtree(self) -> _GameTree:
         """Return a random subtree of this tree."""
-        move = random.choice(self.board.get_valid_moves())
+        move = random.choice(self.board.get_valid_moves() + [Move(Action.END_TURN)])
         return self._make_subtree_from_move(move)
 
     def _make_subtree_from_move(self, move: Move) -> _GameTreeNode:
         """Return the subtree representing this tree after making the given move."""
-        board_copy = self.board.copy_and_make_move(move)
-        board_copy.next_turn()
-        return _GameTree(board_copy, move)
+        board_copy = copy.deepcopy(self.board)
+        if move.action == Action.END_TURN:
+            board_copy.next_turn()
+        else:
+            board_copy.make_move(move)
+        return _GameTree(board_copy, move, seed=self._seed)
 
     def __str__(self) -> str:
         """Return a string representation of this tree."""
@@ -215,47 +219,22 @@ class _GameTree:
         The indentation level is specified by the <depth> parameter.
         """
         expanded = ', expanded' if self.expanded else ''
-        stats = f'({self.total_reward}/{self.visit_count})'
+        stats = f'({self.total_reward}/{self.visit_count}) (seed={self._seed})'
         move_desc = f'{self._move_str()} {stats}{expanded} -> '
         s = '    ' * depth + move_desc
-        s += self._board_str(len(s)) + '\n'
+
+        offset = len(s)
+        board_str = '\n'.join(
+            (offset if index > 0 else 0) * ' ' + line
+            for index, line in enumerate(self.board.as_format_str().splitlines())
+        )
+        s += board_str + '\n'
         if self._subtrees == []:
             return s
         else:
             for subtree in self._subtrees:
                 s += subtree._str_indented(depth + 1)
             return s
-
-    def _board_str(self, offset: int = 0) -> str:
-        """Return an indented string representation of the board for this tree."""
-        board = self.board
-
-        health = colourise_string(f'health {board.hero_health}', colorama.Fore.LIGHTGREEN_EX)
-        turn = colourise_string(f'turn {board.turn_number}', colorama.Fore.LIGHTBLUE_EX)
-        tier = colourise_string(f'tier {board.tavern_tier}', colorama.Fore.LIGHTCYAN_EX)
-        gold = colourise_string(f'{board.gold} gold', colorama.Fore.YELLOW)
-
-        recruit_label = colourise_string('recruits: ', colorama.Fore.LIGHTBLACK_EX)
-        board_label = colourise_string('board: ', colorama.Fore.LIGHTBLACK_EX)
-        hand_label = colourise_string('hand: ', colorama.Fore.LIGHTBLACK_EX)
-
-        def _colourise_minion(minion: Optional[Minion]) -> str:
-            """Return a colourised string representation of the given minion."""
-            if minion is None:
-                return colourise_string('(empty)', colorama.Fore.LIGHTBLACK_EX)
-            else:
-                return colourise_string(f'({str(minion)})', colorama.Fore.LIGHTWHITE_EX)
-
-        lines = [
-            f'{turn}, {health}, {tier}, {gold}',
-            recruit_label + ', '.join(_colourise_minion(x) for x in board.recruits),
-            board_label + ', '.join(_colourise_minion(x) for x in board.board),
-            hand_label + ', '.join(_colourise_minion(x) for x in board.hand)
-        ]
-        return '\n'.join(
-            (offset if index > 0 else 0) * ' ' + line
-            for index, line in enumerate(lines)
-        )
 
     def _move_str(self) -> str:
         """Return a string representation of the move for this tree."""
@@ -278,14 +257,15 @@ class MonteCarloTreeSearcher:
     _game_tree: _GameTree
     _friendly_player: int
 
-    def __init__(self, friendly_player: int, exploration_weight: float = 2**0.5) -> None:
+    def __init__(self, friendly_player: int, exploration_weight: float = 2**0.5, seed: int = None) \
+            -> None:
         """Initialise a new MonteCarloTreeSearcher."""
         self.exploration_weight = exploration_weight
-        self._game_tree = _GameTree()
+        self._game_tree = _GameTree(seed=seed)
         self._friendly_player = friendly_player
 
     def choose(self, game: BattlegroundsGame,
-               metric: Optional[Callable[[_GameTreeNode], float]] = None) -> _GameTreeNode:
+               metric: Optional[Callable[[_GameTreeNode], float]] = None) -> _GameTree:
         """Return the best subtree of the given node according to the given metric function
         That is, find a child of the given game state which maximizes the given metric.
 
@@ -298,29 +278,44 @@ class MonteCarloTreeSearcher:
                     average reward of the game state.
         """
         if game.is_done:
-            raise ValueError(f'choose called on a game state that is done {game}')
+            raise ValueError(f'choose called on a game state that is done {tree}')
 
-        node = self._make_node_from_game(game)
-        if node not in self._children:
-            return self._get_random_successor(node)
+        tree = self.get_tree_from_board(game.boards[self._friendly_player])
+        if tree is None:
+            raise ValueError('the given board state is not a node of the tree')
+
+        if not tree.expanded:
+            return tree.get_random_possible_subtree()
 
         metric = metric or self._average_reward
-        return max(self._children[node], key=metric)
+        return max(tree.get_subtrees(), key=metric)
 
     def rollout(self, game: BattlegroundsGame) -> None:
         """Rollout the tree from the given game state."""
-        node = self._make_node_from_game(game)
-        path = self._select(node)
-        leaf = path[-1]
-        self._expand(leaf)
+        if game.is_done:
+            raise ValueError(f'rollout called on a game state that is done {game}')
 
-        for p in path:
-            print(game.active_player, p.board==game.boards[self._friendly_player])
-            if p.move is None:
-                print(p)
+        tree = self.get_tree_from_board(game.boards[self._friendly_player])
+        path = tree.select()
+        leaf = path[-1]
+        leaf.expand()
+
+        game = copy.deepcopy(game)
+        game.clear_turn_completion()
+        game.start_turn_for_player(self._friendly_player)
+        for node in path:
+            if node.move is None:
                 continue
-            print(p.move)
-            game = game.copy_and_make_move(p.move)
+            random.seed(node._seed)
+            game.make_move(node.move)
+            if game.has_completed_turn(self._friendly_player):
+                for index in game.incomplete_turn_players:
+                    game.start_turn_for_player(index)
+                    while game.is_turn_in_progress:
+                        move = random.choice(game.get_valid_moves())
+                        game.make_move(move)
+                game.next_round()
+                game.start_turn_for_player(self._friendly_player)
 
         reward = self._simulate(game)
         self._backpropagate(path, reward)
@@ -346,15 +341,26 @@ class MonteCarloTreeSearcher:
             tree.total_reward += reward
             tree.visit_count += 1
 
-    def _make_node_from_game(self, game: BattlegroundsGame) -> _GameTreeNode:
-        """Return the _GameTreeNode corresponding to the given game."""
+    def get_tree_from_board(self, board: TavernGameBoard) -> Optional[_GameTree]:
+        """Return the game tree corresponding to the given board."""
+        q = Queue()
+        q.put(self._game_tree)
+        board_str = board.as_format_str()
+        while not q.empty():
+            tree = q.get()
+            if tree.board.as_format_str() == board_str:
+                return tree
+            for subtree in tree.get_subtrees():
+                q.put(subtree)
+        return None
+
         # Get the move that led to this state
-        move_history = game._move_history[self._friendly_player]
-        if move_history:
-            move = move_history[-1]
-        else:
-            move = None
-        return _GameTreeNode(game.boards[self._friendly_player], move)
+        # move_history = game._move_history[self._friendly_player]
+        # if move_history:
+        #     move = move_history[-1]
+        # else:
+        #     move = None
+        # return _GameTree(game.boards[self._friendly_player], move, seed=self._game_tree._seed)
 
     def save(self, filepath: Path) -> None:
         """Save the state of this MonteCarloTreeSearcher to a file."""
