@@ -1,4 +1,6 @@
-"""A simulator for Hearthstone Battlegrounds."""
+"""A simulator for Hearthstone Battlegrounds.
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 from __future__ import annotations
 import copy
 import random

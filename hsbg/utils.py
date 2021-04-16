@@ -1,4 +1,7 @@
-"""Utility functions."""
+"""Utility functions.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Iterable, Tuple, List, Dict, Callable, Optional, Union

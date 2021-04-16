@@ -1,6 +1,8 @@
 """Tests for the combat phase.
 These are just a collection of different battles that always have the same result
 (no matter the random move taken).
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 import pytest
 from hsbg.models import Buff, CardAbility

@@ -1,4 +1,7 @@
-"""A module containing visualisation related functionality."""
+"""A module containing visualisation related functionality.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 import math
 from typing import Tuple, List, Optional
 import pygame

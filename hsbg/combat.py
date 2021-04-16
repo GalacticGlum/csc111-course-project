@@ -1,4 +1,6 @@
-"""A simulator of the combat phase in Hearthstone Battlegrounds."""
+"""A simulator of the combat phase in Hearthstone Battlegrounds.
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 from __future__ import annotations
 import re
 from dataclasses import dataclass

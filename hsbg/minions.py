@@ -9,6 +9,8 @@ in case that they should be implemented in the future.
 
 Refer to the minion_list.txt file for a full list of all minions with implementations
 in the Python recruitment phase simulator, and the C++ combat phase simulator.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 from __future__ import annotations
 import json

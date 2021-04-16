@@ -1,4 +1,7 @@
-"""Test the minion implementations."""
+"""Test the minion implementations.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 import pytest
 import random
 

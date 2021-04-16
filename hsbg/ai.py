@@ -1,4 +1,6 @@
-"""Framework for making Hearthstone Battlegrounds AI."""
+"""Framework for making Hearthstone Battlegrounds AI.
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
 from __future__ import annotations
 import copy
 import time
