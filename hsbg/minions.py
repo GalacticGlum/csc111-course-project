@@ -105,6 +105,7 @@ def _verify_minion_list(card_json_data: Path) -> None:
                 minion_type = 'golden' if minion.is_golden else 'regular'
                 print(f'Error verifying {minion.name} ({minion_type}) ({checks_str})')
 
+
 # A dict mapping each tier to the number of copies of each minion with that tier.
 TIER_NUM_COPIES = {
     1: 18,
