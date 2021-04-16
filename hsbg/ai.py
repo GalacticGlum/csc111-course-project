@@ -157,7 +157,6 @@ class MonteCarloTreeSearcher:
         node = self._make_node_from_game(game)
         path = self._select(node)
         leaf = path[-1]
-        print(f'Expanding node {leaf}')
         self._expand(leaf)
         reward = self._simulate(leaf)
         self._backpropagate(path, reward)
@@ -166,7 +165,6 @@ class MonteCarloTreeSearcher:
         """Return a path to an unexplored descendent of the given node."""
         path = []
         while True:
-            print(node)
             path.append(node)
             if node not in self._children or not self._children[node]:
                 # The current node is either unexplored, or done.
@@ -174,7 +172,6 @@ class MonteCarloTreeSearcher:
                 return path
             # Get the remaining unexplored nodes
             unexplored = self._children[node] - self._children.keys()
-            print(len(unexplored))
             if unexplored:
                 # Select any unexplored node, and we are done!
                 path.append(unexplored.pop())
@@ -196,7 +193,6 @@ class MonteCarloTreeSearcher:
             if node.game.is_done:
                 winning_player = node.game.winner
                 assert winning_player is not None
-                print(winning_player)
                 return int(winning_player == self._friendly_player)
 
             node = self._get_random_successor(node)
@@ -204,7 +200,6 @@ class MonteCarloTreeSearcher:
     def _backpropagate(self, path: List[_GameTreeNode], reward: int) -> None:
         """Propogate the reward up the given path. This is a classical monte carlo update."""
         for node in reversed(path):
-            print(f'Adding reward {reward}')
             self._total_rewards[node] += reward
             self._visit_counts[node] += 1
 
@@ -275,7 +270,7 @@ class MCTSPlayer(Player):
     _iterations: int
     _warmup_iterations: int
 
-    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 50,
+    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 1,
                  warmup_iterations: int = 0):
         """Initialise this MCTSPlayer.
 
