@@ -4,12 +4,12 @@ import copy
 import time
 import math
 import random
-import dill as pickle
 from pathlib import Path
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Tuple, List, FrozenSet, Set, Dict, Callable, Optional
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+import dill as pickle
 
 from hsbg import BattlegroundsGame, Move
 
@@ -65,6 +65,7 @@ class _CompactGameState:
     recruits: FrozenSet[str]
     round_number: int
 
+    @staticmethod
     def from_game(game: BattlegroundsGame, player: int) -> _CompactGameState:
         """Return a game tree node for the given player in the given BattlegroundsGame.
 
@@ -115,7 +116,7 @@ class MonteCarloTreeSearcher:
     _children: Dict[_GameTreeNode, Set[_GameTreeNode]]
     _friendly_player: int
 
-    def __init__(self, friendly_player: int, exploration_weight: float = 2**0.5):
+    def __init__(self, friendly_player: int, exploration_weight: float = 2**0.5) -> None:
         self.exploration_weight = exploration_weight
         self._total_rewards = defaultdict(int)
         self._visit_counts = defaultdict(int)
@@ -211,6 +212,7 @@ class MonteCarloTreeSearcher:
         assert all(x in self._children for x in self._children[node])
 
         log_visit_count = math.log(self._visit_counts[node])
+
         def _uct(n: _GameTreeNode) -> float:
             """Return the upper confidence bound for the given node."""
             exploration_coefficient = math.sqrt(log_visit_count / self._visit_counts[n])
@@ -283,8 +285,8 @@ class MCTSPlayer(Player):
     _iterations: int
     _warmup_iterations: int
 
-    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 1,
-                 warmup_iterations: int = 0, mcts: Optional[MonteCarloTreeSearcher] = None):
+    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 2,
+                 warmup_iterations: int = 0, mcts: Optional[MonteCarloTreeSearcher] = None) -> None:
         """Initialise this MCTSPlayer.
 
         Preconditions:
@@ -325,7 +327,6 @@ class MCTSPlayer(Player):
             return
 
         start_time = time.time()
-        print(f'Training MCTS for {n_iterations} iterations')
         for _ in range(n_iterations):
             self._mcts.rollout(game)
         elapsed_time = time.time() - start_time
@@ -356,7 +357,7 @@ def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: b
 
     Executor = ThreadPoolExecutor if use_thread_pool else ProcessPoolExecutor
     with Executor(max_workers=n_jobs) as pool:
-        futures = [pool.submit(run_game, copy.deepcopy(players)) for _ in range(n)]
+        futures = [pool.submit(run_game, copy.deepcopy(players)) for b in range(n)]
         for game_index, future in enumerate(as_completed(futures)):
             winner, _ = future.result()
             stats[winner] += 1
@@ -387,3 +388,21 @@ def run_game(players: List[Player]) -> Tuple[int, List[Tuple[int, Move]]]:
         game.next_round()
 
     return game.winner, move_sequence
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['copy', 'random', 'enum', 'contextlib', 'concurrent.futures',
+                          'hsbg', 'dill', 'time', 'math', 'pathlib', 'collections'],
+        'allowed-io': ['save', 'load', '_train', 'run_games'],
+        'max-line-length': 100,
+        'disable': ['E1136', 'E1101', 'R0902', 'R0913', 'W0212']
+    })
+
+    # Don't run on this, doesn't like defaultdict
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()

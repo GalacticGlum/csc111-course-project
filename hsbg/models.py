@@ -182,6 +182,11 @@ class Minion:
     _on_end_turn: Optional[Callable[[Minion, TavernGameBoard], None]] = None
 
     @property
+    def buffs(self) -> List[Buff]:
+        """Return the list of buffs of this minion."""
+        return self._buffs
+
+    @property
     def current_health(self) -> int:
         """Return the current health of this minion (including buffs)."""
         return self.health + sum(buff.health for buff in self._buffs)
@@ -202,7 +207,8 @@ class Minion:
     def add_buff(self, buff: Buff) -> None:
         """Apply the given buff to this minion whose source is the given minion.
 
-        >>> minion = Minion('Lonely Boy', CardClass.NEUTRAL, MinionRace.DEMON, 0, 0)  # A lonely minion.
+        >>> minion = Minion('Lonely Boy', CardClass.NEUTRAL, \
+        MinionRace.DEMON, 0, 0)  # A lonely minion.
         >>> buff = Buff(health=1, attack=2, abilities=CardAbility.TAUNT |\
                                                       CardAbility.DIVINE_SHIELD)
         >>> minion.add_buff(buff)
@@ -218,7 +224,8 @@ class Minion:
         """Remove the given buff.
         Do nothing if the given buff is not applied to this minion.
 
-        >>> minion = Minion('Lonely Boy', CardClass.NEUTRAL, MinionRace.DEMON, 0, 0)  # A lonely minion.
+        >>> minion = Minion('Lonely Boy', CardClass.NEUTRAL, \
+        MinionRace.DEMON, 0, 0)  # A lonely minion.
         >>> buff = Buff(health=1, attack=2, abilities=CardAbility.TAUNT |\
                                                       CardAbility.DIVINE_SHIELD)
         >>> minion.add_buff(buff)
@@ -238,7 +245,8 @@ class Minion:
         Args:
             keep_buffs: Whether to keep the buffs applied to this minion.
 
-        >>> minion = Minion('Lonely Boy', CardClass.NEUTRAL, MinionRace.DEMON, 0, 0)  # A lonely minion.
+        >>> minion = Minion('Lonely Boy', CardClass.NEUTRAL, \
+        MinionRace.DEMON, 0, 0) # A lonely minion.
         >>> copy_minion = minion.clone()
         >>> minion is copy_minion
         False
@@ -315,3 +323,14 @@ class Minion:
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['copy', 'enum'],
+        'allowed-io': [],
+        'max-line-length': 100,
+        'disable': ['E1136', 'E0602', 'E1101', 'R0902', 'E9959', 'E9972', 'E9997']
+    })
+
+    import python_ta.contracts
+    python_ta.contracts.check_all_contracts()
