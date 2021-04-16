@@ -1463,12 +1463,15 @@ class BattlegroundsGame:
     #   - _turn_completion: A list containing whether each player has completed their turn for this
     #                       round. The i-th element gives the turn completion for player i.
     #   - _round_number: The current round (where 1 indicates the first round).
+    #   - _previous_move: A tuple containing most recent move, and the index of the player that
+    #                     made that move, or None if no moves have been made.
     _num_players: int
     _boards: List[TavernGameBoard]
     _pool: MinionPool
-    _active_player: Optional[int] = None
+    _active_player: Optional[int]
     _turn_completion: List[bool]
     _round_number: int
+    _previous_move: Optional[Tuple[int, Move]]
 
     def __init__(self, num_players: int = 8) -> None:
         """Initialise the BattlegroundsGame with the given number of players.
@@ -1490,6 +1493,7 @@ class BattlegroundsGame:
         self._active_player = None
         self._turn_completion = [False] * num_players
         self._round_number = 1
+        self._previous_move = None
 
     @contextmanager
     def turn_for_player(self, player: int) -> TavernGameBoard:
@@ -1539,7 +1543,7 @@ class BattlegroundsGame:
 
         Raise a ValueError if a player has not yet completed their turn.
         """
-        if any(not self.has_completed_turn(i) for i in range(self._num_players)):
+        if any(not self.has_completed_turn(i) for i in self.alive_players):
             raise ValueError('A player has not completed their turn!')
 
         if self.is_done:
@@ -1578,10 +1582,12 @@ class BattlegroundsGame:
         if not self.is_turn_in_progress:
             raise ValueError('No player is currently in a turn!')
 
+        player = self._active_player
         if move.action == Action.END_TURN:
             self.end_turn()
         else:
             self.active_board.make_move(move)
+        self._previous_move = (player, move)
 
     def copy_and_make_move(self, move: Move) -> BattlegroundsGame:
         """Make the given move for the active player in a copy of this BattlegroundsGame, and
@@ -1593,7 +1599,7 @@ class BattlegroundsGame:
         if not self.is_turn_in_progress:
             raise ValueError('No player is currently in a turn!')
 
-        game_copy = copy.copy(self)
+        game_copy = copy.deepcopy(self)
         game_copy.make_move(move)
         return game_copy
 
@@ -1619,9 +1625,21 @@ class BattlegroundsGame:
         return self._boards
 
     @property
+    def alive_players(self) -> List[int]:
+        """Return a list of all the players that are still alive."""
+        return [i for i in range(self._num_players) if not self._boards[i].is_dead]
+
+    @property
     def alive_boards(self) -> List[TavernGameBoard]:
         """Return a list of all the game boards that are still alive."""
-        return [board for board in self._boards if not board.is_dead]
+        return [self._boards[i] for i in self.alive_players]
+
+    @property
+    def active_player(self) -> Optional[int]:
+        """The player currently completing their turn, or None if no player is
+        completing their turn.
+        """
+        return self._active_player
 
     @property
     def active_board(self) -> Optional[TavernGameBoard]:
