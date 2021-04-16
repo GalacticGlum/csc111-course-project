@@ -3,10 +3,11 @@ from __future__ import annotations
 import copy
 import random
 from enum import IntEnum
+from dataclasses import dataclass
 from contextlib import contextmanager
 from typing import Iterable, List, Optional, Dict
 
-from hsbg.minions import MinionPool
+from hsbg.minions import Minion, MinionPool
 from hsbg.combat import Battle, simulate_combat
 from hsbg.utils import filter_minions, make_frequency_table
 
@@ -1463,15 +1464,14 @@ class BattlegroundsGame:
     #   - _turn_completion: A list containing whether each player has completed their turn for this
     #                       round. The i-th element gives the turn completion for player i.
     #   - _round_number: The current round (where 1 indicates the first round).
-    #   - _previous_move: A tuple containing most recent move, and the index of the player that
-    #                     made that move, or None if no moves have been made.
+    #   - _move_history: A dict mapping each player to a list of moves made by that player.
     _num_players: int
     _boards: List[TavernGameBoard]
     _pool: MinionPool
     _active_player: Optional[int]
     _turn_completion: List[bool]
     _round_number: int
-    _previous_move: Optional[Tuple[int, Move]]
+    _move_history: Dict[int, List[Move]]
 
     def __init__(self, num_players: int = 8) -> None:
         """Initialise the BattlegroundsGame with the given number of players.
@@ -1493,7 +1493,7 @@ class BattlegroundsGame:
         self._active_player = None
         self._turn_completion = [False] * num_players
         self._round_number = 1
-        self._previous_move = None
+        self._move_history = {index: [] for index in range(num_players)}
 
     @contextmanager
     def turn_for_player(self, player: int) -> TavernGameBoard:
@@ -1587,7 +1587,7 @@ class BattlegroundsGame:
             self.end_turn()
         else:
             self.active_board.make_move(move)
-        self._previous_move = (player, move)
+        self._move_history[player].append(move)
 
     def copy_and_make_move(self, move: Move) -> BattlegroundsGame:
         """Make the given move for the active player in a copy of this BattlegroundsGame, and
@@ -1676,29 +1676,43 @@ class BattlegroundsGame:
         """Return the number of total players in the game."""
         return self._num_players
 
+    # def __deepcopy__(self, memo: dict) -> BattlegroundsGame:
+    #     """Deepcopy this BattlegroundsGame."""
+    #     cls = self.__class__
+    #     game_copy = cls.__new__(cls)
 
+    #     # Update memo dict
+    #     memo[id(self)] = game_copy
+
+    #     # Copy attributes
+    #     for k, v in self.__dict__.items():
+    #         if k == '_boards':
+    #             game_copy._boards = []
+    #             for board in self._boards:
+    #                 game_copy._boards.append(copy.copy(board))
+    #         else:
+    #             setattr(game_copy, k, copy.deepcopy(v, memo))
+
+    #     return game_copy
+
+
+@dataclass(eq=True, frozen=True)
 class Move:
     """A class representing a move in Hearthstone Battlegrounds.
 
     Instance Attributes:
         - action: The type of this move.
         - index: An optional index for specifying a minion to apply the action on.
+
+    Representation Invariants:
+        - self.index is not None or self.action in {Action.UPGRADE, Action.REFRESH, Action.FREEZE, Action.END_TURN}
+        - self.index is None or self.action in {Action.BUY_MINION, Action.SELL_MINION, Action.PLAY_MINION}
+        - self.action != Action.BUY_MINION or 0 <= self.index < MAX_TAVERN_RECRUIT_SIZE
+        - self.action != Action.SELL_MINION or 0 <= self.index < MAX_TAVERN_BOARD_SIZE
+        - self.action != Action.PLAY_MINION or 0 <= self.index < MAX_HAND_SIZE
     """
     action: Action
     index: Optional[int] = None
-
-    def __init__(self, action: Action, index: Optional[int] = None) -> None:
-        """Initialise the Move.
-
-        Preconditions:
-            - index is not None or action in {Action.UPGRADE, Action.REFRESH, Action.FREEZE, Action.END_TURN}
-            - index is None or action in {Action.BUY_MINION, Action.SELL_MINION, Action.PLAY_MINION}
-            - action != Action.BUY_MINION or 0 <= index < MAX_TAVERN_RECRUIT_SIZE
-            - action != Action.SELL_MINION or 0 <= index < MAX_TAVERN_BOARD_SIZE
-            - action != Action.PLAY_MINION or 0 <= index < MAX_HAND_SIZE
-        """
-        self.action = action
-        self.index = index
 
     @property
     def move_id(self) -> int:
