@@ -118,17 +118,18 @@ TIER_NUM_COPIES = {
 
 _ALL_MINIONS = None
 _MINIONS_BELOW_TIER = {}
+_POOL_FIND_MEMO = {}
 
 class MinionPool:
     """A class representing the pool of available minions."""
     # Private Instance Attributes:
-    #   - _pool: A list of minions representing the current pool.
+    #   - _pool: A dict mapping the name of each minion to the number of copies in the pool.
     #   - _gold_suffix: The suffix used to denote gold copies of minions.
-    _pool: List[str]
+    _pool: Dict[str, int]
     _gold_suffix: str
 
     def __init__(self, gold_suffix='_golden', force_rebuild: bool = False) -> None:
-        self._pool = []
+        self._pool = {}
         self._gold_suffix = gold_suffix
 
         # Build _ALL_MINIONS if it is None
@@ -143,8 +144,7 @@ class MinionPool:
                 continue
 
             copies = TIER_NUM_COPIES[minion.tier]
-            for _ in range(copies):
-                self._pool.append(minion.name)
+            self._pool[minion.name] = copies
 
     def find_all(self, limit: Optional[int] = None, **kwargs: dict) -> List[Minion]:
         """Find all the minions matching the given keyword arguments.
@@ -152,7 +152,15 @@ class MinionPool:
 
         Note: the returned list contains COPIES of the minions in the pool.
         """
-        return filter_minions(_ALL_MINIONS.values(), clone=True, limit=limit, **kwargs)
+        global _POOL_FIND_MEMO
+        key = hash(frozenset(kwargs.items()))
+        if key in _POOL_FIND_MEMO:
+            minions = _POOL_FIND_MEMO[key]
+        else:
+            minions = filter_minions(_ALL_MINIONS.values(), clone=False, limit=limit, **kwargs)
+            _POOL_FIND_MEMO[key] = minions
+
+        return [x.clone() for x in minions]
 
     def find(self, **kwargs) -> Optional[Minion]:
         """Find the first minion matching the given keyword arguments.
@@ -196,14 +204,17 @@ class MinionPool:
         if max_tier in _MINIONS_BELOW_TIER:
             pool_subset = _MINIONS_BELOW_TIER[max_tier]
         else:
-            pool_subset = list(filter(predicate, self._pool))
+            pool_subset = list(filter(predicate, self._pool.keys()))
             _MINIONS_BELOW_TIER[max_tier] = pool_subset
 
-        minions = random.sample(pool_subset, k=n)
+        n_copies = [self._pool[minion_name] for minion_name in pool_subset]
+        total_copies = sum(n_copies)
+        probabilities = [x / total_copies for x in n_copies]
+        minions = random.choices(pool_subset, probabilities, k=n)
         if remove:
             # Remove each minion from the pool
             for minion in minions:
-                self._pool.remove(minion)
+                self._pool[minion] = max(self._pool[minion] - 1, 0)
         # Make a clone of each minion
         return [_ALL_MINIONS[minion].clone() for minion in minions]
 
@@ -225,8 +236,8 @@ class MinionPool:
 
         >>> pool = MinionPool()
         >>> previous_pool_size = pool.size
-        >>> minion = pool.find(name='Murloc Scout')
-        >>> golden_minion = pool.find(name='Murloc Scout', is_golden=True)
+        >>> minion = pool.find(name='Alleycat')
+        >>> golden_minion = pool.find(name='Alleycat', is_golden=True)
         >>> pool.insert(minion)
         >>> pool.size == previous_pool_size + 1
         True
@@ -237,14 +248,16 @@ class MinionPool:
         if isinstance(values, Minion):
             values = [values]
         for minion in values:
+            if minion.name not in self._pool:
+                continue
             # Add 3 regular versions of the minion, if golden.
             times = 3 if minion.is_golden else 1
-            self._pool.extend([minion.name] * times)
+            self._pool[minion.name] += times
 
     @property
     def size(self) -> int:
         """Return the number of minions in the pool (including copies)."""
-        return len(self._pool)
+        return sum(self._pool.values())
 
 
 ################################################################################
