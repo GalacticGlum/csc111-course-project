@@ -48,7 +48,7 @@ def visualise_game_board(board: TavernGameBoard, width: int = TARGET_SCREEN_WIDT
             if event.type == pygame.QUIT:
                 running = False
 
-        draw_game_board(screen, play_board)
+        draw_game_board(screen, board)
         flip_display()
 
     close_display()

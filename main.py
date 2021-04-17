@@ -1,11 +1,25 @@
 from ai import RandomPlayer, GreedyPlayer, MCTSPlayer, run_game, run_games
 from test_ai_framework import test_mcts_player
-
+from visualisation import visualise_game_board
 
 if __name__ == '__main__':
     """"For a minimal working example, you may simple run one of the experiments."""
-    # Simulator Demo
-    # ....
+    # We can manipulate a Hearthstone Battlegrounds game using the simulator API.
+    # Here is a short example highlihting how we can mutate the board state, and
+    # perform actions on the board.
+    #
+    # from hsbg import TavernGameBoard
+    # board = TavernGameBoard()  # This is an empty board!
+    # board.next_turn()  # Start the first turn
+    # board.buy_minion(0)  # Buy the minion at index 0, and insert it to the hand.
+    # board.play_minion(0)  # Play a minion from the hand at index 0.
+    # from minions import MURLOC_SCOUT
+    # board.summon_minion(MURLOC_SCOUT.clone())
+    # board.next_turn()  # End the turn
+    # # ...
+    # # Show the game board state.
+    # visualise_game_board(board)
+
 
     # Test the player implementations against a RandomPlayer via a set of experiments.
     #
@@ -27,6 +41,7 @@ if __name__ == '__main__':
     #
     # Experiment 3. Run n games of the GreedyPlayer vs the RandomPlayer and save the results
     # results = run_games(n_games, [GreedyPlayer(0), RandomPlayer()], show_stats=True)
+
 
     # We can also visualise the game as it is played by the agents! To do so, we run a single game
     # with some players, and set visualise to true.
