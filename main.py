@@ -3,7 +3,11 @@
 This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 
-from ai import RandomPlayer, GreedyPlayer, MCTSPlayer, run_game, run_games
+from ai import (
+    RandomPlayer, GreedyPlayer, MCTSPlayer,
+    run_game, run_games,
+    _GameTree
+)
 from test_ai_framework import test_mcts_player
 from visualisation import visualise_game_board
 
@@ -41,7 +45,7 @@ if __name__ == '__main__':
     # results = run_games(n_games, [RandomPlayer(), RandomPlayer()], show_stats=False)
     #
     # Experiment 2. Run n games of the MCTSPlayer vs the RandomPlayer and save the results
-    results = test_mcts_player(n_games)
+    # results = test_mcts_player(n_games)
     #
     # Experiment 3. Run n games of the GreedyPlayer vs the RandomPlayer and save the results
     # results = run_games(n_games, [GreedyPlayer(0), RandomPlayer()], show_stats=True)
@@ -53,3 +57,16 @@ if __name__ == '__main__':
     # Please refrain from clicking while the visualization is running!
     # winner, _ = run_game([RandomPlayer(), RandomPlayer()], visualise=True)
     # print(f'Player {winner + 1} won the game!')
+
+    # Finally, we can also visualise the _GameTree class! In this example, we create an
+    # _GameTree and then expand it a few times.
+    #
+    # Sit back and enjoy the pretty colours!
+    # tree = _GameTree()
+    # for _ in range(5):
+    #     # Get a leaf
+    #     leaf = tree.select()[-1]
+    #     # Expand the leaf
+    #     leaf.expand()
+    # # Print the whole tree after expanding!
+    # print(tree)
