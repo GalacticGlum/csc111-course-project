@@ -647,17 +647,20 @@ def run_game(players: List[Player], visualise: bool = False, fps: int = 5) \
     move_sequence = []
     while not game.is_done:
         for index, player in enumerate(players):
+            if game.is_done:
+                # Stop simulating since the game is done
+                break
             game.start_turn_for_player(index)
             while game.is_turn_in_progress:
                 if visualise:
                     draw_game(screen, game, delay=1000 // fps)
                     flip_display()
-                if game.is_done:
-                    break
 
                 move = player.make_move(game)
                 move_sequence.append((index, move))
-        game.next_round()
+        # Only call next_round if the game isn't finished.
+        if not game.is_done:
+            game.next_round()
 
     if visualise:
         close_display()
