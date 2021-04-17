@@ -8,9 +8,8 @@ import math
 import random
 from queue import Queue
 from pathlib import Path
-from collections import defaultdict
-from dataclasses import dataclass, field
-from typing import Tuple, List, FrozenSet, Set, Dict, Callable, Optional
+from dataclasses import dataclass
+from typing import Tuple, List, FrozenSet, Set, Callable, Optional
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 import dill as pickle
@@ -146,7 +145,7 @@ class _GameTree:
         else:
             return self.total_reward / self.visit_count
 
-    def _get_uct(self, exploration_weight: float = 2**0.5) -> float:
+    def get_uct(self, exploration_weight: float = 2**0.5) -> float:
         """Return the upper confidence bound for this tree."""
         exploration_coefficient = math.sqrt(math.log(self.visit_count) / self.visit_count)
         return self.average_reward + exploration_weight * exploration_coefficient
@@ -155,7 +154,7 @@ class _GameTree:
         """Return a subtree of this tree which maximizes the upper confidence bound."""
         # All subtrees should already be expanded
         assert all(x.expanded for x in self._subtrees)
-        return max(self._subtrees, key=lambda x: x._get_uct())
+        return max(self._subtrees, key=lambda x: x.get_uct())
 
     def expand(self) -> None:
         """Expand this tree with the possible moves available."""
@@ -174,6 +173,7 @@ class _GameTree:
         """Return a path to an unexplored descendent of this tree."""
         path = []
         tree = self
+        # TODO: this is probably the infinite loop error
         while True:
             path.append(tree)
             if tree.get_subtrees() == []:
@@ -187,7 +187,6 @@ class _GameTree:
             else:
                 # Select a node according to the upper confidence bound.
                 tree = tree.uct_select()
-        raise RuntimeError('tree select failed!')
 
     def get_possible_subtrees(self) -> Set[_GameTree]:
         """Return all the possible subtrees from this tree."""
@@ -199,7 +198,7 @@ class _GameTree:
         move = random.choice(self.board.get_valid_moves() + [Move(Action.END_TURN)])
         return self._make_subtree_from_move(move)
 
-    def _make_subtree_from_move(self, move: Move) -> _GameTreeNode:
+    def _make_subtree_from_move(self, move: Move) -> _GameTree:
         """Return the subtree representing this tree after making the given move."""
         board_copy = copy.deepcopy(self.board)
         if move.action == Action.END_TURN:
@@ -243,6 +242,11 @@ class _GameTree:
         else:
             return f'({self.move.action.name}, index={self.move.index})'
 
+    @property
+    def seed(self) -> Optional[int]:
+        """Return the seed of the GameTree."""
+        return self._seed
+
 
 class MonteCarloTreeSearcher:
     """A Monte Carlo tree searcher for the BattlegroundsGame.
@@ -265,7 +269,7 @@ class MonteCarloTreeSearcher:
         self._friendly_player = friendly_player
 
     def choose(self, game: BattlegroundsGame,
-               metric: Optional[Callable[[_GameTreeNode], float]] = None) -> _GameTree:
+               metric: Optional[Callable[[_GameTree], float]] = None) -> _GameTree:
         """Return the best subtree of the given node according to the given metric function
         That is, find a child of the given game state which maximizes the given metric.
 
@@ -278,7 +282,7 @@ class MonteCarloTreeSearcher:
                     average reward of the game state.
         """
         if game.is_done:
-            raise ValueError(f'choose called on a game state that is done {tree}')
+            raise ValueError(f'choose called on a game state that is done {game}')
 
         tree = self.get_tree_from_board(game.boards[self._friendly_player])
         if tree is None:
@@ -310,7 +314,7 @@ class MonteCarloTreeSearcher:
         for node in path:
             if node.move is None:
                 continue
-            random.seed(node._seed)
+            random.seed(node.seed)
             game.make_move(node.move)
             if game.has_completed_turn(self._friendly_player):
                 for index in game.incomplete_turn_players:
@@ -323,7 +327,7 @@ class MonteCarloTreeSearcher:
                     game.start_turn_for_player(self._friendly_player)
 
         reward = self._simulate(game)
-        self._backpropagate(path, reward)
+        MonteCarloTreeSearcher._backpropagate(path, reward)
 
     def _simulate(self, game: BattlegroundsGame) -> int:
         """Return the reward for a random simulation of the given game until completion."""
@@ -340,7 +344,8 @@ class MonteCarloTreeSearcher:
         reward = int(game.winner == self._friendly_player)
         return reward
 
-    def _backpropagate(self, path: List[_GameTree], reward: int) -> None:
+    @staticmethod
+    def _backpropagate(path: List[_GameTree], reward: int) -> None:
         """Propogate the reward up the given path. This is a classical monte carlo update."""
         for tree in reversed(path):
             tree.total_reward += reward
@@ -422,7 +427,7 @@ class MCTSPlayer(Player):
         self._train(game, self._iterations)
         tree = self._mcts.choose(game)
         print('chose: ', tree.move)
-        random.seed(tree._seed)
+        random.seed(tree.seed)
         return tree.move
 
     def _train(self, game: BattlegroundsGame, n_iterations: int) -> None:
@@ -443,7 +448,8 @@ class MCTSPlayer(Player):
 
 
 class GreedyPlayer(Player):
-    """A Hearthstone Battlegrounds AI that greedily chooses the move that maximizes average reward."""
+    """A Hearthstone Battlegrounds AI that greedily chooses
+    the move that maximizes average reward."""
     # Private Instance Attributes
     #   - _player_index: The index of this player.
     #   - _games_per_move: The number of games to simulate per move.
@@ -475,7 +481,7 @@ class GreedyPlayer(Player):
         best_reward = float('-inf')
         for move in moves:
             total_reward = 0
-            for game_index in range(self._games_per_move):
+            for _ in range(self._games_per_move):
                 game_copy = game.copy_and_make_move(move)
                 total_reward += self._simulate(game_copy)
 
@@ -487,7 +493,8 @@ class GreedyPlayer(Player):
         return best_move_yet
 
     def _simulate(self, game: BattlegroundsGame) -> int:
-        """Return the reward for a random simulation from the given game. Every player moves randomly."""
+        """Return the reward for a random simulation from the given game.
+        Every player moves randomly."""
         game.clear_turn_completion()
         while game.winner is None:
             for index in game.alive_players:
@@ -510,7 +517,7 @@ def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: b
         n: The number of games to run.
         players: A list of players to run the games with.
         n_jobs: The number of games to run in parallel.
-        use_threadpool: Whether to use the thread pool or process pool executor.
+        use_thread_pool: Whether to use the thread pool or process pool executor.
 
                         Note that when using a process pool executor, this function
                         must be guarded by ``if __name__ == '__main__':``.
@@ -524,7 +531,7 @@ def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: b
 
     Executor = ThreadPoolExecutor if use_thread_pool else ProcessPoolExecutor
     with Executor(max_workers=n_jobs) as pool:
-        futures = [pool.submit(run_game, copy.deepcopy(players)) for b in range(n)]
+        futures = [pool.submit(run_game, copy.deepcopy(players)) for _ in range(n)]
         for game_index, future in enumerate(as_completed(futures)):
             winner, _ = future.result()
             stats[winner] += 1
@@ -590,14 +597,15 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'extra-imports': ['copy', 'random', 'enum', 'contextlib', 'concurrent.futures',
-    #                       'hsbg', 'dill', 'time', 'math', 'pathlib', 'collections'],
-    #     'allowed-io': ['save', 'load', '_train', 'run_games'],
-    #     'max-line-length': 100,
-    #     'disable': ['E1136', 'E1101', 'R0902', 'R0913', 'W0212']
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['copy', 'random', 'enum', 'contextlib', 'concurrent.futures',
+                          'hsbg', 'dill', 'time', 'math', 'pathlib', 'collections', 'queue',
+                          'hsbg.visualisation'],
+        'allowed-io': ['save', 'load', '_train', 'run_games', 'make_move'],
+        'max-line-length': 100,
+        'disable': ['E1136', 'E1101', 'R0902', 'R0913', 'W0212', 'E9988', 'R1702']
+    })
 
     # Don't run on this, doesn't like defaultdict
     # import python_ta.contracts
