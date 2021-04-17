@@ -147,8 +147,11 @@ class _GameTree:
 
     def get_uct(self, exploration_weight: float = 2**0.5) -> float:
         """Return the upper confidence bound for this tree."""
-        exploration_coefficient = math.sqrt(math.log(self.visit_count) / self.visit_count)
-        return self.average_reward + exploration_weight * exploration_coefficient
+        if self.visit_count == 0:
+            return 0
+        else:
+            exploration_coefficient = math.sqrt(math.log(self.visit_count) / self.visit_count)
+            return self.average_reward + exploration_weight * exploration_coefficient
 
     def uct_select(self) -> _GameTree:
         """Return a subtree of this tree which maximizes the upper confidence bound."""
@@ -284,6 +287,7 @@ class MonteCarloTreeSearcher:
         if game.is_done:
             raise ValueError(f'choose called on a game state that is done {game}')
 
+        # Get the tree corresponding to the game board of the friendly player
         tree = self.get_tree_from_board(game.boards[self._friendly_player])
         if tree is None:
             raise ValueError('the given board state is not a node of the tree')
@@ -304,39 +308,42 @@ class MonteCarloTreeSearcher:
             raise ValueError(f'rollout called on a game state that is done {game}')
 
         tree = self.get_tree_from_board(game.boards[self._friendly_player])
+        if tree is None:
+            print('rollout was given a game state that is not a node of the tree')
+            return
+
         path = tree.select()
         leaf = path[-1]
         leaf.expand()
-
-        game = copy.deepcopy(game)
-        game.clear_turn_completion()
-        game.start_turn_for_player(self._friendly_player)
-        for node in path:
-            if node.move is None:
-                continue
-            random.seed(node.seed)
-            game.make_move(node.move)
-            if game.has_completed_turn(self._friendly_player):
-                for index in game.incomplete_turn_players:
-                    game.start_turn_for_player(index)
-                    while game.is_turn_in_progress:
-                        move = random.choice(game.get_valid_moves())
-                        game.make_move(move)
-                game.next_round()
-                if not game.has_completed_turn(self._friendly_player):
-                    game.start_turn_for_player(self._friendly_player)
-
-        reward = self._simulate(game)
+        reward = self._simulate(copy.deepcopy(game), path)
         MonteCarloTreeSearcher._backpropagate(path, reward)
 
-    def _simulate(self, game: BattlegroundsGame) -> int:
-        """Return the reward for a random simulation of the given game until completion."""
+    def _simulate(self, game: BattlegroundsGame, path: Optional[List[_GameTree]] = None) -> int:
+        """Return the reward for a random simulation of the given game until completion.
+
+        Args:
+            game: The game to simulate from.
+            path: A path of nodes for the friendly player to apply before assuming a random policy.
+        """
         game.clear_turn_completion()
+        current_node_index = 0
+
         while game.winner is None:
             for index in game.alive_players:
                 game.start_turn_for_player(index)
                 while game.is_turn_in_progress:
-                    move = random.choice(game.get_valid_moves())
+                    move = None
+                    # If we are the friendly player, and we have nodes left, use the next element
+                    # from the list of nodes (the path).
+                    has_node_left = path is not None and current_node_index < len(path)
+                    if game.active_player == self._friendly_player and has_node_left:
+                        move = path[current_node_index].move
+                        # Apply the seed for that node
+                        random.seed(path[current_node_index].seed)
+                        current_node_index += 1
+                    # Otherwise, play randomly.
+                    if move is None:
+                        move = random.choice(game.get_valid_moves())
                     game.make_move(move)
             game.next_round()
 
@@ -363,14 +370,6 @@ class MonteCarloTreeSearcher:
             for subtree in tree.get_subtrees():
                 q.put(subtree)
         return None
-
-        # Get the move that led to this state
-        # move_history = game._move_history[self._friendly_player]
-        # if move_history:
-        #     move = move_history[-1]
-        # else:
-        #     move = None
-        # return _GameTree(game.boards[self._friendly_player], move, seed=self._game_tree._seed)
 
     def save(self, filepath: Path) -> None:
         """Save the state of this MonteCarloTreeSearcher to a file."""
