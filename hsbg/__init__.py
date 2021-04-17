@@ -1515,6 +1515,7 @@ class BattlegroundsGame:
     #                       round. The i-th element gives the turn completion for player i.
     #   - _round_number: The current round (where 1 indicates the first round).
     #   - _move_history: A dict mapping each player to a list of moves made by that player.
+    #   - _previous_move: The most recent move made.
     _num_players: int
     _boards: List[TavernGameBoard]
     _pool: MinionPool
@@ -1522,6 +1523,7 @@ class BattlegroundsGame:
     _turn_completion: List[bool]
     _round_number: int
     _move_history: Dict[int, List[Move]]
+    _previous_move: Optional[Tuple[int, Move]]
 
     def __init__(self, num_players: int = 8) -> None:
         """Initialise the BattlegroundsGame with the given number of players.
@@ -1544,6 +1546,7 @@ class BattlegroundsGame:
         self._turn_completion = []
         self._round_number = 1
         self._move_history = {index: [] for index in range(num_players)}
+        self._previous_move = None
         self.clear_turn_completion()
 
     @contextmanager
@@ -1645,7 +1648,9 @@ class BattlegroundsGame:
             self.end_turn()
         else:
             self.active_board.make_move(move)
+
         self._move_history[player].append(move)
+        self._previous_move = (player, move)
 
     def copy_and_make_move(self, move: Move) -> BattlegroundsGame:
         """Make the given move for the active player in a copy of this BattlegroundsGame, and
@@ -1738,6 +1743,11 @@ class BattlegroundsGame:
     def num_total_players(self) -> int:
         """Return the number of total players in the game."""
         return self._num_players
+
+    @property
+    def previous_move(self) -> Optional[Tuple[int, Move]]:
+        """Return the most recent move made, or None if no move has been made yet."""
+        return self._previous_move
 
     # def __deepcopy__(self, memo: dict) -> BattlegroundsGame:
     #     """Deepcopy this BattlegroundsGame."""
