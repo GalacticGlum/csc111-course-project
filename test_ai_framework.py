@@ -28,6 +28,7 @@ def test_mcts_player(n: int, show_stats: bool = True) -> list:
         seed = get_seed()
         player = MCTSPlayer(0, seed=seed)
 
+        # Seed the random engine so that the MCTS player and the game are in sync.
         random.seed(seed)
         winner, _ = run_game([player, RandomPlayer()])
 
