@@ -14,7 +14,7 @@ from hsbg_sim import (
     BattleResult as SimulatorBattleResult
 )
 
-from hsbg.models import CardAbility
+from models import CardAbility
 
 
 @dataclass
@@ -259,7 +259,7 @@ def game_board_to_str(board: TavernGameBoard) -> str:
     * 2/6 Murloc Scout
     * 2/7 Rockpool Hunter
     * 4/6 golden Coldlight Seer
-    >>> from hsbg.models import Buff, CardAbility
+    >>> from models import Buff, CardAbility
     >>> board.board[4].add_buff(Buff(1, 0, CardAbility.TAUNT | CardAbility.DIVINE_SHIELD))
     >>> board.give_gold(10)
     >>> board.upgrade_tavern()
@@ -284,7 +284,7 @@ if __name__ == '__main__':
 
     import python_ta
     python_ta.check_all(config={
-        'extra-imports': ['re', 'hsbg_sim', 'hsbg.models'],
+        'extra-imports': ['re', 'hsbg_sim', 'models'],
         'allowed-io': [],
         'max-line-length': 100,
         'disable': ['E0611', 'E0602', 'R0902']

@@ -3,8 +3,8 @@
 This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 import random
-from hsbg.utils import get_seed
-from hsbg.ai import (
+from utils import get_seed
+from ai import (
     RandomPlayer, GreedyPlayer, MCTSPlayer,
     run_game, run_games,
     plot_game_statistics,
@@ -51,10 +51,10 @@ if __name__ == '__main__':
     # results = run_games(n, [RandomPlayer(), RandomPlayer()], show_stats=True)
     # save_game_statistics_to_file('output/random_random_player_stats.json', results)
 
-    # # Run n games of the GreedyPlayer vs the RandomPlayer and save the results
-    # results = run_games(n, [GreedyPlayer(0), RandomPlayer()], show_stats=True)
-    # save_game_statistics_to_file('output/random_greedy_player_stats.json', results)
+    # Run n games of the GreedyPlayer vs the RandomPlayer and save the results
+    results = run_games(n, [GreedyPlayer(0), RandomPlayer()], show_stats=True)
+    save_game_statistics_to_file('output/random_greedy_player_stats.json', results)
 
-    # Run n games of the MCTSPlayer vs the RandomPlayer and save the results
-    results = test_mcts_player(n)
-    save_game_statistics_to_file('output/mcts_random_player_stats.json', results)
+    # # Run n games of the MCTSPlayer vs the RandomPlayer and save the results
+    # results = test_mcts_player(n)
+    # save_game_statistics_to_file('output/mcts_random_player_stats.json', results)

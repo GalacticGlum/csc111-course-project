@@ -11,9 +11,9 @@ from typing import Iterable, List, Optional, Dict, Tuple
 
 import colorama
 
-from hsbg.minions import Minion, MinionPool
-from hsbg.combat import Battle, simulate_combat
-from hsbg.utils import filter_minions, make_frequency_table, colourise_string
+from minions import Minion, MinionPool
+from combat import Battle, simulate_combat
+from utils import filter_minions, make_frequency_table, colourise_string
 
 
 # The maximum number of minions a player can have in their hand.
@@ -744,7 +744,7 @@ class TavernGameBoard:
         True
         >>> board.summon_minion(minion)
         True
-        >>> from hsbg.models import CardAbility, Buff
+        >>> from models import CardAbility, Buff
         >>> board.board[0].add_buff(Buff(1, 1, CardAbility.TAUNT))
         >>> board.board[1].add_buff(Buff(0, 3, CardAbility.DIVINE_SHIELD))
         >>> board.add_minion_to_hand(minion)  # We now have 3 Murloc Scouts! This will make a golden
@@ -1840,8 +1840,8 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all(config={
         'extra-imports': ['copy', 'random', 'enum',
-                          'contextlib', 'hsbg.minions',
-                          'hsbg.combat', 'hsbg.utils'],  # the names (strs) of imported modules
+                          'contextlib', 'minions',
+                          'combat', 'utils', 'colorama'],  # the names (strs) of imported modules
         'allowed-io': [],  # the names (strs) of functions that call print/open/input
         'max-line-length': 100,
         'disable': ['E1136', 'R0902']

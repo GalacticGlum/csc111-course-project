@@ -5,8 +5,9 @@ These are just a collection of different battles that always have the same resul
 This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 import pytest
-from hsbg.models import Buff, CardAbility
-from hsbg import TavernGameBoard, minions
+import minions
+from models import Buff, CardAbility
+from hsbg import TavernGameBoard
 
 
 def test_battle_1() -> None:

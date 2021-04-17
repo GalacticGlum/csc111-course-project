@@ -8,7 +8,7 @@ from typing import Tuple, List, Optional
 import pygame
 from pygame import gfxdraw
 
-from hsbg.models import Minion, MECHANIC_ABILITIES, Buff
+from models import Minion, MECHANIC_ABILITIES, Buff
 from hsbg import TavernGameBoard, BattlegroundsGame
 
 
@@ -319,8 +319,8 @@ def _scale(surface: pygame.Surface, position: Tuple[float, float]) -> Tuple[floa
 
 
 if __name__ == '__main__':
-    from hsbg import minions
-    # from hsbg.models import Buff
+    import minions
+    # from models import Buff
     # Draw the following game state:
     # Board
     #   * Pack Leader
@@ -353,7 +353,7 @@ if __name__ == '__main__':
 
     # import python_ta
     # python_ta.check_all(config={
-    #     'extra-imports': ['math', 'pygame', 'hsbg', 'hsbg.models'],
+    #     'extra-imports': ['math', 'pygame', 'hsbg', 'models'],
     #     'allowed-io': [],
     #     'max-line-length': 100,
     #     'disable': ['E0602', 'E1136', 'R0913', 'R0914', 'W0703', 'E9969']
