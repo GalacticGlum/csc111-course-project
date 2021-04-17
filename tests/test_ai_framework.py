@@ -2,34 +2,60 @@
 
 This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
-import time
-import pprint
-from hsbg.ai import RandomPlayer, GreedyPlayer, MCTSPlayer, MonteCarloTreeSearcher, run_game, run_games
+import random
+from hsbg.utils import get_seed
+from hsbg.ai import (
+    RandomPlayer, GreedyPlayer, MCTSPlayer,
+    run_game, run_games,
+    plot_game_statistics,
+    save_game_statistics_to_file
+)
 
-# We use the current time as the seed rather than letting numpy seed
-# since we want to achieve consistent results across sessions.
-# Source: https://stackoverflow.com/a/45573061/7614083
-t = int(time.time() * 1000.0)
-seed = ((t & 0xff000000) >> 24) + ((t & 0x00ff0000) >> 8) + ((t & 0x0000ff00) <<  8) + ((t & 0x000000ff) << 24)
+
+def test_mcts_player(n: int, show_stats: bool = True) -> list:
+    """Run n games of the MCTSPlayer against the RandomPlayer.
+
+    Args:
+        n: The number of games to run.
+        show_stats: Whether to display summary statistics about the games.
+
+    Preconditions:
+        - n >= 1
+    """
+    stats = {i: 0 for i in range(2)}
+    results = [None] * n
+
+    for game_index in range(n):
+        seed = get_seed()
+        player = MCTSPlayer(0, seed=seed)
+
+        random.seed(seed)
+        winner, _ = run_game([player, RandomPlayer()])
+
+        stats[winner] += 1
+        results[game_index] = winner
+        print(f'Game {game_index + 1} winner: Player {winner + 1}')
+
+    for player in stats:
+        print(f'Player {player}: {stats[player]}/{n} ({100.0 * stats[player] / n:.2f}%)')
+
+    if show_stats:
+        plot_game_statistics(results, 0)
+
+    return results
+
 
 if __name__ == '__main__':
-    mcts = MonteCarloTreeSearcher(0, seed=seed)
-    player = MCTSPlayer(0, mcts=mcts)
-    wins = 0
-    N_GAMES = 20
-    for game_index in range(N_GAMES):
-        start_time=time.time()
-        winner, move_sequence = run_game([player, RandomPlayer()], seed=seed)
-        print(f'Player {winner + 1} won the game!')
-        print('Took {:.2f} seconds to run a game'.format(time.time() - start_time))
-        if winner == 0:
-            wins+=1
-    print('Player 1 won {:.2f}%% of games'.format(100 * wins / N_GAMES))
-    # pprint.pprint(move_sequence)
-    # player._mcts.save(f'output/tree_final_{N_GAMES}')
+    n = 100
 
-    # start_time=time.time()
-    # n = 100
-    # run_games(n, [GreedyPlayer(0), RandomPlayer()], n_jobs=8)
-    # elapsed = time.time() - start_time
-    # print('Took {:.3f} seconds to run {} games ({:.3f} seconds per game)'.format(elapsed, n, elapsed / n))
+    # Run n games of the RandomPlayer against itself and save the results
+    # results = run_games(n, [RandomPlayer(), RandomPlayer()], show_stats=True)
+    # save_game_statistics_to_file('output/random_random_player_stats.json', results)
+
+    # # Run n games of the GreedyPlayer vs the RandomPlayer and save the results
+    # results = run_games(n, [GreedyPlayer(0), RandomPlayer()], show_stats=True)
+    # save_game_statistics_to_file('output/random_greedy_player_stats.json', results)
+
+    # # Run n games of the MCTSPlayer vs the RandomPlayer and save the results
+    results = test_mcts_player(n)
+    save_game_statistics_to_file('output/mcts_random_player_stats.json', results)

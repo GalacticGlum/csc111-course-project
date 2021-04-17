@@ -33,6 +33,7 @@ numpy>=1.20.0
 
 # Visualisation
 matplotlib
+plotly
 pygame
 
 # Hearthstone Simulator API
