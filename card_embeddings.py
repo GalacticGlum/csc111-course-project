@@ -1,4 +1,8 @@
-"""Module for loading, manipulating, and searching card embedding vector spaces."""
+"""Module for loading, manipulating, and searching card embedding vector spaces.
+
+NOTE: This is rough work, and not actually part of the final project. See the project report
+for more details.
+"""
 from __future__ import annotations
 import re
 import time
@@ -398,3 +402,22 @@ def cosine_similarity(u: np.ndarray, v: np.ndarray) -> float:
         - u.shape == v.shape and u.ndim == 1
     """
     return np.dot(u, v) / (np.linalg.norm(u) * np.linalg.norm(v))
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+    #
+    # import python_ta
+    # python_ta.check_all(config={
+    #     'extra-imports': ['re', 'time', 'math', 'json', 'pathlib', 'dataclasses', 'numpy',
+    #                       'gensim.downloader', 'num2words', 'nltk.corpus', 'nltk.tokenize',
+    #                       'sklearn', 'gensim.models', 'logger'],
+    #     'allowed-io': [],
+    #     'max-line-length': 100,
+    #     'disable': ['E1136', 'E1101', 'R0902', 'R0913', 'W0212', 'E9988', 'R1702']
+    # })
+
+    # Don't run on this
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()

@@ -2,20 +2,18 @@
 
 This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
-import math
-from typing import Tuple, List, Optional
+from typing import Tuple, Optional
 
 import pygame
-from pygame import gfxdraw
 
-from models import Minion, MECHANIC_ABILITIES, Buff
+from models import Minion, MECHANIC_ABILITIES
 from hsbg import TavernGameBoard, BattlegroundsGame
 
 
 # Colours
 GOLDEN_COLOUR = (218, 165, 32)
 BLACK_COLOUR = (0, 0, 0)
-RED_COLOUR =  (255, 0, 0)
+RED_COLOUR = (255, 0, 0)
 FROZEN_COLOUR = (52, 204, 235)
 
 # Sizing and location
@@ -38,6 +36,8 @@ def visualise_game_board(board: TavernGameBoard, width: int = TARGET_SCREEN_WIDT
 
     Args:
         board: The board to visualise.
+        width: The width of the screen
+        height: The height of the screen.
     """
     screen = init_display(width, height)
     running = True
@@ -80,7 +80,8 @@ def draw_game(surface: pygame.Surface, game: BattlegroundsGame, delay: Optional[
     if not game.is_turn_in_progress:
         raise ValueError('No player is currently in a turn!')
 
-    pygame.display.set_caption(f'Hearthstone Battlegrounds Simulator - Player {game.active_player + 1}')
+    pygame.display.set_caption(
+        f'Hearthstone Battlegrounds Simulator - Player {game.active_player + 1}')
     draw_game_board(surface, game.active_board)
 
     previous_move = None
@@ -95,7 +96,8 @@ def draw_game(surface: pygame.Surface, game: BattlegroundsGame, delay: Optional[
     previous_move = game.previous_move[1] if game.previous_move is not None else None
     previous_move_text = f'Previous move: {previous_move}'
     text_width, _ = font.size(previous_move_text)
-    position = (surface.get_width() - text_width - TOP_LABEL_PADDING, text_height + TOP_LABEL_PADDING)
+    position = (surface.get_width() - text_width - TOP_LABEL_PADDING, text_height +
+                TOP_LABEL_PADDING)
     draw_text_for_board(surface, previous_move_text, position, 24)
 
     if delay is not None:
@@ -169,6 +171,7 @@ def get_font(surface: pygame.Surface, font_size: int) -> pygame.font.Font:
     font = pygame.font.SysFont('inconsolata', font_size)
     return font
 
+
 def draw_text_for_board(surface: pygame.Surface, text: str, pos: tuple[int, int],
                         font_size: int, color: tuple = (0, 0, 0)) -> Tuple[int, int]:
     """Draw the given text to the pygame screen at the given position.
@@ -228,7 +231,7 @@ def draw_minion(surface: pygame.Surface, minion: Optional[Minion], rect: tuple) 
     Args:
         surface: The surface to draw on.
         minion: The minion to draw.
-        size: The area to draw the minion in.
+        rect: The area to draw the minion in.
     """
     if minion is None:
         draw_text_word_wrap(surface, '(empty)', rect, 26, alpha=127)

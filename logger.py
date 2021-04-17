@@ -1,4 +1,8 @@
-"""A logger instance with a colourised format."""
+"""A logger instance with a colourised format.
+
+NOTE: This is rough work, and not actually part of the final project. See the project report
+for more details.
+"""
 import copy
 import logging
 import colorama
@@ -52,3 +56,18 @@ handler = logging.StreamHandler()
 handler.setFormatter(ColourisedLoggerFormatter(LOGGER_FORMAT))
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['copy', 'logging', 'colorama'],
+        'allowed-io': [],
+        'max-line-length': 100,
+        'disable': ['E1136']
+    })
+
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()

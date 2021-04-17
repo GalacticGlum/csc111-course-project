@@ -4,7 +4,6 @@ This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 from __future__ import annotations
 import json
 import copy
-import time
 import math
 import random
 from queue import Queue
@@ -589,6 +588,7 @@ def run_games_parallel(n: int, players: List[Player], n_jobs: int = 8, use_threa
         show_stats: Whether to display summary statistics about the games.
         friendly_player: The index of the friendly player.
         seed: THE seed.
+        use_thread_pool: Whether to use the thread pool executor.
 
     Preconditions:
         - n >= 1

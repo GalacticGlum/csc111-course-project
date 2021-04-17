@@ -1,3 +1,8 @@
+"""Main file for running the program.
+
+This file is Copyright (c) 2021 Shon Verch and Grace Lin.
+"""
+
 from ai import RandomPlayer, GreedyPlayer, MCTSPlayer, run_game, run_games
 from test_ai_framework import test_mcts_player
 from visualisation import visualise_game_board
@@ -20,7 +25,6 @@ if __name__ == '__main__':
     # # Show the game board state.
     # visualise_game_board(board)
 
-
     # Test the player implementations against a RandomPlayer via a set of experiments.
     #
     # NOTE: Some of these experiments can take a very long time---patience is key!
@@ -32,16 +36,15 @@ if __name__ == '__main__':
     # After the set number of moves are complete, this will open a plotly window and display
     # statistics about the game. If you prefer not to, simply set show_stats to False.
     #
-    # n_games = 10  # The number of games to run!
+    n_games = 10  # The number of games to run!
     # Experiment 1. Run n games of the RandomPlayer against itself and save the results
-    # results = run_games(n_games, [RandomPlayer(), RandomPlayer()], show_stats=True)
+    # results = run_games(n_games, [RandomPlayer(), RandomPlayer()], show_stats=False)
     #
     # Experiment 2. Run n games of the MCTSPlayer vs the RandomPlayer and save the results
-    # results = test_mcts_player(n_games)
+    results = test_mcts_player(n_games)
     #
     # Experiment 3. Run n games of the GreedyPlayer vs the RandomPlayer and save the results
     # results = run_games(n_games, [GreedyPlayer(0), RandomPlayer()], show_stats=True)
-
 
     # We can also visualise the game as it is played by the agents! To do so, we run a single game
     # with some players, and set visualise to true.

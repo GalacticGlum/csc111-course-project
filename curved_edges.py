@@ -2,11 +2,16 @@
 
 Author: Geoff Sims
 Source: https://github.com/beyondbeneath/bezier-curved-edges-networkx
+
+NOTE: This is not our work, but we had to include this in our project and couldn't install it as pip
+or in other words, this is  not actually part of the final project. See the project report
+for more details.
 """
 
 import bezier
 import networkx as nx
 import numpy as np
+
 
 def curved_edges(G, pos, dist_ratio=0.2, bezier_precision=20, polarity='random'):
     # Get nodes into np array

@@ -1,4 +1,8 @@
-"""A tool for visualising k-hop graphs."""
+"""A tool for visualising k-hop graphs.
+
+NOTE: This is rough work, and not actually part of the final project. See the project report
+for more details.
+"""
 import tqdm
 import logging
 import argparse
@@ -81,7 +85,8 @@ def build_infinity_hop_graph(embeddings: CardEmbeddings, alpha: float = 0.50,
         pairs = np.argwhere(similarities >= alpha)
         for pair in pairs:
             i, j = pair
-            if i == j: continue
+            if i == j:
+                continue
 
             # The weight of the edge is the cosine similary.
             graph.add_edge(
@@ -169,7 +174,7 @@ def draw_k_hop_graph(embeddings: CardEmbeddings, target_word: str,
         community_colour_map: The colour map to use when assigning colours to communities.
     """
     if alpha is None:
-        _, similarity  = embeddings.most_similar(target_word, k=1)[0]
+        _, similarity = embeddings.most_similar(target_word, k=1)[0]
         alpha = similarity - 0.05
         logger.info('No alpha threshold provided. Using alpha = {}'.format(alpha))
 
@@ -224,7 +229,7 @@ def draw_k_hop_graph(embeddings: CardEmbeddings, target_word: str,
     curves = np.nan_to_num(curves)
 
     # Assign a colour to each edge, based on the community of the source node.
-    edge_color =  [cmap(partition[a]) for a, _ in graph.edges]
+    edge_color = [cmap(partition[a]) for a, _ in graph.edges]
     edge_lines = LineCollection(curves, color=edge_color, cmap=cmap, alpha=edge_alpha, linewidths=1)
     plt.gca().add_collection(edge_lines)
 
@@ -347,6 +352,9 @@ if __name__ == '__main__':
     #     'max-line-length': 100,
     #     'disable': ['R1705', 'C0200', 'W0612']
     # })
+
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()
 
     parser = argparse.ArgumentParser(description='A tool for visualising k-hop graphs.')
     parser.add_argument('target_word', type=str, help='The word of interest.')

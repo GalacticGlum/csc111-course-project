@@ -5,7 +5,8 @@ Data Source: https://hearthstone.fandom.com/wiki/Battlegrounds#Minions_by_tier
 
 NOTE: This is a collection of all minions in the Battlegrounds pool as of Patch 20.0.
 However, not all of these minions are implemented. They are merely defined here
-in case that they should be implemented in the future.
+in case that they should be implemented in the future. Pycharm will show errors, but
+rest assured the file runs just fine.
 
 Refer to the minion_list.txt file for a full list of all minions with implementations
 in the Python recruitment phase simulator, and the C++ combat phase simulator.

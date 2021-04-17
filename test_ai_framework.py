@@ -8,7 +8,6 @@ from ai import (
     RandomPlayer, GreedyPlayer, MCTSPlayer,
     run_game, run_games, run_games_parallel,
     plot_game_statistics,
-    save_game_statistics_to_file
 )
 
 
@@ -46,6 +45,20 @@ def test_mcts_player(n: int, show_stats: bool = True) -> list:
 
 
 if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['random', 'ai', 'utils'],
+        'allowed-io': ['test_mcts_player'],
+        'max-line-length': 100,
+        'disable': ['E1136']
+    })
+
+    # Don't run on this, doesn't like defaultdict
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()
     # Benchmark the simulator with multithreadaing.
     import time
     start_time = time.time()
