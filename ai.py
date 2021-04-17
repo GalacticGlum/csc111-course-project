@@ -182,7 +182,6 @@ class _GameTree:
         """Return a path to an unexplored descendent of this tree."""
         path = []
         tree = self
-        # TODO: this is probably the infinite loop error
         while True:
             path.append(tree)
             if tree.get_subtrees() == []:
