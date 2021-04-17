@@ -303,35 +303,6 @@ class CardEmbeddings:
         tokens = self._tokenizer.tokenize(f'{attribute} {value}')
         return self._aggregrate_embeddings(tokens, sum, norm=norm)
 
-    # def vectorize_minion(self, minion: Minion) -> np.ndarray:
-    #     """Vectorize the given minion. Return the corresponding card embedding."""
-    #     # Get card text from card data, if it exists.
-    #     name = minion.name.lower()
-    #     if name in self._card_data:
-    #         text = self._card_data[name].get('text', None)
-    #     else:
-    #         text = None
-
-    #     buffs = [
-    #         ability.as_format_str().lower() for ability in MECHANIC_ABILITIES
-    #         if ability in minion.current_abilities
-    #     ]
-
-    #     name = ('golden ' if minion.is_golden else '') + name
-    #     name_and_buffs = ', '.join([name] + buffs)
-    #     return self.vectorize_card(Card(
-    #         name=name_and_buffs,
-    #         text=text,
-    #         race=minion.race,
-    #         card_class=minion.card_class,
-    #         rarity=minion.rarity,
-    #         tier=minion.tier,
-    #         attack=minion.current_attack,
-    #         health=minion.current_health,
-    #         cost=minion.cost,
-    #         is_golden=minion.is_golden
-    #     ))
-
     def most_similar(self, card_name: str, k: Optional[int] = 10) -> List[Tuple[str, float]]:
         """Finds the most similar cards to the given card, based on the cosine similarity.
         Return a list of 2-element tuple of the word and similarity, sorted in decreasing order
