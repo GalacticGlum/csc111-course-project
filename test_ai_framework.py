@@ -6,7 +6,7 @@ import random
 from utils import get_seed
 from ai import (
     RandomPlayer, GreedyPlayer, MCTSPlayer,
-    run_game, run_games,
+    run_game, run_games, run_games_parallel,
     plot_game_statistics,
     save_game_statistics_to_file
 )
@@ -43,3 +43,12 @@ def test_mcts_player(n: int, show_stats: bool = True) -> list:
         plot_game_statistics(results, 0)
 
     return results
+
+
+if __name__ == '__main__':
+    # Benchmark the simulator with multithreadaing.
+    import time
+    start_time = time.time()
+    run_games_parallel(10000, [RandomPlayer(), RandomPlayer()], show_stats=False, n_jobs=8, use_thread_pool=True)
+    elapsed = time.time() - start_time
+    print('Took {} seconds ({} seconds per game).'.format(elapsed, elapsed / 1000))

@@ -578,7 +578,7 @@ def run_games(n: int, players: List[Player], show_stats: bool = True, friendly_p
     return results
 
 
-def run_games_parallel(n: int, players: List[Player], n_jobs: int = 9, use_thread_pool: bool = False,
+def run_games_parallel(n: int, players: List[Player], n_jobs: int = 8, use_thread_pool: bool = False,
                       show_stats: bool = True, friendly_player: int = 0, seed: int = None) -> None:
     """Run n games using the given Players in parallel.
 
