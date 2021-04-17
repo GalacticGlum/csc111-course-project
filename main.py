@@ -50,5 +50,6 @@ if __name__ == '__main__':
     # with some players, and set visualise to true.
     #
     # For simplicitly, we visualise a game between two RandomPlayers, but feel free to change this.
+    # Please refrain from clicking while the visualization is running!
     # winner, _ = run_game([RandomPlayer(), RandomPlayer()], visualise=True)
     # print(f'Player {winner + 1} won the game!')
