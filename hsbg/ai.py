@@ -29,7 +29,7 @@ class Player:
     """
 
     def make_move(self, game: BattlegroundsGame) -> Move:
-        """Make a move given the current game.
+        """Make a move given the current game. Mutate the given BattlegroundsGame.
 
         Preconditions:
             - There is at least one valid move for the given game
@@ -41,13 +41,15 @@ class RandomPlayer(Player):
     """A Hearthstone Battlegrounds AI whose strategy is always picking a random move."""
 
     def make_move(self, game: BattlegroundsGame) -> Move:
-        """Make a move given the current game.
+        """Make a move given the current game. Mutate the given BattlegroundsGame.
 
         Preconditions:
             - There is at least one valid move for the given game
         """
         possible_moves = game.get_valid_moves()
-        return random.choice(possible_moves)
+        move = random.choice(possible_moves)
+        game.make_move(move)
+        return move
 
 
 @dataclass(eq=True, frozen=True)
@@ -436,7 +438,7 @@ class MCTSPlayer(Player):
         self._cutoff = False
 
     def make_move(self, game: BattlegroundsGame) -> Move:
-        """Make a move given the current game.
+        """Make a move given the current game. Mutate the given BattlegroundsGame.
 
         Preconditions:
             - There is at least one valid move for the given game
@@ -444,6 +446,8 @@ class MCTSPlayer(Player):
         if not self._cutoff:
             self._train(game, self._iterations)
             tree = self._mcts.choose(game)
+            random.seed(tree.seed)
+            game.make_move(tree.move)
 
             # Update previous move
             if tree.move == self._previous_move:
@@ -456,20 +460,18 @@ class MCTSPlayer(Player):
             if self._previous_move_same_count >= self._cutoff_factor:
                 self._cutoff = True
 
-            # Make move in a copy
-            random.seed(tree.seed)
-            game_copy = game.copy_and_make_move(tree.move)
-
             # Update the tree with the latest game nodes
             state = _DeterministicTavernGameBoard.from_board(game.boards[self._player_index])
             if tree._deterministic_state != state:
-                tree.add_subtree(_GameTree(game_copy.boards[self._player_index], tree.move, seed=tree.seed))
+                board_copy = copy.deepcopy(game.boards[self._player_index])
+                tree.add_subtree(_GameTree(board_copy, tree.move, seed=tree.seed))
 
-            random.seed(tree.seed)
             return tree.move
         else:
             # Act like a random player if we have reached the cutoff`
-            return random.choice(game.get_valid_moves())
+            move = random.choice(game.get_valid_moves())
+            game.make_move(move)
+            return move
 
     def _train(self, game: BattlegroundsGame, n_iterations: int) -> None:
         """Train the Monte Carlo tree searcher by performing the given amount of rollouts
@@ -651,7 +653,6 @@ def run_game(players: List[Player], visualise: bool = False, fps: int = 5) \
                     flip_display()
 
                 move = player.make_move(game)
-                game.make_move(move)
                 move_sequence.append((index, move))
         game.next_round()
 
