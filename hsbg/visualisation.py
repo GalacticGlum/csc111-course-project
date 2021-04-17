@@ -12,9 +12,12 @@ from hsbg.models import Minion, MECHANIC_ABILITIES, Buff
 from hsbg import TavernGameBoard, BattlegroundsGame
 
 
+# Colours
 GOLDEN_COLOUR = (218, 165, 32)
 BLACK_COLOUR = (0, 0, 0)
 RED_COLOUR =  (255, 0, 0)
+
+# Sizing and location
 BORDER_PADDING = 20
 BORDER_WIDTH = 2
 
@@ -23,93 +26,93 @@ TOP_LABEL_PADDING = 15
 # The font size of top labels.
 TOP_LABEL_FONT_SIZE = 72
 
+# Default screen dimesnions
 TARGET_SCREEN_WIDTH = 1600
 TARGET_SCREEN_HEIGHT = 900
 
-def _scale_x(surface: pygame.Surface, x: float) -> float:
-    """Return the given horizontal coordinate scaled proportionally with the target resolution."""
-    return x * (surface.get_width() / TARGET_SCREEN_WIDTH)
 
-def _scale_y(surface: pygame.Surface, y: float) -> float:
-    """Return the given vertical coordinate scaled proportionally with the target resolution."""
-    return y * (surface.get_height() / TARGET_SCREEN_HEIGHT)
-
-def _scale(surface: pygame.Surface, position: Tuple[float, float]) -> Tuple[float, float]:
-    """Return the given coordinate scaled proportionally with the target resolution."""
-    x, y = position
-    return (_scale_x(surface, x), _scale_y(surface, y))
-
-
-def visualise_game(surface: pygame.Surface, board: BattlegroundsGame) -> None:
-    """Visualise the current state of a battlegrounds game on the given surface.
-
-    This function partitions the given surface into num_players sub-surfaces and draws
-    the game state of each player.
-
-    Note that this clears the current contents of the surface.
+def visualise_game_board(board: TavernGameBoard, width: int = TARGET_SCREEN_WIDTH,
+                         height: int = TARGET_SCREEN_HEIGHT) -> None:
+    """Visualise the current state of a game board.
 
     Args:
-        surface: The surface to draw on.
         board: The board to visualise.
     """
-    width, height = surface.get_size()
-    sub_surfaces = [... for partition in _partition_rect(width, height, board.num_alive_players)]
+    screen = init_display(width, height)
+    running = True
+    while running:
+        # Search for a quit event
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                running = False
+
+        draw_game_board(screen, play_board)
+        flip_display()
+
+    close_display()
 
 
-def _partition_rect(width: int, height: int, n: int, merit: Optional[callable] = None) \
-        -> List[Tuple[int, int, int, int]]:
-    """Partition a surface with the given size into n (or more, but as few extra partitions
-    as possible) equally sized partitions, so that all the space is used.
+def init_display(width: int = TARGET_SCREEN_WIDTH, height: int = TARGET_SCREEN_HEIGHT) \
+        -> pygame.Surface:
+    """Initialise a pygame display with the given dimensions."""
+    pygame.init()
+    return pygame.display.set_mode([width, height])
 
-    Return a list of tuples containing the left, top, right, and bottom coordinates of each chunk.
 
-    Preconditions:
-        - width > 0 and height > 0
-        - n > 0
+def flip_display() -> None:
+    """Flip the display."""
+    # Flip screen buffers
+    pygame.display.flip()
 
-    Implementation details:
-        - This function finds the optimal partition size (p, q) by iteratively optimising a given
-          merit function, which measures how good a partition size is.
-        - Adapted from https://stackoverflow.com/a/5595244/7614083 (License: CC BY-SA 3.0).
+
+def close_display() -> None:
+    """Close the display."""
+    pygame.quit()
+
+
+def draw_game(surface: pygame.Surface, game: BattlegroundsGame, delay: Optional[int] = None) \
+        -> None:
+    """Visualise the board of the active player in the game.
+    Raise a ValueError if there is no active player.
     """
-    def _default_merit_function(partition_width: float, partition_height: float) -> float:
-        """Default merit function that looks at how close the aspect ratios are.
-        The closer, the higher the merit.
-        """
-        target_ratio = width / height
-        current_ratio = partition_width / partition_height
-        return 1 / math.exp((target_ratio - current_ratio)**2)
+    if not game.is_turn_in_progress:
+        raise ValueError('No player is currently in a turn!')
 
-    merit_function = merit or _default_merit_function
+    pygame.display.set_caption(f'Hearthstone Battlegrounds Simulator - Player {game.active_player + 1}')
+    draw_game_board(surface, game.active_board)
 
-    best_merit_yet = float('-inf')
-    best_configuration_yet = None
-    for p in range(math.floor(math.sqrt(n)), 0, -1):
-        q = math.ceil(n / p)
-        merit1 = merit_function(width / p, height / q)
-        merit2 = merit_function(width / q, height / p)
-        current_merit = max(merit1, merit2)
-        if current_merit > best_merit_yet:
-            # Update best_merit_yet
-            best_merit_yet = current_merit
-            # Update best_configuration_yet
-            if merit1 > merit2:
-                best_configuration_yet = (p, q)
-            else:
-                best_configuration_yet = (q, p)
+    previous_move = None
 
-    # TODO: Partition based on best_configuration_yet
-    raise NotImplementedError
+    font = get_font(surface, 24)
+    # Draw active player
+    active_player_text = f'Player: {game.active_player + 1}'
+    text_width, text_height = font.size(active_player_text)
+    position = (surface.get_width() - text_width - TOP_LABEL_PADDING, TOP_LABEL_PADDING)
+    draw_text_for_board(surface, active_player_text, position, 24)
+    # Draw previous move
+    previous_move = game.previous_move[1] if game.previous_move is not None else None
+    previous_move_text = f'Previous move: {previous_move}'
+    text_width, _ = font.size(previous_move_text)
+    position = (surface.get_width() - text_width - TOP_LABEL_PADDING, text_height + TOP_LABEL_PADDING)
+    draw_text_for_board(surface, previous_move_text, position, 24)
+
+    if delay is not None:
+        pygame.time.wait(delay)
 
 
-def visualise_game_board(surface: pygame.Surface, board: TavernGameBoard) -> None:
+def draw_game_board(surface: pygame.Surface, board: TavernGameBoard) -> None:
     """Visualise the current state of a game board on the given surface.
     Note that this clears the current contents of the surface.
 
     Args:
         surface: The surface to draw on.
         board: The board to visualise.
+        delay: The number of milliseconds to wait after drawing the board.
     """
+    # Fill the background
+    surface.fill((255, 255, 255))
+
     screen_width, screen_height = surface.get_size()
     draw_top_labels(surface, [
         (f'Gold: {board.gold},', GOLDEN_COLOUR),
@@ -126,8 +129,6 @@ def visualise_game_board(surface: pygame.Surface, board: TavernGameBoard) -> Non
             pygame.draw.line(surface, BLACK_COLOUR, (x, start_y), (x, end_y))
             rect = (x + 10, start_y + 10, cell_width - 20, end_y - start_y - 10)
             draw_minion(surface, minions[i], rect)
-
-
 
     # BOB'S SQUADRON
     # card_width = TARGET_SCREEN_WIDTH // 11
@@ -301,17 +302,20 @@ def draw_minion(surface: pygame.Surface, minion: Optional[Minion], rect: tuple) 
     #                                                y + card_l // 2 - card_l // 6 + 10))
 
 
-def draw_text_for_card(surface: pygame.Surface, text: str, pos: tuple[int, int]) -> None:
-    """Draw the given text to the pygame screen at the given position.
+def _scale_x(surface: pygame.Surface, x: float) -> float:
+    """Return the given horizontal coordinate scaled proportionally with the target resolution."""
+    return x * (surface.get_width() / TARGET_SCREEN_WIDTH)
 
-    pos represents the *upper-left corner* of the text.
-    """
-    font_size = min(17 * surface.get_height() // 1080, 17 * surface.get_width() // 1980)
-    font = pygame.font.SysFont('inconsolata', font_size)
-    text_surface = font.render(text, True, (0, 0, 0))
-    width, height = text_surface.get_size()
-    surface.blit(text_surface,
-                 pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
+
+def _scale_y(surface: pygame.Surface, y: float) -> float:
+    """Return the given vertical coordinate scaled proportionally with the target resolution."""
+    return y * (surface.get_height() / TARGET_SCREEN_HEIGHT)
+
+
+def _scale(surface: pygame.Surface, position: Tuple[float, float]) -> Tuple[float, float]:
+    """Return the given coordinate scaled proportionally with the target resolution."""
+    x, y = position
+    return (_scale_x(surface, x), _scale_y(surface, y))
 
 
 if __name__ == '__main__':
@@ -339,31 +343,9 @@ if __name__ == '__main__':
         minion.add_buff(Buff(0, 0, x))
     play_board.summon_minion(minion, clone=False)
 
-    BACKGROUND_COLOUR = (255, 255, 255)
+    visualise_game_board(play_board)
 
-    pygame.init()
-    screen = pygame.display.set_mode([TARGET_SCREEN_WIDTH, TARGET_SCREEN_HEIGHT])
 
-    running = True
-    while running:
-        # Search for a quit event
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.QUIT:
-                running = False
-
-        # Fill the background
-        screen.fill(BACKGROUND_COLOUR)
-
-        visualise_game_board(screen, play_board)
-        # w_card = SCREEN_WIDTH // 10
-        # l_card = w_card * 6 // 5
-        # draw_minion(screen, board.board[0], (w_card_width, l_card), (800, 800))
-
-        # Flip screen buffers
-        pygame.display.flip()
-
-    pygame.quit()
 
 if __name__ == '__main__':
     import doctest

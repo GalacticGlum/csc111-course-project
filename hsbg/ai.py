@@ -16,6 +16,7 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_compl
 import dill as pickle
 
 from hsbg import BattlegroundsGame, TavernGameBoard, Move, Action
+from hsbg.visualisation import init_display, flip_display, close_display, draw_game
 
 
 class Player:
@@ -533,15 +534,33 @@ def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: b
         print(f'Player {player}: {stats[player]}/{n} ({100.0 * stats[player] / n:.2f}%)')
 
 
-def run_game(players: List[Player], seed: int = None) -> Tuple[int, List[Tuple[int, Move]]]:
+def run_game(players: List[Player], seed: int = None, visualise: bool = False, fps: int = 5) \
+        -> Tuple[int, List[Tuple[int, Move]]]:
     """Run a Battlegrounds game between the given players.
 
     Return the index of the winning player and a list of moves made in the game,
     represented as tuples containing the index of the acting player and the move itself.
 
+    Args:
+        players: The agents.
+        seed: A seed to ensure that actions are consistent.
+        visualise: Whether to visualise the state of the game.
+        fps: The amount of turns to show per second.
+
     Preconditions:
         - len(players) > 0 and len(players) % 2 == 0
+
+    Implementation notes:
+        - We call pygame.time.wait to animate the visualisation (drawing one turn at a time).
+          NOTE: You won't be able to close the pygame window while the animation is in
+          progress, only after it's done. But you can still stop the Python interpreter
+          altogether by clicking the red square button in PyCharm.
     """
+    if visualise:
+        screen = init_display()
+    else:
+        screen = None
+
     game = BattlegroundsGame(num_players=len(players))
 
     move_sequence = []
@@ -551,10 +570,18 @@ def run_game(players: List[Player], seed: int = None) -> Tuple[int, List[Tuple[i
             game.start_turn_for_player(index)
 
             while game.is_turn_in_progress:
+                if visualise:
+                    draw_game(screen, game, delay=1000 // fps)
+                    flip_display()
+
                 move = player.make_move(game)
                 game.make_move(move)
                 move_sequence.append((index, move))
+
         game.next_round()
+
+    if visualise:
+        close_display()
 
     return game.winner, move_sequence
 
