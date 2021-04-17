@@ -122,6 +122,7 @@ _ALL_MINIONS = None
 _MINIONS_BELOW_TIER = {}
 _POOL_FIND_MEMO = {}
 
+
 class MinionPool:
     """A class representing the pool of available minions."""
     # Private Instance Attributes:
@@ -2637,7 +2638,7 @@ if __name__ == '__main__':
     import python_ta
     python_ta.check_all(config={
         'extra-imports': ['copy', 'enum'],
-        'allowed-io': [],
+        'allowed-io': ['get_all_minions', '_verify_minion_list'],
         'max-line-length': 100,
         'disable': ['E1136', 'E0602', 'E1101', 'R0902', 'E9959', 'E9972', 'E9997']
     })

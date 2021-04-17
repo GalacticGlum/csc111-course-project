@@ -304,8 +304,13 @@ class Minion:
         """Return a string representation of this minion.
 
         >>> from hsbg import minions
+        >>> from hsbg.models import CardAbility, Buff
         >>> str(minions.MURLOC_SCOUT)
         '1/1 Murloc Scout'
+        >>> minion = minions.CRYSTAL_WEAVER.clone()
+        >>> minion.add_buff(Buff(10, 3, CardAbility.TAUNT))
+        >>> str(minion)
+        '15/7 Crystalweaver, Taunt'
         """
         buffs = [
             ability.as_format_str().lower() for ability in MECHANIC_ABILITIES
