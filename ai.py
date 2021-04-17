@@ -652,6 +652,8 @@ def run_game(players: List[Player], visualise: bool = False, fps: int = 5) \
                 if visualise:
                     draw_game(screen, game, delay=1000 // fps)
                     flip_display()
+                if game.is_done:
+                    break
 
                 move = player.make_move(game)
                 move_sequence.append((index, move))
