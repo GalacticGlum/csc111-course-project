@@ -5,7 +5,7 @@ from visualisation import visualise_game_board
 if __name__ == '__main__':
     """"For a minimal working example, you may simple run one of the experiments."""
     # We can manipulate a Hearthstone Battlegrounds game using the simulator API.
-    # Here is a short example highlihting how we can mutate the board state, and
+    # Here is a short example highlighting how we can mutate the board state, and
     # perform actions on the board.
     #
     # from hsbg import TavernGameBoard
