@@ -13,7 +13,7 @@ import contractions
 from tqdm import tqdm
 from num2words import num2words
 
-from hsbg.utils import parallel_map
+from utils import parallel_map
 
 # Base api url for the Hearthstone wiki
 API_URL = 'https://hearthstone.fandom.com/api.php?action={action}&format=json'
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     # import python_ta
     # python_ta.check_all(config={
     #    'extra-imports': ['re', 'requests', 'pathlib', 'click', 'pypandoc', 'contractions',
-    #                       'tqdm', 'num2words', 'hsbg.utils'],
+    #                       'tqdm', 'num2words', 'utils'],
     #     'allowed-io': ['make_corpus_from_pages', 'clean_pages', 'scrape_pages'],
     #     'max-line-length': 100,
     #     'disable': ['E1136', 'E9989']

@@ -17,9 +17,9 @@ import dill as pickle
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from hsbg.utils import get_seed
+from utils import get_seed
 from hsbg import BattlegroundsGame, TavernGameBoard, Move, Action
-from hsbg.visualisation import init_display, flip_display, close_display, draw_game
+from visualisation import init_display, flip_display, close_display, draw_game
 
 
 class Player:
@@ -483,7 +483,8 @@ class MCTSPlayer(Player):
 
 class GreedyPlayer(Player):
     """A Hearthstone Battlegrounds AI that greedily chooses
-    the move that maximizes average reward."""
+    the move that maximizes average reward.
+    """
     # Private Instance Attributes
     #   - _player_index: The index of this player.
     #   - _games_per_move: The number of games to simulate per move.
@@ -504,7 +505,7 @@ class GreedyPlayer(Player):
         self._games_per_move = games_per_move
 
     def make_move(self, game: BattlegroundsGame) -> Move:
-        """Make a move given the current game.
+        """Make a move given the current game. Mutate the given BattlegroundsGame.
 
         Preconditions:
             - There is at least one valid move for the given game
@@ -524,6 +525,7 @@ class GreedyPlayer(Player):
                 best_reward = average_reward
                 best_move_yet = move
 
+        game.make_move(best_move_yet)
         return best_move_yet
 
     def _simulate(self, game: BattlegroundsGame) -> int:
@@ -721,7 +723,7 @@ if __name__ == '__main__':
     python_ta.check_all(config={
         'extra-imports': ['copy', 'random', 'enum', 'contextlib', 'concurrent.futures',
                           'hsbg', 'dill', 'time', 'math', 'pathlib', 'collections', 'queue',
-                          'hsbg.visualisation'],
+                          'visualisation'],
         'allowed-io': ['save', 'load', '_train', 'run_games', 'make_move'],
         'max-line-length': 100,
         'disable': ['E1136', 'E1101', 'R0902', 'R0913', 'W0212', 'E9988', 'R1702']

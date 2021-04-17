@@ -296,8 +296,8 @@ class Minion:
     def __str__(self) -> str:
         """Return a string representation of this minion.
 
-        >>> from hsbg import minions
-        >>> from hsbg.models import CardAbility
+        >>> import minions
+        >>> from models import CardAbility
         >>> str(minions.MURLOC_SCOUT)
         '1/1 Murloc Scout'
         >>> minion = minions.CRYSTAL_WEAVER.clone()

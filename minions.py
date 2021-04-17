@@ -20,19 +20,19 @@ import argparse
 from pathlib import Path
 from typing import List, Set, Dict, Optional, Union
 
-from hsbg.utils import filter_minions
-from hsbg.models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
+from utils import filter_minions
+from models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
 
 
 # The path to the list of implemented minions
-MINION_LIST_PATH = Path(__file__).parent.parent / 'minion_list.txt'
+MINION_LIST_PATH = Path(__file__).parent / 'minion_list.txt'
 with open(MINION_LIST_PATH) as fp:
     MINION_LIST = set(fp.read().splitlines())
 
 
 def get_all_minions(gold_suffix: str = '_golden', whitelist: Optional[Set[str]] = None) \
         -> Dict[str, Minion]:
-    """Return a dict mapping the name of each minion defined in the hsbg.minions module to
+    """Return a dict mapping the name of each minion defined in the minions module to
     its Minion object instance.
 
     Each key in the returned dict is the name of a minion (with an additional suffix if the
