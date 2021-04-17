@@ -16,6 +16,7 @@ from hsbg import TavernGameBoard, BattlegroundsGame
 GOLDEN_COLOUR = (218, 165, 32)
 BLACK_COLOUR = (0, 0, 0)
 RED_COLOUR =  (255, 0, 0)
+FROZEN_COLOUR = (52, 204, 235)
 
 # Sizing and location
 BORDER_PADDING = 20
@@ -130,32 +131,11 @@ def draw_game_board(surface: pygame.Surface, board: TavernGameBoard) -> None:
             rect = (x + 10, start_y + 10, cell_width - 20, end_y - start_y - 10)
             draw_minion(surface, minions[i], rect)
 
-    # BOB'S SQUADRON
-    # card_width = TARGET_SCREEN_WIDTH // 11
-    # card_length = card_width * 6 // 5
-    # card_padding = (TARGET_SCREEN_WIDTH // 10 - card_width) // 2
-    # for i in range(len(board.recruits)):
-    #     if board.recruits[i] is None:
-    #         continue
-    #     x_pos = card_padding * (i + 1) + card_width * i
-    #     y_pos = 2 * screen_width // 9
-    #     draw_minion(surface, board.recruits[i], (card_width, card_length), (x_pos, y_pos))
-
-    # # # YOUR PLAYED CARDS
-    # for i in range(len(board.board)):
-    #     if board.board[i] is None:
-    #         continue
-    #     x_pos = card_padding * (i + 1) + card_width * i
-    #     y_pos = 4 * screen_height // 9
-    #     draw_minion(surface, board.board[i], (card_width, card_length), (x_pos, y_pos))
-
-    # # # YOUR HAND
-    # for i in range(len(board.hand)):
-    #     if board.hand[i] is None:
-    #         continue
-    #     x_pos = card_padding * (i + 1) + card_width * i
-    #     y_pos = 5 * screen_height // 7
-    #     draw_minion(surface, board.hand[i], (card_width, card_length), (x_pos, y_pos))
+            if board.is_frozen and index == 0:
+                s = pygame.Surface((cell_width, end_y - start_y))
+                s.set_alpha(127)
+                s.fill(FROZEN_COLOUR)
+                surface.blit(s, (x, start_y))
 
 
 def draw_top_labels(surface: pygame.Surface, labels: list) -> None:
@@ -214,15 +194,13 @@ def draw_text_word_wrap(surface: pygame.Surface, text: str, rect: tuple, font_si
 
     # get the height of the font
     font = get_font(surface, font_size)
-    fontHeight = font.get_height()
+    font_height = font.get_height()
 
     while text:
         i = 1
-
         # determine if the row of text will be outside our area
-        if y + fontHeight > rect.bottom:
+        if y + font_height > rect.bottom:
             break
-
         # determine maximum width of line
         while font.size(text[:i])[0] < rect.width and i < len(text):
             i += 1
@@ -236,7 +214,7 @@ def draw_text_word_wrap(surface: pygame.Surface, text: str, rect: tuple, font_si
         image.set_alpha(alpha)
 
         surface.blit(image, (rect.left, y))
-        y += fontHeight + line_spacing
+        y += font_height + line_spacing
 
         # remove the text we just blitted
         text = text[i:]
@@ -256,14 +234,17 @@ def draw_minion(surface: pygame.Surface, minion: Optional[Minion], rect: tuple) 
         draw_text_word_wrap(surface, '(empty)', rect, 26, alpha=127)
         return
 
+    # Draw minion name
     minion_name_text = f'{minion.name} ({minion.tier})'
     colour = GOLDEN_COLOUR if minion.is_golden else BLACK_COLOUR
     _, minion_name_end_y = draw_text_word_wrap(surface, minion_name_text, rect, 26, colour)
 
+    # Draw attack/health stats
     attack_health_text = f'{minion.current_attack} ATK / {minion.current_health} HP'
     attack_health_position = (rect[0], minion_name_end_y + 10)
     draw_text_for_board(surface, attack_health_text, attack_health_position, 20)
 
+    # Draw abilities
     abilities_to_draw = [a.name[0] for a in MECHANIC_ABILITIES if a in minion.current_abilities]
     ability_text = str(','.join(abilities_to_draw))
 
@@ -271,35 +252,6 @@ def draw_minion(surface: pygame.Surface, minion: Optional[Minion], rect: tuple) 
     _, text_height = font.size(ability_text)
 
     draw_text_for_board(surface, ability_text, (rect[0], rect[1] + rect[3] - text_height - 10), 26)
-
-    # TODO: Render index
-    # TODO: Do the frozen thing
-
-    # # MONSTER TYPE
-    # pygame.draw.rect(surface, color,
-    #                  (x + side, y + 2 * card_l // 3 - side, card_w - side * 2, side), 2)
-    # draw_text_for_card(surface, str(minion.card_class.name),
-    #                    (x + side + (card_w - side * 2) // 4,
-    #                     y + 2 * card_l // 3 - side + side // 4))
-
-    # # ATTACK
-    # pygame.draw.rect(surface, color, (x, y + card_l - card_l // 6, card_w // 5, card_l // 6), 2)
-    # draw_text_for_card(surface, str(minion.attack),
-    #                    (x + card_w // 10 - font_padding, y + card_l - card_l // 12 - font_padding))
-
-    # # HEALTH
-    # pygame.draw.rect(surface, color, (x + card_w - card_w // 5, y + card_l - card_l // 6,
-    #                                   card_w // 5, card_l // 6), 2)
-    # draw_text_for_card(surface, str(minion.health),
-    #                    (x + card_w - card_w // 10 - font_padding,
-    #                     y + card_l - card_l // 12 - font_padding))
-
-    # # NAME
-    # # TODO: Fix the name and all the text including colour and shit
-    # pygame.draw.rect(surface, color, (x + side // 2, y + card_l // 2 - card_l // 6,
-    #                                   card_w - side, card_l // 6), 2)
-    # draw_text_for_card(surface, str(minion.name), (x + side // 2 + 4,
-    #                                                y + card_l // 2 - card_l // 6 + 10))
 
 
 def _scale_x(surface: pygame.Surface, x: float) -> float:
@@ -316,35 +268,6 @@ def _scale(surface: pygame.Surface, position: Tuple[float, float]) -> Tuple[floa
     """Return the given coordinate scaled proportionally with the target resolution."""
     x, y = position
     return (_scale_x(surface, x), _scale_y(surface, y))
-
-
-if __name__ == '__main__':
-    import minions
-    # from models import Buff
-    # Draw the following game state:
-    # Board
-    #   * Pack Leader
-    #   * Alleycat
-    # Hand
-    #   * Kindly Grandmother
-    #   * Scavenging Hyena
-    play_board = TavernGameBoard()
-    play_board.next_turn()
-    play_board.add_minion_to_hand(minions.ALLEYCAT)
-    play_board.add_minion_to_hand(minions.KINDLY_GRANDMOTHER)
-    play_board.add_minion_to_hand(minions.SCAVENGING_HYENA)
-    play_board.add_minion_to_hand(minions.NAT_PAGLE_GOLDEN)
-
-    play_board.play_minion(0)
-    play_board.play_minion(1)
-
-    minion = minions.PACK_LEADER.clone()
-    for x in MECHANIC_ABILITIES:
-        minion.add_buff(Buff(0, 0, x))
-    play_board.summon_minion(minion, clone=False)
-
-    visualise_game_board(play_board)
-
 
 
 if __name__ == '__main__':

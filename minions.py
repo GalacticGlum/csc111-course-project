@@ -195,8 +195,6 @@ class MinionPool:
         True
         """
         def predicate(minion_name: str) -> bool:
-            # TODO: Remove this! This is only a temporary fix so that unimplemented minions
-            # are not added to the recruitment pool.
             if minion_name not in MINION_LIST:
                 return False
 
@@ -360,7 +358,6 @@ DRAGON_SPAWN_LIEUTENANT_GOLDEN = Minion(
     cost=2, is_golden=True, abilities=CardAbility.TAUNT
 )
 
-# TODO: Start of combat (Deal 1 damage per friendly Dragon to one random enemy minion).
 RED_WHELP = Minion(
     'Red Whelp', CardClass.NEUTRAL, MinionRace.DRAGON, 1, 2
 )
@@ -551,12 +548,10 @@ DECK_SWABBIE_GOLDEN = Minion(
     _on_this_played=_deck_swabbie_on_this_played
 )
 
-# TODO: Deathrattle (Summon a 1/1 Pirate. It attacks immediately.)
 SCALLYWAG = Minion(
     'Scallywag', CardClass.NEUTRAL, MinionRace.PIRATE, 2, 1,
     abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Deathrattle (Summon a 2/2 Pirate. It attacks immediately.)
 SCALLYWAG_GOLDEN = Minion(
     'Scallywag', CardClass.NEUTRAL, MinionRace.PIRATE, 4, 2,
     is_golden=True, abilities=CardAbility.DEATH_RATTLE
@@ -585,12 +580,10 @@ BIG_BAD_WOLF_GOLDEN = Minion(
     cost=2, tier=1, is_golden=True
 )
 
-# TODO: Deathrattle (Summon a 3/2 Big Bad Wolf.)
 KINDLY_GRANDMOTHER = Minion(
     'Kindly Grandmother', CardClass.HUNTER, MinionRace.BEAST, 1, 1,
     cost=2, tier=2, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Deathrattle (Summon a 6/4 Big Bad Wolf.)
 KINDLY_GRANDMOTHER_GOLDEN = Minion(
     'Kindly Grandmother', CardClass.HUNTER, MinionRace.BEAST, 2, 2,
     cost=2, tier=2, is_golden=True, abilities=CardAbility.DEATH_RATTLE
@@ -658,12 +651,10 @@ IMP_GOLDEN = Minion(
     tier=1, is_golden=True, purchasable=False
 )
 
-# TODO: Deathrattle (Summon a 1/1 imp)
 IMPRISONER = Minion(
     'Imprisoner', CardClass.NEUTRAL, MinionRace.DEMON, 3, 3,
     cost=3, tier=2, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
 )
-# TODO: Deathrattle (Summon a 2/2 imp)
 IMPRISONER_GOLDEN = Minion(
     'Imprisoner', CardClass.NEUTRAL, MinionRace.DEMON, 6, 6,
     cost=3, tier=2, is_golden=True,
@@ -701,13 +692,10 @@ NATHREZIM_OVERSEER_GOLDEN = Minion(
 )
 
 # Dragon Pool
-# TODO: Implement effect: Whenever this attacks, DOUBLE its attack.
-#       This requires implementing the effect in the C++ simulator!
 GLYPH_GUARDIAN = Minion(
     'Glyph Guardian', CardClass.MAGE, MinionRace.DRAGON, 2, 4,
     cost=3, tier=2
 )
-# TODO: Implement effect: Whenever this attacks, TRIPLE its attack.
 GLYPH_GUARDIAN_GOLDEN = Minion(
     'Glyph Guardian', CardClass.MAGE, MinionRace.DRAGON, 4, 8,
     cost=3, tier=2, is_golden=True
@@ -736,12 +724,10 @@ STEWARD_OF_TIME_GOLDEN = Minion(
     _on_this_sold=_steward_of_time_on_this_sold
 )
 
-# TODO: Implement effect: Whenever a friendly Dragon kills an enemy, gain +2/+2.
 WAXRIDER_TOGWAGGLE = Minion(
     'Waxrider Togwaggle', CardClass.NEUTRAL, MinionRace.NONE, 1, 3,
     cost=3, tier=2
 )
-# TODO: Implement effect: Whenever a friendly Dragon kills an enemy, gain +4/+4.
 WAXRIDER_TOGWAGGLE_GOLDEN = Minion(
     'Waxrider Togwaggle', CardClass.NEUTRAL, MinionRace.NONE, 2, 6,
     cost=3, tier=2, is_golden=True
@@ -815,23 +801,19 @@ DAMAGED_GOLEM_GOLDEN = Minion(
     cost=1, tier=1, is_golden=True
 )
 
-# TODO: Implement deathrattle (Summon a 2/1 Damaged Golem).
 HARVEST_GOLEM = Minion(
     'Harvest Golem', CardClass.NEUTRAL, MinionRace.MECH, 2, 3,
     cost=3, tier=2, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Summon a 4/2 Damaged Golem).
 HARVEST_GOLEM_GOLDEN = Minion(
     'Harvest Golem', CardClass.NEUTRAL, MinionRace.MECH, 4, 6,
     cost=3, tier=2, is_golden=True, abilities=CardAbility.DEATH_RATTLE
 )
 
-# TODO: Implement deathrattle (Deal 4 damage to a random enemy minion).
 KABOOM_BOT = Minion(
     'Kaboom Bot', CardClass.NEUTRAL, MinionRace.MECH, 2, 2,
     cost=3, tier=2, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Deal 4 damage to a random enemy minion twice).
 KABOOM_BOT_GOLDEN = Minion(
     'Kaboom Bot', CardClass.NEUTRAL, MinionRace.MECH, 4, 4,
     cost=3, tier=2, is_golden=True, abilities=CardAbility.DEATH_RATTLE
@@ -892,12 +874,10 @@ FREEDEALING_GAMBLER_GOLDEN = Minion(
     _on_this_sold=lambda _, board: board.give_gold(abs(6 - board._minion_sell_price))
 )
 
-# TODO: Implement effect: Your other Pirates have +1/+1.
 SOUTHSEA_CAPTAIN = Minion(
     'Southsea Captain', CardClass.NEUTRAL, MinionRace.PIRATE, 3, 3,
     cost=3, tier=2, rarity=CardRarity.EPIC
 )
-# TODO: Implement effect: Your other Pirates have +2/+2.
 SOUTHSEA_CAPTAIN_GOLDEN = Minion(
     'Southsea Captain', CardClass.NEUTRAL, MinionRace.PIRATE, 6, 6,
     cost=3, tier=2, rarity=CardRarity.EPIC, is_golden=True
@@ -944,45 +924,37 @@ MENAGERIE_MUG_GOLDEN = Minion(
     _on_this_played=_managerie_mug_on_this_played
 )
 
-# TODO: Implement deathrattle (Give your minions +1/+1).
 SPAWN_OF_NZOTH = Minion(
     'Spawn of N\'Zoth', CardClass.NEUTRAL, MinionRace.NONE, 2, 2,
     cost=3, tier=2, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Give your minions +2/+2).
 SPAWN_OF_NZOTH_GOLDEN = Minion(
     'Spawn of N\'Zoth', CardClass.NEUTRAL, MinionRace.NONE, 4, 4,
     cost=3, tier=2, is_golden=True, abilities=CardAbility.DEATH_RATTLE
 )
 
-# TODO: Implement deathrattle (Give a random friendly minion Divine Shield).
 SELFLESS_HERO = Minion(
     'Selfless Hero', CardClass.PALADIN, MinionRace.NONE, 2, 1,
     cost=1, tier=2, rarity=CardRarity.RARE, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Give 2 random friendly minions Divine Shield).
 SELFLESS_HERO_GOLDEN = Minion(
     'Selfless Hero', CardClass.PALADIN, MinionRace.NONE, 4, 2,
     cost=1, tier=2, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.DEATH_RATTLE
 )
 
-# TODO: Implement effect: Whenever this is attacked, give adjacent minions +1/+1.
 TORMENETED_RITUALIST = Minion(
     'Tormented Ritualist', CardClass.NEUTRAL, MinionRace.NONE, 2, 3,
     cost=3, tier=2, abilities=CardAbility.TAUNT
 )
-# TODO: Implement effect: Whenever this is attacked, give adjacent minions +2/+2.
 TORMENETED_RITUALIST_GOLDEN = Minion(
     'Tormented Ritualist', CardClass.NEUTRAL, MinionRace.NONE, 4, 6,
     cost=3, tier=2, is_golden=True, abilities=CardAbility.TAUNT
 )
 
-# TODO: Implement deathrattle (Deal 1 damage to all minions).
 UNSTABLE_GHOUL = Minion(
     'Unstable Ghoul', CardClass.NEUTRAL, MinionRace.NONE, 1, 3,
     cost=2, tier=2, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Deal 1 damage to all minions TWICE).
 UNSTABLE_GHOUL_GOLDEN = Minion(
     'Unstable Ghoul', CardClass.NEUTRAL, MinionRace.NONE, 2, 6,
     cost=2, tier=2, is_golden=True, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
@@ -1003,24 +975,20 @@ SPIDER_GOLDEN = Minion(
     tier=1, is_golden=True, purchasable=False
 )
 
-# TODO: Implement deathrattle (Summon two 1/1 Spiders).
 INFESTED_WOLF = Minion(
     'Infested Wolf', CardClass.HUNTER, MinionRace.BEAST, 3, 3,
     cost=4, tier=3, rarity=CardRarity.RARE, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Summon two 2/2 Spiders).
 INFESTED_WOLF_GOLDEN = Minion(
     'Infested Wolf', CardClass.HUNTER, MinionRace.BEAST, 6, 6,
     cost=4, tier=3, rarity=CardRarity.RARE, is_golden=True,
     abilities=CardAbility.DEATH_RATTLE
 )
 
-# TODO: Implement effect: After this attacks, trigger a random friendly minion's Deathrattle.
 MONSTROUS_MACAW = Minion(
     'Monstrous Macaw', CardClass.NEUTRAL, MinionRace.BEAST, 4, 3,
     cost=3, tier=3
 )
-# TODO: Implement effect: After this attacks, trigger a random friendly minion's Deathrattle TWICE.
 MONSTROUS_MACAW_GOLDEN = Minion(
     'Monstrous Macaw', CardClass.NEUTRAL, MinionRace.BEAST, 8, 6,
     cost=3, tier=3, is_golden=True
@@ -1065,13 +1033,11 @@ RAT_GOLDEN = Minion(
     tier=1, is_golden=True, purchasable=False
 )
 
-# TODO: Implement deathrattle (Summon a number of 1/1 Rats equal to this minion's Attack).
 RAT_PACK = Minion(
     'Rat Pack', CardClass.HUNTER, MinionRace.BEAST, 2, 2,
     cost=3, tier=3, rarity=CardRarity.EPIC,
     abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Summon a number of 2/2 Rats equal to this minion's Attack).
 RAT_PACK_GOLDEN = Minion(
     'Rat Pack', CardClass.HUNTER, MinionRace.BEAST, 4, 4,
     cost=3, tier=3, rarity=CardRarity.EPIC, is_golden=True,
@@ -1079,12 +1045,10 @@ RAT_PACK_GOLDEN = Minion(
 )
 
 # Demon Pool
-# TODO: Implement effect: Whenever this minion takes damage, summon a 1/1 Imp.
 IMP_GANG_BOSS = Minion(
     'Imp Gang Boss', CardClass.WARLOCK, MinionRace.DEMON, 2, 4,
     cost=3, tier=3
 )
-# TODO: Implement effect: Whenever this minion takes damage, summon a 2/2 Imp.
 IMP_GANG_BOSS_GOLDEN = Minion(
     'Imp Gang Boss', CardClass.WARLOCK, MinionRace.DEMON, 4, 8,
     cost=3, tier=3, is_golden=True
@@ -1149,12 +1113,10 @@ SOUL_DEVOURER_GOLDEN = Minion(
     _on_this_played=_soul_devourer_on_this_played
 )
 
-# TODO: Implement effect: After a friendly Demon dies, deal 3 damage to a random enemy minion.
 SOUL_JUGGLER = Minion(
     'Soul Juggler', CardClass.WARLOCK, MinionRace.NONE, 3, 3,
     cost=3, tier=3
 )
-# TODO: Implement effect: After a friendly Demon dies, deal 3 damage to a random enemy minion TWICE.
 SOUL_JUGGLER_GOLDEN = Minion(
     'Soul Juggler', CardClass.WARLOCK, MinionRace.NONE, 6, 6,
     cost=3, tier=3, is_golden=True
@@ -1273,12 +1235,10 @@ STASIS_ELEMENTAL_GOLDEN = Minion(
 )
 
 # Mech Pool
-# TODO: Implement effect: Whenever you summon a Mech during combat, gain +1 Attack and Divine Shield
 DEFLECT_O_BOT = Minion(
     'Deflect-o-Bot', CardClass.NEUTRAL, MinionRace.MECH, 3, 2,
     cost=4, tier=3, abilities=CardAbility.DIVINE_SHIELD
 )
-# TODO: Implement effect: Whenever you summon a Mech during combat, gain +2 Attack and Divine Shield
 DEFLECT_O_BOT_GOLDEN = Minion(
     'Deflect-o-Bot', CardClass.NEUTRAL, MinionRace.MECH, 6, 4,
     cost=4, tier=3, is_golden=True, abilities=CardAbility.DIVINE_SHIELD
@@ -1313,12 +1273,10 @@ IRON_SENSEI_GOLDEN = Minion(
     _on_end_turn=_iron_sensei_on_end_turn
 )
 
-# TODO: Implement deathrattle (Summon a random 2-cost minion).
 PILOTED_SHREDDER = Minion(
     'Piloted Shredder', CardClass.NEUTRAL, MinionRace.MECH, 4, 3,
     cost=4, tier=3, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Summon two random 2-cost minions).
 PILOTED_SHREDDER_GOLDEN = Minion(
     'Piloted Shredder', CardClass.NEUTRAL, MinionRace.MECH, 8, 6,
     cost=4, tier=3, is_golden=True, abilities=CardAbility.DEATH_RATTLE
@@ -1494,8 +1452,6 @@ SOUTHSEA_STRONGARM_GOLDEN = Minion(
 )
 
 # Neutral Pool
-# TODO: Implement effect: Whenever a friendly TAUNT minion is attacked,
-#       give it +2 Attack PERMANENTLY.
 # NOTE: This effect requires reading a trace of the battle from the C++ simulator,
 #       and then reflecting the changes in our game state representation.
 #       (since we need to update the attack of the minion for future combat)
@@ -1529,7 +1485,6 @@ def _khadgar_on_any_summoned(self: Minion, board: TavernGameBoard, summoned_mini
         board.summon_minion(minion, call_events=False)
 
 
-# TODO: Implement effect: Your cards that summon minions summon twice as many.
 # NOTE: This requires changing the C++ simulator as well, since this effect applies
 #       during the combat phase, as well as the recruitment phase.
 KHADGAR = Minion(
@@ -1543,13 +1498,11 @@ KHADGAR_GOLDEN = Minion(
     _on_any_summoned=_khadgar_on_any_summoned
 )
 
-# TODO: Implement deathrattle (Add a Gold Coin to your hand).
 # NOTE: This requires reading information from the C++ simulator.
 WARDEN_OF_OLD = Minion(
     'Warden of Old', CardClass.NEUTRAL, MinionRace.NEUTRAL, 3, 3,
     cost=4, tier=3, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Add 2 Gold Coins to your hand).
 WARDEN_OF_OLD_GOLDEN = Minion(
     'Warden of Old', CardClass.NEUTRAL, MinionRace.NEUTRAL, 6, 6,
     cost=4, tier=3, is_golden=True, abilities=CardAbility.DEATH_RATTLE
@@ -1560,7 +1513,6 @@ WARDEN_OF_OLD_GOLDEN = Minion(
 ################################################################################
 # Beast Pool
 
-# TODO: Implement effect: Also damages the minions next to whomever this attacks.
 CAVE_HYDRA = Minion(
     'Cave Hydra', CardClass.HUNTER, MinionRace.BEAST, 2, 4,
     cost=3, tier=4
@@ -1580,12 +1532,10 @@ HYENA_GOLDEN = Minion(
     cost=2, tier=1, is_golden=True, purchasable=False
 )
 
-# TODO: Implement deathrattle (Summon two 2/2 Hyenas).
 SAVANNAH_HIGHMANE = Minion(
     'Savannah Highmane', CardClass.HUNTER, MinionRace.BEAST, 6, 5,
     cost=6, tier=4, rarity=CardRarity.RARE, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Summon two 4/4 Hyenas).
 SAVANNAH_HIGHMANE_GOLDEN = Minion(
     'Savannah Highmane', CardClass.HUNTER, MinionRace.BEAST, 12, 10,
     cost=6, tier=4, rarity=CardRarity.RARE, is_golden=True,
@@ -1621,34 +1571,28 @@ VIRMEN_SENSEI_GOLDEN = Minion(
 
 # Demon Pool
 
-# TODO: Implement effect: After you summon a Demon, gain +1/+1 PERMANENTLY.
 BIGFERNAL = Minion(
     'Bigfernal', CardClass.NEUTRAL, MinionRace.DEMON, 4, 4,
     cost=5, tier=4
 )
-# TODO: Implement effect: After you summon a Demon, gain +2/+2 PERMANENTLY.
 BIGFERNAL_GOLDEN = Minion(
     'Bigfernal', CardClass.NEUTRAL, MinionRace.DEMON, 8, 8,
     cost=5, tier=4, is_golden=True
 )
 
-# TODO: Implement deathrattle (Summon two 3/2 imps).
 RING_MATRON = Minion(
     'Ring Matron', CardClass.WARLOCK, MinionRace.DEMON, 6, 4,
     cost=6, tier=4, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Summon two 6/4 imps).
 RING_MATRON_GOLDEN = Minion(
     'Ring Matron', CardClass.WARLOCK, MinionRace.DEMON, 12, 8,
     cost=6, tier=4, is_golden=True, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
 )
 
-# TODO: Implement effect: Your other demons have +1 Attack.
 SIEGEBREAKER = Minion(
     'Siegebreaker', CardClass.WARLOCK, MinionRace.DEMON, 5, 8,
     cost=7, tier=4, rarity=CardRarity.RARE, abilities=CardAbility.TAUNT
 )
-# TODO: Implement effect: Your other demons have +2 Attack.
 SIEGEBREAKER_GOLDEN = Minion(
     'Siegebreaker', CardClass.WARLOCK, MinionRace.DEMON, 10, 16,
     cost=7, tier=4, rarity=CardRarity.RARE, is_golden=True, abilities=CardAbility.TAUNT
@@ -1681,23 +1625,19 @@ COBALT_SCALEBANE_GOLDEN = Minion(
     _on_end_turn=_cobalt_scalebane_on_end_turn
 )
 
-# TODO: Implement effect: After a friendly minion loses Divine Shield, gain +2/+2.
 DRAKONID_ENFORCER = Minion(
     'Drakonid Enforcer', CardClass.NEUTRAL, MinionRace.DRAGON, 3, 6,
     cost=6, tier=4
 )
-# TODO: Implement effect: After a friendly minion loses Divine Shield, gain +4/+4.
 DRAKONID_ENFORCER_GOLDEN = Minion(
     'Drakonid Enforcer', CardClass.NEUTRAL, MinionRace.DRAGON, 6, 12,
     cost=6, tier=4, is_golden=True
 )
 
-# TODO: Implement overkill (Deal 3 damage to the left-most enemy minion).
 HERALD_OF_FLAME = Minion(
     'Herald of Flame', CardClass.WARLOCK, MinionRace.DRAGON, 5, 6,
     cost=5, tier=4
 )
-# TODO: Implement overkill (Deal 6 damage to the left-most enemy minion).
 HERALD_OF_FLAME_GOLDEN = Minion(
     'Herald of Flame', CardClass.WARLOCK, MinionRace.DRAGON, 10, 12,
     cost=5, tier=4, is_golden=True
@@ -1731,14 +1671,10 @@ MAJORDOMO_EXECUTUS_GOLDEN = Minion(
     _on_end_turn=_majordomo_executus_on_end_turn
 )
 
-# TODO: Implement effect: After this attacks and kills a minion,
-#       deal excess damage to a random adjacent minion.
 WILDFIRE_ELEMENTAL = Minion(
     'Wildfire Elemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 7, 3,
     cost=6, tier=4
 )
-# TODO: Implement effect: After this attacks and kills a minion,
-#       deal excess damage to both adjacent minions.
 WILDFIRE_ELEMENTAL_GOLDEN = Minion(
     'Wildfire Elemental', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 14, 6,
     cost=6, tier=4, is_golden=True
@@ -1766,12 +1702,10 @@ ROBOSAUR_GOLDEN = Minion(
     cost=8, tier=1, is_golden=True, purchasable=False
 )
 
-# TODO: Implement deathrattle (Summon an 8/8 Robosaur).
 MECHANO_EGG = Minion(
     'Mechano-Egg', CardClass.PALADIN, MinionRace.MECH, 0, 5,
     cost=5, tier=4, abilities=CardAbility.DEATH_RATTLE
 )
-# TODO: Implement deathrattle (Summon an 16/16 Robosaur).
 MECHANO_EGG_GOLDEN = Minion(
     'Mechano-Egg', CardClass.PALADIN, MinionRace.MECH, 0, 10,
     cost=5, tier=4, is_golden=True, abilities=CardAbility.DEATH_RATTLE
@@ -1787,20 +1721,16 @@ GUARD_BOT_GOLDEN = Minion(
     cost=2, tier=1, purchasable=False, is_golden=True, abilities=CardAbility.TAUNT
 )
 
-# TODO: Implement effect (Whenever this minion takes damage, summon a 2/3 Mech with Taunt).
 SECURITY_ROVER = Minion(
     'Security Rover', CardClass.WARLOCK, MinionRace.MECH, 2, 6,
     cost=6, tier=4
 )
-# TODO: Implement effect (Whenever this minion takes damage, summon a 4/6 Mech with Taunt).
 SECURITY_ROVER_GOLDEN = Minion(
     'Security Rover', CardClass.WARLOCK, MinionRace.MECH, 4, 12,
     cost=6, tier=4, is_golden=True
 )
 
 # Murloc Pool
-
-# TODO: Implement battlecry (If you control another Murloc, DISCOVER a Murloc).
 # NOTE: Discover is a tricky thing to implement, so we will probably skip it!
 #
 # See https://www.reddit.com/r/hearthstone/comments/dzgrea/discover_mechanic/
@@ -1811,7 +1741,6 @@ PRIMALFIN_LOOKOUT = Minion(
     cost=3, tier=4, abilities=CardAbility.BATTLECRY,
     # _on_this_played=???
 )
-# TODO: Implement battlecry (If you control another Murloc, DISCOVER two Murlocs).
 PRIMALFIN_LOOKOUT_GOLDEN = Minion(
     'Primalfin Lookout', CardClass.NEUTRAL, MinionRace.MURLOC, 6, 4,
     cost=3, tier=4, is_golden=True, abilities=CardAbility.BATTLECRY,
@@ -1866,36 +1795,30 @@ GOLDGRUBBER_GOLDEN = Minion(
     _on_end_turn=_goldgrubber_on_end_turn
 )
 
-# TODO: Implement effect: Whenever another friendly Pirate attacks, give it +2/+2.
 RIPSNARL_CAPTAIN = Minion(
     'Ripsnarl Captain', CardClass.NEUTRAL, MinionRace.PIRATE, 4, 5,
     cost=4, tier=4
 )
-# TODO: Implement effect: Whenever another friendly Pirate attacks, give it +4/+4.
 RIPSNARL_CAPTAIN_GOLDEN = Minion(
     'Ripsnarl Captain', CardClass.NEUTRAL, MinionRace.PIRATE, 8, 10,
     cost=4, tier=4, is_golden=True
 )
 
 # Neutral Pool
-# TODO: Implement effect: After a friendly minion loses Divine Shield, gain +2 Attack.
 BOLVAR_FIREBLOOD = Minion(
     'Bolvar, Fireblood', CardClass.PALADIN, MinionRace.NONE, 1, 7,
     cost=5, tier=4, rarity=CardRarity.LEGENDARY, abilities=CardAbility.DIVINE_SHIELD
 )
-# TODO: Implement effect: After a friendly minion loses Divine Shield, gain +4 Attack.
 BOLVAR_FIREBLOOD_GOLDEN = Minion(
     'Bolvar, Fireblood', CardClass.PALADIN, MinionRace.NONE, 2, 14,
     cost=5, tier=4, rarity=CardRarity.LEGENDARY, is_golden=True,
     abilities=CardAbility.DIVINE_SHIELD
 )
 
-# TODO: Implement effect: Whenever a friendly Taunt minion is attacked, gain +1/+1 PERMANENTLY.
 CHAMPION_OF_YSHAARJ = Minion(
     'Champion of Y\'Shaarj', CardClass.NEUTRAL, MinionRace.NONE, 4, 4,
     cost=4, tier=4
 )
-# TODO: Implement effect: Whenever a friendly Taunt minion is attacked, gain +2/+2 PERMANENTLY.
 CHAMPION_OF_YSHAARJ_GOLDEN = Minion(
     'Champion of Y\'Shaarj', CardClass.NEUTRAL, MinionRace.NONE, 8, 8,
     cost=4, tier=4, is_golden=True
@@ -1961,12 +1884,10 @@ MENAGERIE_JUG_GOLDEN = Minion(
     _on_this_played=_managerie_jug_on_this_played
 )
 
-# TODO: Implement effect: After a friendly minion with Taunt dies, give its neighbours +2/+2.
 QIRAJI_HARBINGER = Minion(
     'Qiraji Harbinger', CardClass.NEUTRAL, MinionRace.NONE, 5, 5,
     cost=6, tier=4
 )
-# TODO: Implement effect: After a friendly minion with Taunt dies, give its neighbours +4/+4.
 QIRAJI_HARBINGER_GOLDEN = Minion(
     'Qiraji Harbinger', CardClass.NEUTRAL, MinionRace.NONE, 10, 10,
     cost=6, tier=4, is_golden=True
@@ -1987,7 +1908,6 @@ IRONHIDE_RUNT_GOLDEN = Minion(
     cost=5, tier=1, is_golden=True, purchasable=False
 )
 
-# TODO: Implement overkill (summon a 5/5 Ironhide Runt) How do i do this without knowing overkill
 IRONHIDE_DIREHORN = Minion(
     'Ironhide Direhorn', CardClass.DRUID, MinionRace.BEAST, 7, 7,
     cost=7, tier=5
@@ -2029,7 +1949,6 @@ def _annihilian_battlemaster_on_any_played(self: Minion, board: TavernGameBoard)
     """Handle the effect for the Annihilan Battlemaster minion.
     Effect: Gain +1 (+2 if Golden) Health for each damage your hero has taken.
     """
-    # TODO: is hero health even 40 always at the start
     to_gain = 40 - board.hero_health
     if self.is_golden:
         buff = Buff(2 * to_gain, 0, CardAbility.NONE)
@@ -2051,7 +1970,6 @@ ANNIHILAN_BATTLEMASTER_GOLDEN = Minion(
     _on_this_played=_annihilian_battlemaster_on_any_played
 )
 
-# TODO: Implement effect: your other demons have a +2/+2 and your hero is immune
 MAL_GANIS = Minion(
     'Mal\'Ganis', CardClass.WARLOCK, MinionRace.DEMON, 9, 7,
     cost=9, tier=5, rarity=CardRarity.LEGENDARY,
@@ -2073,7 +1991,6 @@ VOIDWALKER_GOLDEN = Minion(
     cost=1, tier=1, abilities=CardAbility.TAUNT, purchasable=False
 )
 
-# TODO: Deathrattle: summon three 1/3 (2/6 if golden) demons with taunt
 VOIDLORD = Minion(
     'Voidlord', CardClass.WARLOCK, MinionRace.DEMON, 3, 9,
     cost=9, tier=5, rarity=CardRarity.EPIC,
@@ -2087,13 +2004,11 @@ VOIDLORD_GOLDEN = Minion(
 )
 
 # Dragon Pool
-# TODO: Implement effect: Battlecry: Add a minion from your last opponent's warband to your hand
 MUROZOND = Minion(
     'Murozond', CardClass.NEUTRAL, MinionRace.DRAGON, 5, 5,
     cost=7, tier=5, abilities=CardAbility.BATTLECRY
 )
 
-# TODO: and make the added card golden
 MUROZOND_GOLDEN = Minion(
     'Murozond', CardClass.NEUTRAL, MinionRace.DRAGON, 10, 10,
     cost=7, tier=5, is_golden=True, abilities=CardAbility.BATTLECRY
@@ -2124,13 +2039,11 @@ RAZORGORE_THE_UNTAMED_GOLDEN = Minion(
 
 # Elemental Pool
 
-
 def _nomi_on_any_played(self: Minion, board: TavernGameBoard, played_minion: Minion) -> None:
     """Handle the effect for the Nomi, Kitchen Nightmare minion.
     Effect: After you play an Elemental, Elementals in Bob's Tavern have +1/+1 (or +2/+2 if golden)
     for the rest of the game.
     """
-    # TODO: do i need if played_minion is self also this probably isnt right
     if MinionRace.ELEMENTAL not in played_minion.race:
         return
     for minion in board.get_minions_on_board(race=MinionRace.ELEMENTAL):
@@ -2177,7 +2090,6 @@ TAVERN_TEMPEST_GOLD = Minion(
 )
 
 # Mech Pool
-# TODO: Implement effect: whenever a friendly Mech dies, gain +2/+2 (+4/+4 if golden)
 JUNKBOT = Minion(
     "Junkbot", CardClass.NEUTRAL, MinionRace.MECH, 1, 5,
     cost=5, tier=5
@@ -2188,7 +2100,6 @@ JUNKBOT_GOLDEN = Minion(
     cost=5, tier=5, is_golden=True
 )
 
-# TODO: Implement deathrattle (Summon a random legendary minion) or 2
 SNEED_OLD_SHREDDER = Minion(
     "Sneed's Old Shredder", CardClass.NEUTRAL, MinionRace.MECH, 5, 7,
     cost=8, tier=5, rarity=CardRarity.LEGENDARY,
@@ -2213,7 +2124,6 @@ def _king_bargurgle_on_this_played(self: Minion, board: TavernGameBoard) -> None
         minion.add_buff(Buff(additional, additional, CardAbility.NONE))
 
 
-# TODO: Handle the deathrattle effect (same as battlecry effect)
 KING_BAGURGLE = Minion(
     "King Bargurgle", CardClass.NEUTRAL, MinionRace.MURLOC, 6, 3,
     cost=6, tier=5, rarity=CardRarity.LEGENDARY,
@@ -2229,7 +2139,6 @@ KING_BAGURGLE_GOLDEN = Minion(
 )
 
 # Pirate Pool
-# TODO: implement effect: after you buy a pirate, gain 1 gold this turn only
 CAPN_HOGGARR = Minion(
     'Cap\'n Hoggarr', CardClass.NEUTRAL, MinionRace.PIRATE, 6, 6,
     cost=6, tier=5
@@ -2240,7 +2149,6 @@ CAPN_HOGGARR_GOLDEN = Minion(
     cost=6, tier=5, is_golden=True
 )
 
-# TODO: Implement effect: When this attacks and kills a minion, add a random minion to your hand
 NAT_PAGLE = Minion(
     'Nat Pagle, Extreme Angler', CardClass.NEUTRAL, MinionRace.PIRATE, 8, 5,
     cost=7, tier=5
@@ -2251,7 +2159,6 @@ NAT_PAGLE_GOLDEN = Minion(
     cost=7, tier=5, is_golden=True
 )
 
-# TODO: Implement Overkill: Gives your other Pirates +2/+2 (+4/+4 if golden)
 SEABREAKER_GOLIATH = Minion(
     'Seabreaker Goliath', CardClass.NEUTRAL, MinionRace.PIRATE, 6, 7,
     cost=7, tier=5, abilities=CardAbility.WINDFURY
@@ -2263,7 +2170,6 @@ SEABREAKER_GOLIATH_GOLDEN = Minion(
 )
 
 # Neutral
-# TODO: Implement effect: your minions trigger their Death rattles twice (thrice for golden)
 BARON_RIVENDARE = Minion(
     'Baron Rivendare', CardClass.NEUTRAL, MinionRace.NEUTRAL, 1, 7,
     cost=4, tier=5, rarity=CardRarity.LEGENDARY
@@ -2274,7 +2180,6 @@ BARON_RIVENDARE_GOLDEN = Minion(
     cost=4, tier=5, is_golden=True, rarity=CardRarity.LEGENDARY
 )
 
-# TODO: implement effect your battlecries trigger twice
 BRANN_BRONZEBEARD = Minion(
     'Brann Bronzebeard', CardClass.NEUTRAL, MinionRace.NEUTRAL, 2, 4,
     cost=3, tier=5, rarity=CardRarity.LEGENDARY
@@ -2295,7 +2200,6 @@ DEADLY_SPORE_GOLDEN = Minion(
     cost=4, tier=5, is_golden=True, abilities=CardAbility.POISONOUS
 )
 
-# TODO: Battlecry: choose minion in Bob's tavern and transform into a plain/golden copy of it
 FACELESS_TAVERNGOER = Minion(
     'Faceless Taverngoer', CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 4,
     cost=4, tier=5, abilities=CardAbility.BATTLECRY
@@ -2325,7 +2229,6 @@ def _lightfang_enforcer_on_end_turn(self: Minion, board: TavernGameBoard) -> Non
             minion.add_buff(Buff(2, 2, CardAbility.NONE))
 
 
-# TODO: look over the function
 LIGHTFANG_ENFORCER = Minion(
     'Lightfang Enforcer', CardClass.NEUTRAL, MinionRace.NEUTRAL, 2, 2,
     cost=6, tier=5,
@@ -2354,7 +2257,6 @@ def _mythrax_on_end_turn(self: Minion, board: TavernGameBoard) -> None:
     self.add_buff(Buff(multiplier * base_buff, multiplier * base_buff * 2, CardAbility.NONE))
 
 
-# TODO: aint no way i did that function right
 MYTHRAX_THE_UNRAVELER = Minion(
     'Mythrax the Unraveler', CardClass.NEUTRAL, MinionRace.NEUTRAL, 4, 4,
     cost=5, tier=5,
@@ -2372,7 +2274,6 @@ def _strongshell_scavenger_on_this_played(self: Minion, board: TavernGameBoard) 
     """Handle the battlecry effect for the Strongshell Scavenger minion.
     Effect: Give your Taunt minions +2/+2 (+4/+4 if golden)
     """
-    # TODO: THIS IS NOT CORRECT PLESAE FIX I DONT KNOW HOW TO GET ALL THE TAUNT MINIONS
     additional = 4 if self.is_golden else 2
     minions = board.get_minions_on_board(abilities=CardAbility.TAUNT)
     for minion in minions:
@@ -2395,8 +2296,6 @@ STRONGSHELL_SCAVENGER_GOLDEN = Minion(
 # Tier 6 cards
 ################################################################################
 # Beast Pool
-# TODO: Add random ability if needed
-# TODO: Implement effect: Deathrattle: summon 2(4) random deathrattle minions
 GHASTCOILER = Minion(
     'Ghastcoiler', CardClass.PRIEST, MinionRace.BEAST, 7, 7,
     cost=6, tier=6, abilities=CardAbility.DEATH_RATTLE
@@ -2407,7 +2306,6 @@ GHASTCOILER_GOLDEN = Minion(
     cost=6, tier=6, is_golden=True, abilities=CardAbility.DEATH_RATTLE
 )
 
-# TODO: Implement Deathrattle: Give your beasts +5/+5 (+10/+10)
 GOLDRINN = Minion(
     'Goldrinn, the Great Wolf', CardClass.NEUTRAL, MinionRace.BEAST, 4, 4,
     cost=8, rarity=CardRarity.LEGENDARY, tier=6, abilities=CardAbility.DEATH_RATTLE
@@ -2429,7 +2327,6 @@ MAEXXNA_GOLD = Minion(
 )
 
 # Demon Pool
-# TODO: Implement whenever this minion takes damage, summon 1(2) random Demon and give taunt
 IMP_MAMA = Minion(
     'Imp Mama', CardClass.NEUTRAL, MinionRace.DEMON, 6, 10,
     cost=8, tier=6
@@ -2467,7 +2364,6 @@ KALECGOS_GOLDEN = Minion(
     _on_any_played=_kalecgos_on_any_played
 )
 
-# TODO: Implement Deathrattle: Give your dragons divine shield
 NADINA_THE_RED = Minion(
     'Nadina the Red', CardClass.NEUTRAL, MinionRace.DRAGON, 7, 4,
     cost=6, tier=6, abilities=CardAbility.DEATH_RATTLE
@@ -2479,7 +2375,6 @@ NADINA_THE_RED_GOLDEN = Minion(
 )
 
 # Elemental Pool
-# TODO: Implement deathrattle: summon another(or 2) random elemental and add copy of it to your hand
 GENTLE_DJINNI = Minion(
     'Gentle Djinni', CardClass.NEUTRAL, MinionRace.ELEMENTAL, 4, 5,
     cost=6, tier=6, abilities=CardAbility.TAUNT | CardAbility.DEATH_RATTLE
@@ -2543,7 +2438,6 @@ LIL_RAG_GOLDEN = Minion(
 )
 
 # Mech Pool
-# TODO: Implement effect: Also damages the minions next to whomever it attacks.
 FOE_REAPER_4000 = Minion(
     'Foe Reaper 4000', CardClass.NEUTRAL, MinionRace.MECH, 6, 9,
     cost=8, rarity=CardRarity.LEGENDARY, tier=6
@@ -2554,7 +2448,6 @@ FOE_REAPER_4000_GOLDEN = Minion(
     cost=8, rarity=CardRarity.LEGENDARY, tier=6, is_golden=True
 )
 
-# TODO: Implement Deathrattle: summon the first 2 (or 4) friendly mechs that died this combat
 KANGORS_APPRENTICE = Minion(
     'Kangor\'s Apprentice', CardClass.NEUTRAL, MinionRace.MECH, 4, 8,
     cost=9, rarity=CardRarity.EPIC, tier=6, abilities=CardAbility.DEATH_RATTLE
@@ -2566,7 +2459,6 @@ KANGORS_APPRENTICE_GOLDEN = Minion(
 )
 
 # Pirate Pool
-# TODO: Whenever a friendly pirate attacks, give all friednly minions +2/+1 (+4/+2)
 DREAD_ADMIRAL_ELIZA = Minion(
     'Dread Admiral Eliza', CardClass.NEUTRAL, MinionRace.PIRATE, 6, 7,
     cost=6, tier=6
@@ -2577,7 +2469,6 @@ DREAD_ADMIRAL_ELIZA_GOLDEN = Minion(
     cost=6, tier=6, is_golden=True
 )
 
-# TODO: Implement deathrattle: summon 3 (or 6) random Pirates
 THE_TIDE_RAZOR = Minion(
     'The Tide Razor', CardClass.NEUTRAL, MinionRace.PIRATE, 6, 4,
     cost=7, tier=6, abilities=CardAbility.DEATH_RATTLE
@@ -2589,8 +2480,6 @@ THE_TIDE_RAZOR_GOLDEN = Minion(
 )
 
 # Neutral Pool
-# TODO: Implement battlecry: for each different minion type you have among other minions,
-# TODO: adapt randomly (or adapt randomly twice???) (Also implement adapt ability?)
 AMALGADON = Minion(
     'Amalgadon', CardClass.NEUTRAL, MinionRace.ALL, 6, 6,
     cost=8, tier=6, abilities=CardAbility.BATTLECRY
@@ -2601,7 +2490,6 @@ AMALGADON_GOLDEN = Minion(
     cost=8, tier=6, is_golden=True, abilities=CardAbility.BATTLECRY
 )
 
-# TODO: implement ability: this minion always attacks the enemy minion with lowest Attack
 ZAPP_SLYWICK = Minion(
     'Zapp Slywick', CardClass.NEUTRAL, MinionRace.NEUTRAL, 7, 10,
     cost=8, rarity=CardRarity.LEGENDARY, tier=6, abilities=CardAbility.WINDFURY
