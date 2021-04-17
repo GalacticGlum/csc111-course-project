@@ -50,50 +50,6 @@ class CardRarity(Enum):
             return None
 
 
-class CardAbility(Flag):
-    """A special affect, power, or behaviour found on cards."""
-    NONE = 0
-    TAUNT = auto()
-    DIVINE_SHIELD = auto()
-    POISONOUS = auto()
-    WINDFURY = auto()
-    MEGA_WINDFURY = auto()
-    BATTLECRY = auto()
-    DEATH_RATTLE = auto()
-    START_OF_COMBAT = auto()
-    SUMMON = auto()
-    GENERATE = auto()
-    REBORN = auto()
-    CHARGE = auto()
-    MAGNETIC = auto()
-    OVERKILL = auto()
-    DISCOVER = auto()
-
-    def as_format_str(self) -> str:
-        """Return this CardAbility as a properly formatted string.
-
-        >>> CardAbility.NONE.as_format_str()
-        'None'
-        >>> CardAbility.START_OF_COMBAT.as_format_str()
-        'Start Of Combat'
-        >>> CardAbility.MEGA_WINDFURY.as_format_str()
-        'Mega Windfury'
-        """
-        name = self.name.replace('_', ' ')
-        parts = name.split()
-        return ' '.join(x[0].upper() + x[1:].lower() for x in parts)
-
-
-# A list of abilities that are also mechanics
-MECHANIC_ABILITIES = [
-    CardAbility.TAUNT,
-    CardAbility.DIVINE_SHIELD,
-    CardAbility.POISONOUS,
-    CardAbility.WINDFURY,
-    CardAbility.REBORN
-]
-
-
 class MinionRace(Flag):
     """The race of the minion."""
     NONE = 0
@@ -115,6 +71,43 @@ class MinionRace(Flag):
             return cls[name]
         except KeyError:
             return None
+
+
+class CardAbility(Flag):
+    """A special affect, power, or behaviour found on cards."""
+    NONE = 0
+    TAUNT = auto()
+    DIVINE_SHIELD = auto()
+    POISONOUS = auto()
+    WINDFURY = auto()
+    MEGA_WINDFURY = auto()
+    BATTLECRY = auto()
+    DEATH_RATTLE = auto()
+    REBORN = auto()
+
+    def as_format_str(self) -> str:
+        """Return this CardAbility as a properly formatted string.
+
+        >>> CardAbility.NONE.as_format_str()
+        'None'
+        >>> CardAbility.DIVINE_SHIELD.as_format_str()
+        'Divine Shield'
+        >>> CardAbility.MEGA_WINDFURY.as_format_str()
+        'Mega Windfury'
+        """
+        name = self.name.replace('_', ' ')
+        parts = name.split()
+        return ' '.join(x[0].upper() + x[1:].lower() for x in parts)
+
+
+# A list of abilities that are also mechanics
+MECHANIC_ABILITIES = [
+    CardAbility.TAUNT,
+    CardAbility.DIVINE_SHIELD,
+    CardAbility.POISONOUS,
+    CardAbility.WINDFURY,
+    CardAbility.REBORN
+]
 
 
 @dataclass
@@ -202,10 +195,10 @@ class Minion:
     @property
     def current_abilities(self) -> CardAbility:
         """Return the current abilities of this minion (including buffs)."""
-        current_abilities = self.abilities
+        result = self.abilities
         for buff in self._buffs:
-            current_abilities |= buff.abilities
-        return current_abilities
+            result |= buff.abilities
+        return result
 
     def add_buff(self, buff: Buff) -> None:
         """Apply the given buff to this minion whose source is the given minion.
@@ -304,13 +297,13 @@ class Minion:
         """Return a string representation of this minion.
 
         >>> from hsbg import minions
-        >>> from hsbg.models import CardAbility, Buff
+        >>> from hsbg.models import CardAbility
         >>> str(minions.MURLOC_SCOUT)
         '1/1 Murloc Scout'
         >>> minion = minions.CRYSTAL_WEAVER.clone()
         >>> minion.add_buff(Buff(10, 3, CardAbility.TAUNT))
         >>> str(minion)
-        '15/7 Crystalweaver, Taunt'
+        '15/7 Crystalweaver, taunt'
         """
         buffs = [
             ability.as_format_str().lower() for ability in MECHANIC_ABILITIES
@@ -320,12 +313,6 @@ class Minion:
         name = ('golden ' if self.is_golden else '') + self.name
         name_and_buffs = ', '.join([name] + buffs)
         return f'{self.current_attack}/{self.current_health} {name_and_buffs}'
-
-    # def __deepcopy__(self, memo: dict) -> Minion:
-    #     """Deepcopy this Minion."""
-    #     minion_copy = self.clone()
-    #     memo[id(self)] = minion_copy
-    #     return minion_copy
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@
 This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 from __future__ import annotations
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Iterable, Tuple, List, Dict, Callable, Optional, Union
 
@@ -169,6 +170,16 @@ def parallel_map(iterables: Union[list, iter], function: callable, n_jobs: Optio
                 _add_func(exception, output)
 
     return output
+
+
+def get_seed() -> int:
+    """Make a seed from the current time.
+    Source: https://stackoverflow.com/a/45573061/7614083
+    """
+    t = int(time.time() * 1000.0)
+    seed = ((t & 0xff000000) >> 24) + ((t & 0x00ff0000) >> 8) + ((t & 0x0000ff00) <<  8) + ((t & 0x000000ff) << 24)
+    return seed
+
 
 def colourise_string(string: str, colour: str) -> str:
     """Return a string with a stdout colour format."""

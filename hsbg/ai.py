@@ -2,6 +2,7 @@
 This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 from __future__ import annotations
+import json
 import copy
 import time
 import math
@@ -9,11 +10,14 @@ import random
 from queue import Queue
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Tuple, List, FrozenSet, Set, Callable, Optional
+from typing import Tuple, List, FrozenSet, Set, Callable, Optional, Union
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 import dill as pickle
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
+from hsbg.utils import get_seed
 from hsbg import BattlegroundsGame, TavernGameBoard, Move, Action
 from hsbg.visualisation import init_display, flip_display, close_display, draw_game
 
@@ -147,8 +151,11 @@ class _GameTree:
 
     def get_uct(self, exploration_weight: float = 2**0.5) -> float:
         """Return the upper confidence bound for this tree."""
-        exploration_coefficient = math.sqrt(math.log(self.visit_count) / self.visit_count)
-        return self.average_reward + exploration_weight * exploration_coefficient
+        if self.visit_count == 0:
+            return 0
+        else:
+            exploration_coefficient = math.sqrt(math.log(self.visit_count) / self.visit_count)
+            return self.average_reward + exploration_weight * exploration_coefficient
 
     def uct_select(self) -> _GameTree:
         """Return a subtree of this tree which maximizes the upper confidence bound."""
@@ -284,6 +291,7 @@ class MonteCarloTreeSearcher:
         if game.is_done:
             raise ValueError(f'choose called on a game state that is done {game}')
 
+        # Get the tree corresponding to the game board of the friendly player
         tree = self.get_tree_from_board(game.boards[self._friendly_player])
         if tree is None:
             raise ValueError('the given board state is not a node of the tree')
@@ -304,39 +312,42 @@ class MonteCarloTreeSearcher:
             raise ValueError(f'rollout called on a game state that is done {game}')
 
         tree = self.get_tree_from_board(game.boards[self._friendly_player])
+        if tree is None:
+            print('rollout was given a game state that is not a node of the tree')
+            return
+
         path = tree.select()
         leaf = path[-1]
         leaf.expand()
-
-        game = copy.deepcopy(game)
-        game.clear_turn_completion()
-        game.start_turn_for_player(self._friendly_player)
-        for node in path:
-            if node.move is None:
-                continue
-            random.seed(node.seed)
-            game.make_move(node.move)
-            if game.has_completed_turn(self._friendly_player):
-                for index in game.incomplete_turn_players:
-                    game.start_turn_for_player(index)
-                    while game.is_turn_in_progress:
-                        move = random.choice(game.get_valid_moves())
-                        game.make_move(move)
-                game.next_round()
-                if not game.has_completed_turn(self._friendly_player):
-                    game.start_turn_for_player(self._friendly_player)
-
-        reward = self._simulate(game)
+        reward = self._simulate(copy.deepcopy(game), path)
         MonteCarloTreeSearcher._backpropagate(path, reward)
 
-    def _simulate(self, game: BattlegroundsGame) -> int:
-        """Return the reward for a random simulation of the given game until completion."""
+    def _simulate(self, game: BattlegroundsGame, path: Optional[List[_GameTree]] = None) -> int:
+        """Return the reward for a random simulation of the given game until completion.
+
+        Args:
+            game: The game to simulate from.
+            path: A path of nodes for the friendly player to apply before assuming a random policy.
+        """
         game.clear_turn_completion()
+        current_node_index = 0
+
         while game.winner is None:
             for index in game.alive_players:
                 game.start_turn_for_player(index)
                 while game.is_turn_in_progress:
-                    move = random.choice(game.get_valid_moves())
+                    move = None
+                    # If we are the friendly player, and we have nodes left, use the next element
+                    # from the list of nodes (the path).
+                    has_node_left = path is not None and current_node_index < len(path)
+                    if game.active_player == self._friendly_player and has_node_left:
+                        move = path[current_node_index].move
+                        # Apply the seed for that node
+                        random.seed(path[current_node_index].seed)
+                        current_node_index += 1
+                    # Otherwise, play randomly.
+                    if move is None:
+                        move = random.choice(game.get_valid_moves())
                     game.make_move(move)
             game.next_round()
 
@@ -364,14 +375,6 @@ class MonteCarloTreeSearcher:
                 q.put(subtree)
         return None
 
-        # Get the move that led to this state
-        # move_history = game._move_history[self._friendly_player]
-        # if move_history:
-        #     move = move_history[-1]
-        # else:
-        #     move = None
-        # return _GameTree(game.boards[self._friendly_player], move, seed=self._game_tree._seed)
-
     def save(self, filepath: Path) -> None:
         """Save the state of this MonteCarloTreeSearcher to a file."""
         with open(filepath, 'wb+') as fp:
@@ -389,13 +392,21 @@ class MCTSPlayer(Player):
     # Private Instance Attributes
     #   - _mcts: The Montre Carlo tree searcher.
     #   - _iterations: The number of rollouts to perform before making a move.
-    #   - _warmup_iterations: The number of rollouts to perform before making a move.
+    #   - _player_index: The index of this player.
+    #   - _previous_move_same_count: The number of times the same move has been made.
+    #   - _previous_move_same_count: The previous move made.
     _mcts: MonteCarloTreeSearcher
     _iterations: int
     _warmup_iterations: int
+    _player_index: int
+    _previous_move_same_count: int
+    _previous_move: Move
+    _cutoff_factor: int
+    _cutoff: bool
 
-    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 50,
-                 warmup_iterations: int = 0, mcts: Optional[MonteCarloTreeSearcher] = None) -> None:
+    def __init__(self, index: int, exploration_weight: float = 2**0.5, iterations: int = 5,
+                 mcts: Optional[MonteCarloTreeSearcher] = None, cutoff_factor: int = 10,
+                 seed: int = None) -> None:
         """Initialise this MCTSPlayer.
 
         Preconditions:
@@ -406,15 +417,23 @@ class MCTSPlayer(Player):
             index: The index of this player.
             exploration_weight: Exploration weight in the UCT bound.
             iterations: The number of rollouts to perform before making a move.
-            warmup_iterations: The number of rollouts to perform when initialising the tree.
             mcts: The MonteCarloTreeSearcher instance to use. If None, initialises one instead.
         """
+        if seed is None:
+            seed = get_seed()
+
         if mcts is None:
-            self._mcts = MonteCarloTreeSearcher(index, exploration_weight=exploration_weight)
+            self._mcts = MonteCarloTreeSearcher(index, exploration_weight=exploration_weight,
+                                                seed=seed)
         else:
             self._mcts = mcts
+
         self._iterations = iterations
-        self._warmup_iterations = warmup_iterations
+        self._player_index = index
+        self._previous_move_same_count = 0
+        self._previous_move = None
+        self._cutoff_factor = cutoff_factor
+        self._cutoff = False
 
     def make_move(self, game: BattlegroundsGame) -> Move:
         """Make a move given the current game.
@@ -422,29 +441,42 @@ class MCTSPlayer(Player):
         Preconditions:
             - There is at least one valid move for the given game
         """
-        # if game._previous_move is None:
-        #     self._train(game, self._warmup_iterations)
-        self._train(game, self._iterations)
-        tree = self._mcts.choose(game)
-        print('chose: ', tree.move)
-        random.seed(tree.seed)
-        return tree.move
+        if not self._cutoff:
+            self._train(game, self._iterations)
+            tree = self._mcts.choose(game)
+
+            # Update previous move
+            if tree.move == self._previous_move:
+                self._previous_move_same_count += 1
+            else:
+                self._previous_move_same_count = 0
+            self._previous_move = tree.move
+
+            # Update cutoff
+            if self._previous_move_same_count >= self._cutoff_factor:
+                self._cutoff = True
+
+            # Make move in a copy
+            random.seed(tree.seed)
+            game_copy = game.copy_and_make_move(tree.move)
+
+            # Update the tree with the latest game nodes
+            state = _DeterministicTavernGameBoard.from_board(game.boards[self._player_index])
+            if tree._deterministic_state != state:
+                tree.add_subtree(_GameTree(game_copy.boards[self._player_index], tree.move, seed=tree.seed))
+
+            random.seed(tree.seed)
+            return tree.move
+        else:
+            # Act like a random player if we have reached the cutoff`
+            return random.choice(game.get_valid_moves())
 
     def _train(self, game: BattlegroundsGame, n_iterations: int) -> None:
         """Train the Monte Carlo tree searcher by performing the given amount of rollouts
         from the given game state.
         """
-        if n_iterations == 0:
-            return
-
-        start_time = time.time()
         for _ in range(n_iterations):
-            print(f'rolling out on {game.active_player}')
             self._mcts.rollout(game)
-        elapsed_time = time.time() - start_time
-        print('Finished rollout in {:.2f} seconds ({:.2f} seconds per rollout)'.format(
-            elapsed_time, elapsed_time / n_iterations
-        ))
 
 
 class GreedyPlayer(Player):
@@ -509,18 +541,51 @@ class GreedyPlayer(Player):
         return reward
 
 
-def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: bool = False) \
-        -> None:
-    """Run n games using the given Players.
+def run_games(n: int, players: List[Player], show_stats: bool = True, friendly_player: int = 0) \
+        -> List[int]:
+    """Run n games using the given Players in parallel.
+    Return a list of the winners.
+
+    Args:
+        n: The number of games to run.
+        players: A list of players to run the games with.
+        show_stats: Whether to display summary statistics about the games.
+        friendly_player: The index of the friendly player.
+        seed: THE seed.
+
+    Preconditions:
+        - n >= 1
+        - len(players) > 0 and len(players) % 2 == 0
+    """
+    stats = {i: 0 for i in range(len(players))}
+    results = [None] * n
+
+    for game_index in range(n):
+        winner, _ = run_game(players)
+        stats[winner] += 1
+        results[game_index] = winner
+        print(f'Game {game_index + 1} winner: Player {winner + 1}')
+
+    for player in stats:
+        print(f'Player {player}: {stats[player]}/{n} ({100.0 * stats[player] / n:.2f}%)')
+
+    if show_stats:
+        plot_game_statistics(results, friendly_player)
+
+    return results
+
+
+def run_games_parallel(n: int, players: List[Player], n_jobs: int = 9, use_thread_pool: bool = False,
+                      show_stats: bool = True, friendly_player: int = 0, seed: int = None) -> None:
+    """Run n games using the given Players in parallel.
 
     Args:
         n: The number of games to run.
         players: A list of players to run the games with.
         n_jobs: The number of games to run in parallel.
-        use_thread_pool: Whether to use the thread pool or process pool executor.
-
-                        Note that when using a process pool executor, this function
-                        must be guarded by ``if __name__ == '__main__':``.
+        show_stats: Whether to display summary statistics about the games.
+        friendly_player: The index of the friendly player.
+        seed: THE seed.
 
     Preconditions:
         - n >= 1
@@ -528,20 +593,28 @@ def run_games(n: int, players: List[Player], n_jobs: int = 1, use_thread_pool: b
         - n_jobs >= 1
     """
     stats = {i: 0 for i in range(len(players))}
+    results = [None] * n
 
     Executor = ThreadPoolExecutor if use_thread_pool else ProcessPoolExecutor
     with Executor(max_workers=n_jobs) as pool:
+        if seed is not None:
+            # Initialise this seed
+            random.seed(seed)
         futures = [pool.submit(run_game, copy.deepcopy(players)) for _ in range(n)]
         for game_index, future in enumerate(as_completed(futures)):
             winner, _ = future.result()
             stats[winner] += 1
+            results[game_index] = winner
             print(f'Game {game_index + 1} winner: Player {winner + 1}')
 
     for player in stats:
         print(f'Player {player}: {stats[player]}/{n} ({100.0 * stats[player] / n:.2f}%)')
 
+    if show_stats:
+        plot_game_statistics(results, friendly_player)
 
-def run_game(players: List[Player], seed: int = None, visualise: bool = False, fps: int = 5) \
+
+def run_game(players: List[Player], visualise: bool = False, fps: int = 5) \
         -> Tuple[int, List[Tuple[int, Move]]]:
     """Run a Battlegrounds game between the given players.
 
@@ -550,7 +623,6 @@ def run_game(players: List[Player], seed: int = None, visualise: bool = False, f
 
     Args:
         players: The agents.
-        seed: A seed to ensure that actions are consistent.
         visualise: Whether to visualise the state of the game.
         fps: The amount of turns to show per second.
 
@@ -569,13 +641,10 @@ def run_game(players: List[Player], seed: int = None, visualise: bool = False, f
         screen = None
 
     game = BattlegroundsGame(num_players=len(players))
-
     move_sequence = []
-    while game.winner is None:
+    while not game.is_done:
         for index, player in enumerate(players):
-            random.seed(seed)
             game.start_turn_for_player(index)
-
             while game.is_turn_in_progress:
                 if visualise:
                     draw_game(screen, game, delay=1000 // fps)
@@ -584,13 +653,63 @@ def run_game(players: List[Player], seed: int = None, visualise: bool = False, f
                 move = player.make_move(game)
                 game.make_move(move)
                 move_sequence.append((index, move))
-
         game.next_round()
 
     if visualise:
         close_display()
 
     return game.winner, move_sequence
+
+
+def make_game_statistics(results: List[int], friendly_player: int = 0) -> tuple:
+    """Return the game statistics."""
+    outcomes = [1 if result == friendly_player else 0 for result in results]
+    cumulative_win_probability = [sum(outcomes[0:i]) / i for i in range(1, len(outcomes) + 1)]
+    rolling_win_probability = \
+        [sum(outcomes[max(i - 50, 0):i]) / min(50, i) for i in range(1, len(outcomes) + 1)]
+    return outcomes, cumulative_win_probability, rolling_win_probability
+
+
+def plot_game_statistics(results: List[int], friendly_player: int = 0) -> None:
+    """Plot the outcomes and win probabilities for a given list of Battlegrounds game results.
+
+    Preconditions:
+        - all(0 <= r < num_players for r in results)
+    """
+    outcomes, cumulative_win_probability, rolling_win_probability = make_game_statistics(
+        results, friendly_player
+    )
+
+    fig = make_subplots(rows=2, cols=1)
+    fig.add_trace(go.Scatter(y=outcomes, mode='markers',
+                             name='Outcome (1 = Friendly player win, 0 = Enemy player win)'),
+                  row=1, col=1)
+    fig.add_trace(go.Scatter(y=cumulative_win_probability, mode='lines',
+                             name='Friendly player win percentage (cumulative)'),
+                  row=2, col=1)
+    fig.add_trace(go.Scatter(y=rolling_win_probability, mode='lines',
+                             name='Friendly player win percentage (most recent 50 games)'),
+                  row=2, col=1)
+    fig.update_yaxes(range=[0.0, 1.0], row=2, col=1)
+
+    fig.update_layout(title='Battlegrounds Game Results', xaxis_title='Game')
+    fig.show()
+
+
+def save_game_statistics_to_file(filepath: Union[str, Path], results: List[int],
+                                 friendly_player: int = 0) -> None:
+    """Save the game statistics to the given file."""
+    outcomes, cumulative_win_probability, rolling_win_probability = make_game_statistics(
+        results, friendly_player
+    )
+    filepath = Path(filepath)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    with open(filepath, 'w+') as fp:
+        json.dump({
+            'outcomes': outcomes,
+            'cum_win_prob': cumulative_win_probability,
+            'rolling_win_prob': rolling_win_probability
+        }, fp)
 
 
 if __name__ == '__main__':
