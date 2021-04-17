@@ -5,10 +5,9 @@ This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 import random
 from utils import get_seed
 from ai import (
-    RandomPlayer, GreedyPlayer, MCTSPlayer,
-    run_game, run_games,
+    RandomPlayer, MCTSPlayer,
+    run_game,
     plot_game_statistics,
-    save_game_statistics_to_file
 )
 
 
@@ -43,3 +42,20 @@ def test_mcts_player(n: int, show_stats: bool = True) -> list:
         plot_game_statistics(results, 0)
 
     return results
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'extra-imports': ['random', 'ai', 'utils'],
+        'allowed-io': ['test_mcts_player'],
+        'max-line-length': 100,
+        'disable': ['E1136']
+    })
+
+    # Don't run on this, doesn't like defaultdict
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()

@@ -1,4 +1,8 @@
-"""A tool for visualising k-hop graphs."""
+"""A tool for visualising k-hop graphs.
+
+NOTE: This is rough work, and not actually part of the final project. See the project report
+for more details.
+"""
 import tqdm
 import logging
 import argparse
@@ -347,6 +351,9 @@ if __name__ == '__main__':
     #     'max-line-length': 100,
     #     'disable': ['R1705', 'C0200', 'W0612']
     # })
+
+    # import python_ta.contracts
+    # python_ta.contracts.check_all_contracts()
 
     parser = argparse.ArgumentParser(description='A tool for visualising k-hop graphs.')
     parser.add_argument('target_word', type=str, help='The word of interest.')
