@@ -43,18 +43,3 @@ def test_mcts_player(n: int, show_stats: bool = True) -> list:
         plot_game_statistics(results, 0)
 
     return results
-
-
-if __name__ == '__main__':
-    n = 10
-    # Run n games of the RandomPlayer against itself and save the results
-    # results = run_games(n, [RandomPlayer(), RandomPlayer()], show_stats=True)
-    # save_game_statistics_to_file('output/random_random_player_stats.json', results)
-
-    # Run n games of the GreedyPlayer vs the RandomPlayer and save the results
-    # results = run_games(n, [GreedyPlayer(0), RandomPlayer()], show_stats=True)
-    # save_game_statistics_to_file('output/random_greedy_player_stats.json', results)
-
-    # # Run n games of the MCTSPlayer vs the RandomPlayer and save the results
-    # results = test_mcts_player(n)
-    # save_game_statistics_to_file('output/mcts_random_player_stats.json', results)
