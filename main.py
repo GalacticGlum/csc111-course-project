@@ -53,7 +53,7 @@ if __name__ == '__main__':
     # We can also visualise the game as it is played by the agents! To do so, we run a single game
     # with some players, and set visualise to true.
     #
-    # For simplicitly, we visualise a game between two RandomPlayers, but feel free to change this.
+    # For simplicity, we visualise a game between two RandomPlayers, but feel free to change this.
     # Please refrain from clicking while the visualization is running!
     # winner, _ = run_game([RandomPlayer(), RandomPlayer()], visualise=True)
     # print(f'Player {winner + 1} won the game!')
