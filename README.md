@@ -1,2 +1,2 @@
-# csc111-course-project
+# Hearthstone Battlegrounds AI
 An agent for playing Hearthstone Battlegrounds using Deep Reinforcement Learning
