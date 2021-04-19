@@ -1,7 +1,5 @@
 # Testing and code checking
-hypothesis
 pytest
-python-ta
 
 # General packages
 tqdm
