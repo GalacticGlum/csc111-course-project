@@ -119,10 +119,6 @@ TIER_NUM_COPIES = {
     6: 6
 }
 
-_ALL_MINIONS = None
-_MINIONS_BELOW_TIER = {}
-_POOL_FIND_MEMO = {}
-
 
 class MinionPool:
     """A class representing the pool of available minions."""
@@ -131,18 +127,21 @@ class MinionPool:
     #   - _gold_suffix: The suffix used to denote gold copies of minions.
     _pool: Dict[str, int]
     _gold_suffix: str
+    # Shared state variables
+    __all_minions: Dict[str, Minion] = None
+    __minions_below_tier: Dict[int, List[Minion]] = {}
+    __pool_find_cache: Dict[int, List[Minion]] = {}
 
     def __init__(self, gold_suffix='_golden', force_rebuild: bool = False) -> None:
         self._pool = {}
         self._gold_suffix = gold_suffix
 
-        # Build _ALL_MINIONS if it is None
-        global _ALL_MINIONS
-        if _ALL_MINIONS is None or force_rebuild:
-            _ALL_MINIONS = get_all_minions(gold_suffix=gold_suffix)
+        # Build __all_minions if it is None, or if we are forcing a rebuild.
+        if MinionPool.__all_minions is None or force_rebuild:
+            MinionPool.__all_minions = get_all_minions(gold_suffix=gold_suffix)
 
         # Build the pool
-        for minion in _ALL_MINIONS.values():
+        for minion in MinionPool.__all_minions.values():
             # Don't include unpurchasable minions or golden copies in the pool.
             if not minion.purchasable or minion.is_golden:
                 continue
@@ -156,13 +155,12 @@ class MinionPool:
 
         Note: the returned list contains COPIES of the minions in the pool.
         """
-        global _POOL_FIND_MEMO
         key = hash(frozenset(kwargs.items()))
-        if key in _POOL_FIND_MEMO:
-            minions = _POOL_FIND_MEMO[key]
+        if key in MinionPool.__pool_find_cache:
+            minions = MinionPool.__pool_find_cache[key]
         else:
-            minions = filter_minions(_ALL_MINIONS.values(), clone=False, limit=limit, **kwargs)
-            _POOL_FIND_MEMO[key] = minions
+            minions = filter_minions(MinionPool.__all_minions.values(), clone=False, limit=limit, **kwargs)
+            MinionPool.__pool_find_cache[key] = minions
 
         return [x.clone() for x in minions]
 
@@ -199,15 +197,14 @@ class MinionPool:
             if minion_name not in MINION_LIST:
                 return False
 
-            minion = _ALL_MINIONS[minion_name]
+            minion = MinionPool.__all_minions[minion_name]
             return max_tier is None or minion.tier <= max_tier
 
-        global _MINIONS_BELOW_TIER
-        if max_tier in _MINIONS_BELOW_TIER:
-            pool_subset = _MINIONS_BELOW_TIER[max_tier]
+        if max_tier in MinionPool.__minions_below_tier:
+            pool_subset = MinionPool.__minions_below_tier[max_tier]
         else:
             pool_subset = list(filter(predicate, self._pool.keys()))
-            _MINIONS_BELOW_TIER[max_tier] = pool_subset
+            MinionPool.__minions_below_tier[max_tier] = pool_subset
 
         n_copies = [self._pool[minion_name] for minion_name in pool_subset]
         total_copies = sum(n_copies)
@@ -218,20 +215,20 @@ class MinionPool:
             for minion in minions:
                 self._pool[minion] = max(self._pool[minion] - 1, 0)
         # Make a clone of each minion
-        return [_ALL_MINIONS[minion].clone() for minion in minions]
+        return [MinionPool.__all_minions[minion].clone() for minion in minions]
 
     def get_golden(self, name: str) -> Minion:
         """Return a golden copy of the minion with the given name.
         Raise a ValueError if there is no minion with that name, or if it has no golden copy.
         """
-        if name not in _ALL_MINIONS:
+        if name not in MinionPool.__all_minions:
             raise ValueError(f'Could not find minion with name \'{name}\' in the pool.')
 
         golden_copy_name = name + self._gold_suffix
-        if golden_copy_name not in _ALL_MINIONS:
+        if golden_copy_name not in MinionPool.__all_minions:
             raise ValueError(f'The minion with name \'{name}\' has no golden copy.')
 
-        return _ALL_MINIONS[golden_copy_name].clone()
+        return MinionPool.__all_minions[golden_copy_name].clone()
 
     def insert(self, values: Union[Minion, List[Minion]]) -> None:
         """Insert the given minions into the pool.
