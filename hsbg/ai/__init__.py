@@ -38,7 +38,7 @@ def run_games(n: int, players: List[Player], show_stats: bool = True, friendly_p
     results = [None] * n
 
     def _game_done(winner: int) -> None:
-        """..."""
+        """Handle when a game is done."""
         stats[winner] += 1
         results[game_index] = winner
         print(f'Game {game_index + 1} winner: Player {winner + 1}')
