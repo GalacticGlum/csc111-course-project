@@ -4,10 +4,10 @@ This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 """
 import random
 from hsbg.ai import (
-    RandomPlayer, GreedyPlayer,
     run_game, run_games,
     plot_game_statistics,
 )
+from hsbg.ai.players import RandomPlayer, GreedyPlayer
 
 
 if __name__ == '__main__':
