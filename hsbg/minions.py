@@ -207,9 +207,7 @@ class MinionPool:
             MinionPool.__minions_below_tier[max_tier] = pool_subset
 
         n_copies = [self._pool[minion_name] for minion_name in pool_subset]
-        total_copies = sum(n_copies)
-        probabilities = [x / total_copies for x in n_copies]
-        minions = random.choices(pool_subset, probabilities, k=n)
+        minions = random.choices(pool_subset, weights=n_copies, k=n)
         if remove:
             # Remove each minion from the pool
             for minion in minions:
