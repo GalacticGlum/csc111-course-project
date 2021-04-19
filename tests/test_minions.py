@@ -5,9 +5,8 @@ This file is Copyright (c) 2021 Shon Verch and Grace Lin.
 import pytest
 import random
 
-import minions
-from models import CardAbility, Buff
-from hsbg import TavernGameBoard
+from hsbg.models import CardAbility, Buff
+from hsbg import TavernGameBoard, minions
 
 
 def test_alleycat_battlecry() -> None:

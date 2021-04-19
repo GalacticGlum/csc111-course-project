@@ -11,9 +11,9 @@ from typing import Iterable, List, Optional, Dict, Tuple
 
 import colorama
 
-from minions import Minion, MinionPool
-from combat import Battle, simulate_combat
-from utils import filter_minions, make_frequency_table, colourise_string
+from hsbg.minions import Minion, MinionPool
+from hsbg.combat import Battle, simulate_combat
+from hsbg.utils import filter_minions, make_frequency_table, colourise_string
 
 
 # The maximum number of minions a player can have in their hand.
@@ -1837,15 +1837,3 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    import python_ta
-    python_ta.check_all(config={
-        'extra-imports': ['copy', 'random', 'enum',
-                          'contextlib', 'minions',
-                          'combat', 'utils', 'colorama'],  # the names (strs) of imported modules
-        'allowed-io': [],  # the names (strs) of functions that call print/open/input
-        'max-line-length': 100,
-        'disable': ['E1136', 'R0902']
-    })
-
-    import python_ta.contracts
-    python_ta.contracts.check_all_contracts()

@@ -14,7 +14,7 @@ from hsbg_sim import (
     BattleResult as SimulatorBattleResult
 )
 
-from models import CardAbility
+from hsbg.models import CardAbility
 
 
 @dataclass
@@ -281,15 +281,3 @@ if __name__ == '__main__':
     # just not realizing copy was used, the code works!
     import doctest
     doctest.testmod()
-
-    import python_ta
-    python_ta.check_all(config={
-        'extra-imports': ['re', 'hsbg_sim', 'models'],
-        'allowed-io': [],
-        'max-line-length': 100,
-        'disable': ['E0611', 'E0602', 'R0902']
-    })
-
-    # Don't run on this, doesn't like defaultdict
-    #  import python_ta.contracts
-    # python_ta.contracts.check_all_contracts()

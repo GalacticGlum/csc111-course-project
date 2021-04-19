@@ -6,7 +6,7 @@ from typing import Tuple, Optional
 
 import pygame
 
-from models import Minion, MECHANIC_ABILITIES
+from hsbg.models import Minion, MECHANIC_ABILITIES
 from hsbg import TavernGameBoard, BattlegroundsGame
 
 
@@ -277,13 +277,3 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'extra-imports': ['math', 'pygame', 'hsbg', 'models'],
-    #     'allowed-io': [],
-    #     'max-line-length': 100,
-    #     'disable': ['E0602', 'E1136', 'R0913', 'R0914', 'W0703', 'E9969']
-    # })
-
-    import python_ta.contracts
-    python_ta.contracts.check_all_contracts()

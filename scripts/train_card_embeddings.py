@@ -117,22 +117,6 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == '__main__':
-    # NO NEED TO RUN THESE FILES
-    # import doctest
-    # doctest.testmod()
-    #
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'extra-imports': ['argparse', 'time', 'pathlib', 'typing', 'tensorflow', 'gensim.models',
-    #                       'gensim.models.callback', 'gensim.utils'],
-    #     'allowed-io': ['main'],
-    #     'max-line-length': 100,
-    #     'disable': ['E1136', 'E9989']
-    # })
-    #
-    # import python_ta.contracts
-    # python_ta.contracts.check_all_contracts()
-
     parser = argparse.ArgumentParser(description='Train a card embedding model on a corpus.')
     parser.add_argument('corpus_filepath', type=Path,
                         help='Name of text files to train on (the corpus).')

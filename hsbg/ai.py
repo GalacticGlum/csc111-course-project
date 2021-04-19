@@ -16,9 +16,9 @@ import dill as pickle
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from utils import get_seed
+from hsbg.utils import get_seed
 from hsbg import BattlegroundsGame, TavernGameBoard, Move, Action
-from visualisation import init_display, flip_display, close_display, draw_game
+from hsbg.visualisation import init_display, flip_display, close_display, draw_game
 
 
 class Player:
@@ -723,16 +723,3 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-    import python_ta
-    python_ta.check_all(config={
-        'extra-imports': ['copy', 'random', 'enum', 'contextlib', 'concurrent.futures',
-                          'hsbg', 'dill', 'time', 'math', 'pathlib', 'collections', 'queue',
-                          'visualisation'],
-        'allowed-io': ['save', 'load', '_train', 'run_games', 'make_move'],
-        'max-line-length': 100,
-        'disable': ['E1136', 'E1101', 'R0902', 'R0913', 'W0212', 'E9988', 'R1702']
-    })
-
-    # Don't run on this, doesn't like defaultdict
-    # import python_ta.contracts
-    # python_ta.contracts.check_all_contracts()

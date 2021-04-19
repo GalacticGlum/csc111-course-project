@@ -21,12 +21,12 @@ import argparse
 from pathlib import Path
 from typing import List, Set, Dict, Optional, Union
 
-from utils import filter_minions
-from models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
+from hsbg.utils import filter_minions
+from hsbg.models import CardClass, CardRarity, CardAbility, MinionRace, Buff, Minion
 
 
 # The path to the list of implemented minions
-MINION_LIST_PATH = Path(__file__).parent / 'minion_list.txt'
+MINION_LIST_PATH = Path(__file__).parent.parent / 'minion_list.txt'
 with open(MINION_LIST_PATH) as fp:
     MINION_LIST = set(fp.read().splitlines())
 
@@ -2522,14 +2522,3 @@ if __name__ == '__main__':
         _verify_minion_list(args.card_data_path)
     elif args.task is not None:
         raise ValueError(f'\'{args.task}\' is an invalid task!')
-
-    import python_ta
-    python_ta.check_all(config={
-        'extra-imports': ['copy', 'enum'],
-        'allowed-io': ['get_all_minions', '_verify_minion_list'],
-        'max-line-length': 100,
-        'disable': ['E1136', 'E0602', 'E1101', 'R0902', 'E9959', 'E9972', 'E9997']
-    })
-
-    import python_ta.contracts
-    python_ta.contracts.check_all_contracts()

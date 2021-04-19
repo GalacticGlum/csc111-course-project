@@ -328,34 +328,6 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == '__main__':
-    # import python_ta
-    # python_ta.check_all(config={
-    #     'extra-imports': [
-    #         'tqdm',
-    #         'logging',
-    #         'argparse',
-    #         'pathlib',
-    #         'typing',
-    #         'numpy',
-    #         'networkx',
-    #         'matplotlib.cm',
-    #         'matplotlib.pyplot',
-    #         'matplotlib.collections',
-    #         'community',
-    #         'fa2',
-    #         'sklearn.metrics',
-    #         'curved_edges',
-    #         'word_embeddings',
-    #         'logger',
-    #     ],
-    #     'allowed-io': [''],
-    #     'max-line-length': 100,
-    #     'disable': ['R1705', 'C0200', 'W0612']
-    # })
-
-    # import python_ta.contracts
-    # python_ta.contracts.check_all_contracts()
-
     parser = argparse.ArgumentParser(description='A tool for visualising k-hop graphs.')
     parser.add_argument('target_word', type=str, help='The word of interest.')
     # Preview and export configuration

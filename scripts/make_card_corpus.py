@@ -107,20 +107,6 @@ def main(args: argparse.Namespace) -> None:
 
 
 if __name__ == '__main__':
-    # import doctest
-    # doctest.testmod()
-    #
-    # import python_ta.contracts
-    # python_ta.check_all(config={
-    #     'extra-imports': ['re', 'pathlib', 'json', 'tqdm', 'num2words', 'argparse'],
-    #     'allowed-io': ['main'],
-    #     'max-line-length': 100,
-    #     'disable': ['E1136', 'E9989', 'R0914', 'R0912']
-    # })
-    #
-    # import python_ta.contracts
-    # python_ta.contracts.check_all_contracts()
-
     parser = argparse.ArgumentParser(description='Make a corpus of textual card descriptions.')
     parser.add_argument('card_data_filepaths', nargs='+', type=Path,
                         help='A list of input card data json files.')
