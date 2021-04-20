@@ -23,12 +23,12 @@ class Autoencoder(nn.Module):
     # Private Instance Attributes:
     #   - _in_text_lstm: The LSTM layer used for preprocessing the card text.
     #   - _in_race_embedding: The embedding layer for the card race variable.
-    #   - _in_classes_embedding: The embedding layer for the card class variable.
+    #   - _in_class_embedding: The embedding layer for the card class variable.
     #   - _enc_fc_layers: The layers defining the encoder.
     #   - _dec_fc_layers: The layers defining the decoder.
     _in_text_lstm: nn.LSTM
     _in_race_embedding: nn.Embedding
-    _in_classes_embedding: nn.Embedding
+    _in_class_embedding: nn.Embedding
     _enc_fc_layers: nn.Linear
     _dec_fc_layers: nn.Linear
 
@@ -68,12 +68,12 @@ class Autoencoder(nn.Module):
         # Layer that takes in the one-hot vector for the card race
         self._in_race_embedding = nn.Embedding((num_races + 1,), 10)
         # Layer that takes in the one-hot vector for the card class
-        self._in_classes_embedding = nn.Embedding((num_classes + 1,), 10)
+        self._in_class_embedding = nn.Embedding((num_classes + 1,), 10)
 
         num_stats = 3   # Attack, health, and cost
         input_dim = 2 * max_text_length * word_embedding_size + \
             self._in_race_embedding.embedding_dim + \
-            self._in_classes_embedding.embedding_dim + num_stats
+            self._in_class_embedding.embedding_dim + num_stats
 
         # Initialize architecture to default if not given
         layer_sizes = layer_sizes or [128, 64, 12]
@@ -163,8 +163,8 @@ class Autoencoder(nn.Module):
         batch_size = text.shape[0]
         text = text.contiguous().view(batch_size, -1)
         # Process other inputs
-        race = self._in_race_embedding(race)  # Returns (batch_size, 10)
-        card_class = self._in_classes_embedding(card_class)  # Returns (batch_size, 10)
+        race = self._in_race_embedding(race)  # Returns (batch_size, race_dim)
+        card_class = self._in_class_embedding(card_class)  # Returns (batch_size, class_dim)
         stats = torch.stack((attack, health, cost), dim=1)  # Returns (batch_size, 3)
         # Concatenate inputs (all tensors have shape (batch_size, X))
         # Returns (batch_size, sum x.shape[1] for all input tensors x)
