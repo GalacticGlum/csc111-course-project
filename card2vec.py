@@ -33,8 +33,8 @@ class Autoencoder(nn.Module):
     _dec_fc_layers: nn.Linear
 
     def __init__(self, max_text_length: int, word_embedding_size: int, num_races: int,
-                 num_classes: int, lstm_size: int = 256, layer_sizes: Optional[List[int]] = None) \
-            -> None:
+                 num_classes: int, lstm_size: int = 256, num_lstm_layers: int = 2,
+                 layer_sizes: Optional[List[int]] = None) -> None:
         """Initialise the Autoencoder.
 
         Args:
@@ -44,6 +44,7 @@ class Autoencoder(nn.Module):
             num_races: The number of possible card races (categories).
             num_classes: The number of possible card classes (categories).
             lstm_size: The number of hidden units in the LSTM layer used to encode the card text.
+            num_lstm_layers: The number of LSTM layers to stack.
             layer_sizes: A list containing the size of each layer in the encoder. The last element
                          in this list is the target dimensionality of the latent space. The decoder
                          is defined like the encoder, but with the layer sizes in reverse.
@@ -59,7 +60,7 @@ class Autoencoder(nn.Module):
         self._in_text_lstm = nn.LSTM(
             word_embedding_size,
             lstm_size,
-            num_layers=2,
+            num_layers=num_lstm_layers,
             dropout=0,
             bidirectional=True,
             batch_first=True  # Make the input and outputs have batch_size on the outer dim
