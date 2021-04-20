@@ -70,9 +70,10 @@ class Autoencoder(nn.Module):
         # Layer that takes in the one-hot vector for the card class
         self._in_classes_embedding = nn.Embedding((num_classes + 1,), 10)
 
-        self._num_stats = 3   # Attack, health, and cost
-        input_dim = self._in_text_fc.out_features + self._in_race_embedding.embedding_dim +
-            self._in_classes_embedding.embedding_dim + self._num_stats
+        num_stats = 3   # Attack, health, and cost
+        input_dim = 2 * max_text_length * word_embedding_size + \
+            self._in_race_embedding.embedding_dim + \
+            self._in_classes_embedding.embedding_dim + num_stats
 
         # Initialize architecture to default if not given
         layer_sizes = layer_sizes or [128, 64, 12]
