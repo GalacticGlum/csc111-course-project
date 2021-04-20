@@ -7,6 +7,7 @@ import time
 from pathlib import Path
 from typing import Iterator, List, Optional
 
+import nltk
 import tensorflow as tf
 from gensim.models import Word2Vec
 from gensim.models.callbacks import CallbackAny2Vec
@@ -20,7 +21,7 @@ class SentenceIterator:
 
     def __iter__(self) -> Iterator[List[str]]:
         for line in open(self.filepath, encoding='utf-8'):
-            words = simple_preprocess(line, min_len=0, max_len=float('inf'))
+            words = simple_preprocess(line)
             yield words
 
 
@@ -84,7 +85,13 @@ def main(args: argparse.Namespace) -> None:
         dataset = SentenceIterator(args.corpus_filepath)
     else:
         corpus_text = args.corpus_filepath.read_text(encoding='utf-8')
-        dataset = simple_preprocess(corpus_text, min_len=0, max_len=float('inf'))
+        # Replace newlines with spaces
+        corpus_text = corpus_text.replace('\n', ' ').replace('\r', '')
+        sentences = nltk.sent_tokenize(corpus_text)
+        dataset = [
+            simple_preprocess(sentence)
+            for sentence in sentences
+        ]
 
     print('Started training model...')
     start_time = time.time()
@@ -92,7 +99,7 @@ def main(args: argparse.Namespace) -> None:
         sentences=dataset,
         vector_size=args.hidden_size,
         workers=args.num_workers,
-        min_count=0,  # Don't ignore any words by frequency
+        min_count=1,  # Don't ignore any words by frequency
         window=args.window_size,
         sg=True,  # Use skip-gram algorithm
         negative=args.n_negative_samples,
