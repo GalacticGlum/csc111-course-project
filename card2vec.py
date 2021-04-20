@@ -116,7 +116,7 @@ class Autoencoder(nn.Module):
         """"
         # Feed through encoder
         for layer in self._enc_fc_layers:
-            x = layer(x)
+            x = torch.relu(layer(x))
         return x
 
     def decode(self, x: torch.Tensor) -> torch.Tensor:
@@ -129,8 +129,12 @@ class Autoencoder(nn.Module):
                of the card in the latent-space.
         """"
         # Feed through decoder
-        for layer in self._dec_fc_layers:
+        for index, layer in enumerate(self._dec_fc_layers):
             x = layer(x)
+            if index <= len(self._dec_fc_layers) - 1:
+                x = torch.relu(x)
+            else:
+                x = torch.sigmoid(x)
         return x
 
     def preprocess_input(self, text: torch.Tensor, race: torch.Tensor, card_class: torch.Tensor,
